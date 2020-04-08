@@ -39,7 +39,15 @@ import {
 } from './EditorMixins/RunRequestEditorMixin.js';
 
 const configProperty = 'config';
-const iteratorPathHandlerSymbol = 'config';
+
+const helpBase = 'https://docs.advancedrestclient.com/arc-actions/';
+const helpMap = {
+  'set-cookie': `${helpBase}introduction/set-cookie-action`,
+  'set-variable': `${helpBase}introduction/set-variable-action`,
+  'delete-cookie': `${helpBase}introduction/remove-cookie-s-action`,
+};
+
+const actionHelpTplAymbol = Symbol();
 
 /**
  * @typedef SetCookieConfig
@@ -120,10 +128,10 @@ export class ActionEditor extends
        */
       sync: { type: Boolean, reflect: true },
       /**
-       * Whether the action should fail quietly, meaning, should not fail
+       * Whether the action should fail when
        * the request / response if it results in error.
        */
-      silent: { type: Boolean, reflect: true },
+      failOnError: { type: Boolean, reflect: true },
       /**
        * Action's priority on a scale of 1 to 10. The default value is 5 and
        * this property is optional.
@@ -242,6 +250,23 @@ export class ActionEditor extends
     this[notifyChangeSymbol]('view.opened');
   }
 
+  _seekHelp(e) {
+    const { url } = e.target.dataset;
+    const ev = new CustomEvent('open-external-url', {
+      bubbles: true,
+      cancelable: true,
+      composed: true,
+      detail: {
+        url
+      }
+    });
+    this.dispatchEvent(ev);
+    if (ev.defaultPrevented) {
+      return null;
+    }
+    return window.open(url);
+  }
+
   render() {
     const { opened=false } = this;
     return html`
@@ -282,8 +307,12 @@ export class ActionEditor extends
 
   _openedCardTitle(name) {
     const label = actionNamesMap(name);
+    const helpUrl = helpMap[name];
     return html`
-    <div class="action-title">${label}</div>
+    <div class="opened-title">
+      <div class="action-title">${label}</div>
+      ${this[actionHelpTplAymbol](helpUrl)}
+    </div>
     `;
   }
 
@@ -296,6 +325,16 @@ export class ActionEditor extends
       ${this._closeButtonTemplate()}
     </div>
     `;
+  }
+
+  [actionHelpTplAymbol](url) {
+    if (!url) {
+      return '';
+    }
+    return html`<anypoint-button
+      class="action-help"
+      data-url="${url}"
+      @click="${this._seekHelp}">Help</anypoint-button>`;
   }
 
   _enableSwitchTemplate() {

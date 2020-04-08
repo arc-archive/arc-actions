@@ -279,7 +279,7 @@ export class RequestActionsPanel extends LitElement {
    * @return {String|Object} Template for an action
    */
   [actionTplSymbol](action, index) {
-    const { name, type, enabled, priority, config, sync, silent, view={} } = action;
+    const { name, type, enabled, priority, config, sync, failOnError, view={} } = action;
     if (allowedActions.indexOf(name) === -1) {
       return '';
     }
@@ -292,7 +292,7 @@ export class RequestActionsPanel extends LitElement {
       priority="${priority}"
       .config="${config}"
       ?sync="${sync}"
-      ?silent="${silent}"
+      ?failOnError="${failOnError}"
       ?opened="${view.opened}"
       ?outlined="${outlined}"
       ?compatibility="${compatibility}"

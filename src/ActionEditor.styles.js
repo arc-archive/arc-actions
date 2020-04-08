@@ -37,11 +37,13 @@ anypoint-input[compatibility] {
 }
 
 .action-delete,
-.action-open {
+.action-open,
+.action-help {
   margin-left: auto;
 }
 
-.closed-title {
+.closed-title,
+.opened-title {
   display: flex;
   align-items: center;
 }

@@ -20,7 +20,7 @@ export class ArcAction {
    * @param {?Number} [init.priority=5]
    * @param {?Object} [init.config={}]
    * @param {?Boolean} [init.sync=true]
-   * @param {?Boolean} [init.silent=true]]
+   * @param {?Boolean} [init.failOnError=true]]
    * @param {?Object} [init.view={ opened: true }={}]
    */
   constructor(init = {}) {
@@ -31,7 +31,7 @@ export class ArcAction {
       priority = 5,
       config = {},
       sync = true,
-      silent = true,
+      failOnError = true,
       view = {
         opened: true
       }
@@ -42,7 +42,7 @@ export class ArcAction {
     this.priority = priority;
     this.config = config;
     this.sync = sync;
-    this.silent = silent;
+    this.failOnError = failOnError;
     this.view = view;
   }
 

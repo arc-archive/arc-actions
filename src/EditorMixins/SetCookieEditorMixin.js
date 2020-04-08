@@ -21,6 +21,8 @@ const csessionTplSymbol = Symbol();
 const sourceTplSymbol = Symbol();
 const arraySearchTplSymbol = Symbol();
 const pathTplSymbol = Symbol();
+const useRequestUrlTplSymbol = Symbol();
+const failTplSymbol = Symbol();
 /**
  * Mixin that adds support for set-cookie type action editor.
  *
@@ -33,6 +35,7 @@ export const SetCookieEditorMixin = (superClass) => class extends superClass {
     const { config={} } = this;
     return html`
     ${this[cnameTplSymbol](config)}
+    ${this[useRequestUrlTplSymbol](config)}
     ${this[cdomainTplSymbol](config)}
     ${this[cpathTplSymbol](config)}
     ${this[cexpiresTplSymbol](config)}
@@ -44,10 +47,21 @@ export const SetCookieEditorMixin = (superClass) => class extends superClass {
     ${this[sourceTplSymbol](config)}
     ${this[arraySearchTplSymbol](config)}
     ${this[pathTplSymbol](config)}
+    ${this[failTplSymbol](this)}
     `;
   }
 
-  [cnameTplSymbol]({ name = '' }) {
+  [useRequestUrlTplSymbol]({ useRequestUrl = false }) {
+    const label = this.type === 'request' ?
+     'Use the request URL' :
+     'Use the final response URL';
+    return this[configCheckbox]('config.useRequestUrl', useRequestUrl, label, {
+      notify: 'config',
+      render: 'true',
+    });
+  }
+
+  [cnameTplSymbol]({ useRequestUrl = false,name = '' }) {
     return this[configInput]('config.name', name, 'Cookie name (required)', {
       required: true,
       autoValidate: true,
@@ -55,7 +69,10 @@ export const SetCookieEditorMixin = (superClass) => class extends superClass {
     });
   }
 
-  [cdomainTplSymbol]({ domain = '' }) {
+  [cdomainTplSymbol]({ useRequestUrl = false, domain = '' }) {
+    if (useRequestUrl) {
+      return '';
+    }
     return this[configInput]('config.domain', domain, 'Domain (required)', {
       required: true,
       autoValidate: true,
@@ -63,7 +80,10 @@ export const SetCookieEditorMixin = (superClass) => class extends superClass {
     });
   }
 
-  [cpathTplSymbol]({ path = '/' }) {
+  [cpathTplSymbol]({ useRequestUrl = false, path = '/' }) {
+    if (useRequestUrl) {
+      return '';
+    }
     return this[configInput]('config.path', path, 'Path (required)', {
       required: true,
       autoValidate: true,
@@ -125,6 +145,12 @@ export const SetCookieEditorMixin = (superClass) => class extends superClass {
     }
     const label = iteratorEnabled ? 'Array item\'s property for the value' : 'Path to the value';
     return this[configInput]('config.source.path', path, label, {
+      notify: 'config',
+    });
+  }
+
+  [failTplSymbol]({ failOnError = false }) {
+    return this[configCheckbox]('failOnError', failOnError, 'Fail when data cannot be set', {
       notify: 'config',
     });
   }

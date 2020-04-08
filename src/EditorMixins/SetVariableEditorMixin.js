@@ -28,7 +28,7 @@ export const SetVariableEditorMixin = (superClass) => class extends superClass {
     ${this[sourceTplSymbol](config)}
     ${this[arraySearchTplSymbol](config)}
     ${this[pathTplSymbol](config)}
-    ${this[failTplSymbol](config)}
+    ${this[failTplSymbol](this)}
     `;
   }
 
@@ -67,8 +67,8 @@ export const SetVariableEditorMixin = (superClass) => class extends superClass {
     });
   }
 
-  [failTplSymbol]({ silent = false }) {
-    return this[configCheckbox]('silent', silent, 'Ignore when the property is not found', {
+  [failTplSymbol]({ failOnError = false }) {
+    return this[configCheckbox]('failOnError', failOnError, 'Fail when data cannot be set', {
       notify: 'config',
     });
   }
