@@ -1,80 +1,55 @@
-# \<arc-actions>
+# ARC actions
 
-This webcomponent follows the [open-wc](https://github.com/open-wc/open-wc) recommendation.
+An UI and logic for Advanced REST Client actions.
+
+This module contains a set of web components and libraries responsible for the UI and execution of actions in the Advanced REST Client application.
+An action is a runnable command that is executed, depending on the configuration, before or after a request. Actions can change data stored in ARC,
+like variables or cookies, based on the data in request or response.
+
+The module replaces:
+-   request-actions-panel component
+-   other ARC's local libraries in the application logic to process actions.
 
 ## Installation
+
 ```bash
-npm i arc-actions
+npm i @advanced-rest-client/arc-actions
 ```
 
 ## Usage
-```html
-<script type="module">
-  import 'arc-actions/arc-actions.js';
-</script>
 
-<arc-actions></arc-actions>
+The component has `requestActions` and `responseActions` properties that contains
+request and response actions definitions respectively.
+
+Each time a user change an editor value the `actionchange` event is dispatched from the panel. The event's detail contains `type` property that informs which array changed. Possible values are `request` and `response`.
+
+Corresponding `onactionchange` setter is available.
+
+```javascript
+render() {
+  const {
+    requestActions = [],
+    responseActions = [],
+    compatibility,
+    outlined,
+  } = this;
+  return html`
+  <arc-actions
+    .requestActions="${requestActions}"
+    .responseActions="${responseActions}"
+    ?compatibility="${compatibility}"
+    ?outlined="${outlined}"
+    @actionchange="${this._actionsChange}"
+  ></arc-actions>`;
+}
+
+_actionsChange(e) {
+  const { type } = e.detail;
+  const { target } = e;
+  const list = type === 'request' ? target.requestActions : target.responseActions;
+  const key = type === 'request' ? 'requestActions' : 'responseActions';
+  this[key] = list;
+}
 ```
 
-## Linting with ESLint, Prettier, and Types
-To scan the project for linting errors, run
-```bash
-npm run lint
-```
-
-You can lint with ESLint and Prettier individually as well
-```bash
-npm run lint:eslint
-```
-```bash
-npm run lint:prettier
-```
-
-To automatically fix many linting errors, run
-```bash
-npm run format
-```
-
-You can format using ESLint and Prettier individually as well
-```bash
-npm run format:eslint
-```
-```bash
-npm run format:prettier
-```
-
-## Testing with Karma
-To run the suite of karma tests, run
-```bash
-npm run test
-```
-
-To run the tests in watch mode (for <abbr title="test driven development">TDD</abbr>, for example), run
-
-```bash
-npm run test:watch
-```
-
-## Demoing with Storybook
-To run a local instance of Storybook for your component, run
-```bash
-npm run storybook
-```
-
-To build a production version of Storybook, run
-```bash
-npm run storybook:build
-```
-
-
-## Tooling configs
-
-For most of the tools, the configuration is in the `package.json` to reduce the amount of files in your project.
-
-If you customize the configuration a lot, you can consider moving them to individual files.
-
-## Local Demo with `es-dev-server`
-```bash
-npm start
-```
-To run a local development server that serves the basic demo located in `demo/index.html`
+The view can be controlled by setting `selected` property which is 0-based index of the selected tab. When a user change the selection of the tab the `selectedchange` event is dispatched. Corresponding `onselectedchange` setter is available.

@@ -33,10 +33,6 @@ import {
   DeleteCookieEditorMixin,
   renderDeleteCookieEditor,
 } from './EditorMixins/DeleteCookieEditorMixin.js';
-import {
-  RunRequestEditorMixin,
-  renderRunRequestEditor,
-} from './EditorMixins/RunRequestEditorMixin.js';
 
 const configProperty = 'config';
 
@@ -90,10 +86,9 @@ const actionHelpTplAymbol = Symbol();
  */
 
 export class ActionEditor extends
-  RunRequestEditorMixin(
-    DeleteCookieEditorMixin(
-      SetVariableEditorMixin(
-        SetCookieEditorMixin(LitElement)))) {
+  DeleteCookieEditorMixin(
+    SetVariableEditorMixin(
+      SetCookieEditorMixin(LitElement))) {
 
   static get styles() {
     return [
@@ -284,7 +279,6 @@ export class ActionEditor extends
       case 'set-cookie': content = this[renderSetCookieEditor](); break;
       case 'set-variable': content = this[renderSetVariableEditor](); break;
       case 'delete-cookie': content = this[renderDeleteCookieEditor](); break;
-      case 'run-request': content = this[renderRunRequestEditor](); break;
       default: return html``;
     }
     return html`

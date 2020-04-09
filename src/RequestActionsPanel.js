@@ -21,7 +21,6 @@ export const allowedActions = [
   'set-variable',
   'set-cookie',
   'delete-cookie',
-  'run-request',
 ];
 
 export class RequestActionsPanel extends LitElement {
@@ -46,6 +45,11 @@ export class RequestActionsPanel extends LitElement {
        * Enables outlined MD theme
        */
       outlined: { type: Boolean, reflect: true },
+      /**
+       * A type of actions this panel renders. The actions are using
+       * type defined in the action definition. This property is used by the tutorial.
+       */
+      type: { type: String, reflect: true }
     };
   }
 
@@ -77,6 +81,7 @@ export class RequestActionsPanel extends LitElement {
      * @type {Array<Object>}
      */
     this.actions = null;
+    this.type = null;
     this.compatibility = false;
     this.outlined = false;
   }
@@ -221,8 +226,7 @@ export class RequestActionsPanel extends LitElement {
     return html`
     <div class="tutorial-section">
       <p class="content">
-        Request actions allow to execute some predefined logic before the request is executed.
-        When an action fails then the request is not executed.
+        ${this._introTextTemplate()}
       </p>
       <anypoint-button
         ?compatibility="${compatibility}"
@@ -231,6 +235,19 @@ export class RequestActionsPanel extends LitElement {
     </div>
     ${this[addAcrionTplSymbol]()}
     `;
+  }
+
+  _introTextTemplate() {
+    const { type } = this;
+    let label;
+    if (type === 'request') {
+      label = `Request actions allow to execute some predefined logic before the request is executed.
+      When an action fails then the request is not executed.`;
+    } else if (type === 'response') {
+      label = `Response actions allow to execute some predefined logic after the response is ready.
+      When an action fails then the request is reported as an error.`;
+    }
+    return html`<p class="content">${label}</p>`;
   }
 
   /**
@@ -258,7 +275,6 @@ export class RequestActionsPanel extends LitElement {
           <anypoint-item data-name="set-variable" ?compatibility="${compatibility}">Set variable</anypoint-item>
           <anypoint-item data-name="set-cookie" ?compatibility="${compatibility}">Set cookie</anypoint-item>
           <anypoint-item data-name="delete-cookie" ?compatibility="${compatibility}">Delete cookie</anypoint-item>
-          <anypoint-item data-name="run-request" ?compatibility="${compatibility}">Run request</anypoint-item>
         </anypoint-listbox>
       </anypoint-menu-button>
     </div>
