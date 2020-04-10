@@ -8,6 +8,7 @@ import '@anypoint-web-components/anypoint-item/anypoint-item.js';
 import '@anypoint-web-components/anypoint-checkbox/anypoint-checkbox.js';
 import '@anypoint-web-components/anypoint-input/anypoint-input.js';
 import '@anypoint-web-components/anypoint-switch/anypoint-switch.js';
+import { helpOutline } from '@advanced-rest-client/arc-icons/ArcIcons.js';
 import styles from './ActionEditor.styles.js';
 import {
   notifyChangeSymbol,
@@ -19,6 +20,7 @@ import {
   dataSourceHandlerSymbol,
   dataIteratorTplSymbol,
   iteratorTemplateSymbol,
+  dataSourcePathTplSymbol,
 } from './EditorMixins/Utils.js';
 import { actionNamesMap } from './Utils.js';
 import {
@@ -565,7 +567,7 @@ export class ActionEditor extends
   [dataIteratorTplSymbol](enabled) {
     const { compatibility } = this;
     return html`
-    <div>
+    <div class="help-hint-block">
       <anypoint-switch
         ?compatibility="${compatibility}"
         .checked="${enabled}"
@@ -574,6 +576,42 @@ export class ActionEditor extends
         data-render="true"
         @change="${this[configChangeHandlerSymbol]}"
       >Array search</anypoint-switch>
+      <div class="tooltip">
+        <span class="icon help">${helpOutline}</span>
+        <span class="tooltiptext">
+          Allows to search for an item in an array by checking each value against a configured condition.
+        </span>
+      </div>
+    </div>`;
+  }
+
+  /**
+   * Renders a template for data source's path input.
+   * @param {Object} config
+   * @return {Object}
+   */
+  [dataSourcePathTplSymbol]({ source = {} }) {
+    const { iteratorEnabled = false, path = '', source: dataSource = '' } = source;
+    if (['request.method'].indexOf(dataSource) !== -1) {
+      return '';
+    }
+    const label = iteratorEnabled ? 'Array item\'s property for the value' : 'Path to the value';
+    const help = iteratorEnabled ?
+      'Path to the property relative to the array item found in the search.' :
+      'Path to the property that contains the data to extract.';
+    // @ts-ignore
+    const input = this[configInput]('config.source.path', path, label, {
+      notify: 'config',
+    });
+    return html`
+    <div class="form-row">
+      ${input}
+      <div class="tooltip">
+        <span class="icon help">${helpOutline}</span>
+        <span class="tooltiptext">
+          ${help} Example: "data.property.subproperty".
+        </span>
+      </div>
     </div>`;
   }
 
@@ -588,11 +626,24 @@ export class ActionEditor extends
   }
 
   [iteratorPathTemplate](path='') {
-    return this[configInput]('config.source.iterator.path', path, 'Path to the property (required)', {
+    const input = this[configInput]('config.source.iterator.path', path, 'Path to the property (required)', {
       required: true,
       autoValidate: true,
       notify: 'config',
     });
+    return html`
+    <div class="form-row">
+      ${input}
+      <div class="tooltip">
+        <span class="icon help">${helpOutline}</span>
+        <span class="tooltiptext">
+          Path to the property that contains the value to compare.
+          Use star "*" to tell where the array items are.
+          Example: data.*.property.
+        </span>
+      </div>
+    </div>
+    `;
   }
 
   [iteratorConditionTemplate](condition='') {

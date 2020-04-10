@@ -5,13 +5,13 @@ import {
   dataSourceSelector,
   dataIteratorTplSymbol,
   iteratorTemplateSymbol,
+  dataSourcePathTplSymbol,
 } from './Utils.js';
 
 export const renderSetVariableEditor = Symbol();
 const nameTplSymbol = Symbol();
 const sourceTplSymbol = Symbol();
 const arraySearchTplSymbol = Symbol();
-const pathTplSymbol = Symbol();
 const failTplSymbol = Symbol();
 /**
  * Mixin that adds support for set-variable type action editor.
@@ -27,7 +27,7 @@ export const SetVariableEditorMixin = (superClass) => class extends superClass {
     ${this[nameTplSymbol](config)}
     ${this[sourceTplSymbol](config)}
     ${this[arraySearchTplSymbol](config)}
-    ${this[pathTplSymbol](config)}
+    ${this[dataSourcePathTplSymbol](config)}
     ${this[failTplSymbol](this)}
     `;
   }
@@ -71,23 +71,6 @@ export const SetVariableEditorMixin = (superClass) => class extends superClass {
     return html`${this[dataIteratorTplSymbol](iteratorEnabled)}
     ${iteratorEnabled ? this[iteratorTemplateSymbol](source.iterator) : ''}
     `;
-  }
-
-  /**
-   * Renders a template for data source's path input.
-   * @param {Object} config
-   * @return {Object}
-   */
-  [pathTplSymbol]({ source = {} }) {
-    const { iteratorEnabled = false, path = '', source: dataSource = '' } = source;
-    if (['request.method'].indexOf(dataSource) !== -1) {
-      return '';
-    }
-    const label = iteratorEnabled ? 'Array item\'s property for the value' : 'Path to the value';
-    // @ts-ignore
-    return this[configInput]('config.source.path', path, label, {
-      notify: 'config',
-    });
   }
 
   /**

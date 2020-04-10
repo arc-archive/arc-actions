@@ -53,4 +53,65 @@ anypoint-input[compatibility] {
   border-left: 1px #FFA031 solid;
   margin-left: 12px;
 }
+
+.form-row,
+.help-hint-block {
+  display: flex;
+  align-items: center;
+}
+
+.form-row > anypoint-input {
+  flex: 1;
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+  fill: currentColor;
+}
+
+.icon.help {
+  color: var(--primary-color);
+  cursor: help;
+}
+
+.tooltip {
+  position: relative;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  max-width: 320px;
+  min-width: 120px;
+  width: auto;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 8px;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -60px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.tooltip .tooltiptext::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #555 transparent transparent transparent;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+}
 `;
