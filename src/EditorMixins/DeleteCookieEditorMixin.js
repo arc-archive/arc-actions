@@ -28,6 +28,7 @@ export const DeleteCookieEditorMixin = (superClass) => class extends superClass 
   }
 
   [useRequestUrlTplSymbol]({ useRequestUrl = false }) {
+    // @ts-ignore
     return this[configCheckbox]('config.useRequestUrl', useRequestUrl, 'Use request URL', {
       notify: 'config',
       render: 'true',
@@ -38,6 +39,7 @@ export const DeleteCookieEditorMixin = (superClass) => class extends superClass 
     if (useRequestUrl) {
       return '';
     }
+    // @ts-ignore
     return this[configInput]('config.url', url, 'Cookie URL (required)', {
       required: true,
       autoValidate: true,
@@ -48,6 +50,7 @@ export const DeleteCookieEditorMixin = (superClass) => class extends superClass 
   }
 
   [removeAllTplSymbol]({ removeAll = false }) {
+    // @ts-ignore unique symbol
     return this[configCheckbox]('config.removeAll', removeAll, 'Remove all cookies', {
       notify: 'config',
       render: 'true',
@@ -58,6 +61,7 @@ export const DeleteCookieEditorMixin = (superClass) => class extends superClass 
     if (removeAll) {
       return '';
     }
+    // @ts-ignore unique symbol
     return this[configInput]('config.name', name, 'Cookie name (required)', {
       required: true,
       autoValidate: true,

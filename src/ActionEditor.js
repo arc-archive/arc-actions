@@ -44,6 +44,29 @@ const helpMap = {
 };
 
 const actionHelpTplAymbol = Symbol();
+const updateDeepPropertySymbol = Symbol();
+const enabledHandlerSymbol = Symbol();
+const deleteHandlerSymbol = Symbol();
+const duplicateHandlerSymbol = Symbol();
+const closeHandlerSymbol = Symbol();
+const openenHandlerSymbol = Symbol();
+const helpHandlerSymbol = Symbol();
+const openedCardTemplate = Symbol();
+const closedCardTemplate = Symbol();
+const openedCardTitle = Symbol();
+const openedCardFooter = Symbol();
+const closedCardTitle = Symbol();
+const openButtonTemplate = Symbol();
+const enableSwitchTemplate = Symbol();
+const deleteButtonTemplate = Symbol();
+const duplicateButtonTemplate = Symbol();
+const closeButtonTemplate = Symbol();
+const requestSourceOptions = Symbol();
+const responseSourceOptions = Symbol();
+const iteratorConditionOptions = Symbol();
+const iteratorOperatorTemplate = Symbol();
+const iteratorPathTemplate = Symbol();
+const iteratorConditionTemplate = Symbol();
 
 /**
  * @typedef SetCookieConfig
@@ -165,7 +188,7 @@ export class ActionEditor extends
 
   [inputHandlerSymbol](e) {
     const { name, value } = e.target;
-    this._updateDeepProperty(name, value);
+    this[updateDeepPropertySymbol](name, value);
     const { notify } = e.target.dataset;
     if (notify) {
       this[notifyChangeSymbol](notify);
@@ -177,9 +200,11 @@ export class ActionEditor extends
    * @param {Event} e
    */
   [configChangeHandlerSymbol](e) {
-    const { name, checked } = e.target;
-    this._updateDeepProperty(name, checked);
-    const { notify, render } = e.target.dataset;
+    const target = /** @type {HTMLElement} */ (e.target);
+    // @ts-ignore
+    const { name, checked } = target;
+    this[updateDeepPropertySymbol](name, checked);
+    const { notify, render } = target.dataset;
     if (notify) {
       this[notifyChangeSymbol](notify);
     }
@@ -193,11 +218,14 @@ export class ActionEditor extends
    * @param {Event} e
    */
   [dataSourceHandlerSymbol](e) {
-    const name = e.target.parentElement.name;
-    const value = e.target.selected;
-    this._updateDeepProperty(name, value);
+    const target = /** @type {HTMLElement} */ (e.target);
+    // @ts-ignore
+    const name = target.parentElement.name;
+    // @ts-ignore
+    const value = target.selected;
+    this[updateDeepPropertySymbol](name, value);
     this[notifyChangeSymbol](configProperty);
-    const { notify, render } = e.target.dataset;
+    const { notify, render } = target.dataset;
     if (notify) {
       this[notifyChangeSymbol](notify);
     }
@@ -206,7 +234,7 @@ export class ActionEditor extends
     }
   }
 
-  _updateDeepProperty(name, value) {
+  [updateDeepPropertySymbol](name, value) {
     let tmp = this;
     let last = '';
     String(name).split('.').forEach((item, index, arr) => {
@@ -222,30 +250,30 @@ export class ActionEditor extends
     tmp[last] = value;
   }
 
-  _enabledHandler(e) {
+  [enabledHandlerSymbol](e) {
     this.enabled = e.target.checked;
     this[notifyChangeSymbol]('enabled');
   }
 
-  _deleteHandler() {
+  [deleteHandlerSymbol]() {
     this.dispatchEvent(new CustomEvent('remove'));
   }
 
-  _duplicateHandler() {
+  [duplicateHandlerSymbol]() {
     this.dispatchEvent(new CustomEvent('duplicate'));
   }
 
-  _closeHandler() {
+  [closeHandlerSymbol]() {
     this.opened = false;
     this[notifyChangeSymbol]('view.opened');
   }
 
-  _openenHandler() {
+  [openenHandlerSymbol]() {
     this.opened = true;
     this[notifyChangeSymbol]('view.opened');
   }
 
-  _seekHelp(e) {
+  [helpHandlerSymbol](e) {
     const { url } = e.target.dataset;
     const ev = new CustomEvent('open-external-url', {
       bubbles: true,
@@ -266,40 +294,43 @@ export class ActionEditor extends
     const { opened=false } = this;
     return html`
     <section class="action-card">
-      ${opened ? this._openedCardTemplate() : this._closedCardTemplate()}
+      ${opened ? this[openedCardTemplate]() : this[closedCardTemplate]()}
     </section>
     `;
   }
 
-  _openedCardTemplate() {
+  [openedCardTemplate]() {
     const { name='' } = this;
     const lowerName = String(name).toLowerCase();
     let content;
     switch (lowerName) {
+      // @ts-ignore
       case 'set-cookie': content = this[renderSetCookieEditor](); break;
+      // @ts-ignore
       case 'set-variable': content = this[renderSetVariableEditor](); break;
+      // @ts-ignore
       case 'delete-cookie': content = this[renderDeleteCookieEditor](); break;
       default: return html``;
     }
     return html`
-    ${this._openedCardTitle(name)}
+    ${this[openedCardTitle](name)}
     ${content}
-    ${this._openedCardFooter()}
+    ${this[openedCardFooter]()}
     `;
   }
 
-  _closedCardTemplate() {
+  [closedCardTemplate]() {
     const { name='' } = this;
     const lowerName = String(name).toLowerCase();
     return html`
     <div class="closed-title">
-    ${this._closedCardTitle(lowerName)}
-    ${this._openButtonTemplate()}
+    ${this[closedCardTitle](lowerName)}
+    ${this[openButtonTemplate]()}
     </div>
     `;
   }
 
-  _openedCardTitle(name) {
+  [openedCardTitle](name) {
     const label = actionNamesMap(name);
     const helpUrl = helpMap[name];
     return html`
@@ -310,13 +341,13 @@ export class ActionEditor extends
     `;
   }
 
-  _openedCardFooter() {
+  [openedCardFooter]() {
     return html`
     <div class="action-footer">
-      ${this._enableSwitchTemplate()}
-      ${this._deleteButtonTemplate()}
-      ${this._duplicateButtonTemplate()}
-      ${this._closeButtonTemplate()}
+      ${this[enableSwitchTemplate]()}
+      ${this[deleteButtonTemplate]()}
+      ${this[duplicateButtonTemplate]()}
+      ${this[closeButtonTemplate]()}
     </div>
     `;
   }
@@ -328,62 +359,62 @@ export class ActionEditor extends
     return html`<anypoint-button
       class="action-help"
       data-url="${url}"
-      @click="${this._seekHelp}">Help</anypoint-button>`;
+      @click="${this[helpHandlerSymbol]}">Help</anypoint-button>`;
   }
 
-  _enableSwitchTemplate() {
+  [enableSwitchTemplate]() {
     const { compatibility, enabled } = this;
     return html`
     <anypoint-switch
       ?compatibility="${compatibility}"
       .checked="${enabled}"
-      @change="${this._enabledHandler}"
+      @change="${this[enabledHandlerSymbol]}"
     >Enabled</anypoint-switch>`;
   }
 
-  _deleteButtonTemplate() {
+  [deleteButtonTemplate]() {
     const { compatibility } = this;
     return html`
     <anypoint-button
       title="Removes this action"
       class="action-delete"
       ?compatibility="${compatibility}"
-      @click="${this._deleteHandler}"
+      @click="${this[deleteHandlerSymbol]}"
     >Delete</anypoint-button>`;
   }
 
-  _duplicateButtonTemplate() {
+  [duplicateButtonTemplate]() {
     const { compatibility } = this;
     return html`
     <anypoint-button
       title="Duplicates this action"
       ?compatibility="${compatibility}"
-      @click="${this._duplicateHandler}"
+      @click="${this[duplicateHandlerSymbol]}"
     >Duplicate</anypoint-button>`;
   }
 
-  _closeButtonTemplate() {
+  [closeButtonTemplate]() {
     const { compatibility } = this;
     return html`
     <anypoint-button
       title="Closes the editor"
       ?compatibility="${compatibility}"
-      @click="${this._closeHandler}"
+      @click="${this[closeHandlerSymbol]}"
     >Close</anypoint-button>`;
   }
 
-  _openButtonTemplate() {
+  [openButtonTemplate]() {
     const { compatibility } = this;
     return html`
     <anypoint-button
       title="Opens the editor"
       class="action-open"
       ?compatibility="${compatibility}"
-      @click="${this._openenHandler}"
+      @click="${this[openenHandlerSymbol]}"
     >Open</anypoint-button>`;
   }
 
-  _closedCardTitle(name) {
+  [closedCardTitle](name) {
     const label = actionNamesMap(name);
     return html`
     <div class="action-title">${label}</div>
@@ -494,14 +525,14 @@ export class ActionEditor extends
         data-notify="config"
         data-render="true"
       >
-        ${this._requestSourceOptions()}
-        ${this._responseSourceOptions()}
+        ${this[requestSourceOptions]()}
+        ${this[responseSourceOptions]()}
       </anypoint-listbox>
     </anypoint-dropdown-menu>
     `;
   }
 
-  _requestSourceOptions() {
+  [requestSourceOptions]() {
     const {
       compatibility,
       type,
@@ -516,7 +547,7 @@ export class ActionEditor extends
     <anypoint-item value="request.body" ?compatibility="${compatibility}">Body</anypoint-item>`;
   }
 
-  _responseSourceOptions() {
+  [responseSourceOptions]() {
     const {
       compatibility,
       type,
@@ -549,14 +580,14 @@ export class ActionEditor extends
   [iteratorTemplateSymbol](config={}) {
     return html`
     <div class="iterator-block">
-      ${this._iteratorPathTemplate(config.path)}
-      ${this._iteratorOperatorTemplate(config.operator)}
-      ${this._iteratorConditionTemplate(config.condition)}
+      ${this[iteratorPathTemplate](config.path)}
+      ${this[iteratorOperatorTemplate](config.operator)}
+      ${this[iteratorConditionTemplate](config.condition)}
     </div>
     `;
   }
 
-  _iteratorPathTemplate(path='') {
+  [iteratorPathTemplate](path='') {
     return this[configInput]('config.source.iterator.path', path, 'Path to the property (required)', {
       required: true,
       autoValidate: true,
@@ -564,7 +595,7 @@ export class ActionEditor extends
     });
   }
 
-  _iteratorConditionTemplate(condition='') {
+  [iteratorConditionTemplate](condition='') {
     return this[configInput]('config.source.iterator.condition', condition, 'Condition value (required)', {
       required: true,
       autoValidate: true,
@@ -572,7 +603,7 @@ export class ActionEditor extends
     });
   }
 
-  _iteratorOperatorTemplate(operator='') {
+  [iteratorOperatorTemplate](operator='') {
     const {
       outlined,
       compatibility,
@@ -601,13 +632,13 @@ export class ActionEditor extends
         @selected-changed="${this[dataSourceHandlerSymbol]}"
         data-notify="config"
       >
-        ${this._iteratorConditionOptions()}
+        ${this[iteratorConditionOptions]()}
       </anypoint-listbox>
     </anypoint-dropdown-menu>
     `;
   }
 
-  _iteratorConditionOptions() {
+  [iteratorConditionOptions]() {
     const {
       compatibility,
     } = this;

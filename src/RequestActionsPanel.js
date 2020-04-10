@@ -12,6 +12,33 @@ const tutorialTplSymbol = Symbol();
 const addAcrionTplSymbol = Symbol();
 const actionsListTplSymbol = Symbol();
 const actionTplSymbol = Symbol();
+const introTextTplSymbol = Symbol();
+const duplicateHandlerSymbol = Symbol();
+const notifyChangeSymbol = Symbol();
+const changeHandlerSymbol = Symbol();
+const removeHandlerSymbol = Symbol();
+const addHandlerSymbol = Symbol();
+const openTutorialHandlerSymbol = Symbol();
+
+/**
+ * Maps actions list to a list of `ArcAction` instances.
+ * If an item is not an instance of `ArcAction` then it creates an instance of it
+ * by passing the map as an argument.
+ *
+ * @param {Array<Object>} value Passed list of actions.
+ * @return {Array<ArcAction>} Mapped actions.
+ */
+const mapActions = (value) => {
+  if (!Array.isArray(value)) {
+    return null;
+  }
+  return value.map((item) => {
+    if (!(item instanceof ArcAction)) {
+      item = new ArcAction(item);
+    }
+    return item;
+  });
+}
 
 /**
  * A list of actions names that are supported by this element.
@@ -59,7 +86,7 @@ export class RequestActionsPanel extends LitElement {
 
   set actions(value) {
     const old = this._actions;
-    const actions = this._mapActions(value);
+    const actions = mapActions(value);
     if (old === actions) {
       return;
     }
@@ -86,18 +113,6 @@ export class RequestActionsPanel extends LitElement {
     this.outlined = false;
   }
 
-  _mapActions(value) {
-    if (!Array.isArray(value)) {
-      return null;
-    }
-    return value.map((item) => {
-      if (!(item instanceof ArcAction)) {
-        item = new ArcAction(item);
-      }
-      return item;
-    });
-  }
-
   /**
    * Adds a new, empty request action to the list of actions.
    * If actions list hasn't been initialized then it creates it.
@@ -120,7 +135,7 @@ export class RequestActionsPanel extends LitElement {
    *
    * @return {window|null}
    */
-  _openTutorialHandler() {
+  [openTutorialHandlerSymbol]() {
     const url = 'https://docs.advancedrestclient.com/using-arc/request-actions';
     const e = new CustomEvent('open-external-url', {
       bubbles: true,
@@ -142,8 +157,10 @@ export class RequestActionsPanel extends LitElement {
    *
    * @param {CustomEvent} e
    */
-  _addHandler(e) {
-    const { selectedItem } = e.target;
+  [addHandlerSymbol](e) {
+    const target = /** @type {HTMLElement} */ (e.target);
+    // @ts-ignore
+    const { selectedItem } = target;
     if (!selectedItem) {
       return;
     }
@@ -152,28 +169,40 @@ export class RequestActionsPanel extends LitElement {
       return;
     }
     this.add(name);
-    this._notifyChange();
+    this[notifyChangeSymbol]();
   }
 
-  _removeHandler(e) {
-    const index = Number(e.target.dataset.index);
+  /**
+   * Handler for a click on "Delete action button".
+   *
+   * @param {CustomEvent} e
+   */
+  [removeHandlerSymbol](e) {
+    const target = /** @type {HTMLElement} */ (e.target);
+    const index = Number(target.dataset.index);
     if (isNaN(index)) {
       return;
     }
     this.actions.splice(index, 1);
     this.requestUpdate();
-    this._notifyChange();
+    this[notifyChangeSymbol]();
   }
 
-  _changeHandler(e) {
-    const index = Number(e.target.dataset.index);
+  /**
+   * Handler for a change made in the editor.
+   *
+   * @param {CustomEvent} e
+   */
+  [changeHandlerSymbol](e) {
+    const target = /** @type {HTMLElement} */ (e.target);
+    const index = Number(target.dataset.index);
     if (isNaN(index)) {
       return;
     }
     const item = this.actions[index];
     const { prop='' } = e.detail;
     if (prop.indexOf('.') === -1) {
-      item[prop] = e.target[prop];
+      item[prop] = target[prop];
     } else {
       let tmp = item;
       let last = '';
@@ -187,16 +216,16 @@ export class RequestActionsPanel extends LitElement {
         }
         tmp = tmp[item];
       });
-      tmp[last] = e.target[last];
+      tmp[last] = target[last];
     }
-    this._notifyChange();
+    this[notifyChangeSymbol]();
   }
 
-  _notifyChange() {
+  [notifyChangeSymbol]() {
     this.dispatchEvent(new CustomEvent('change'));
   }
 
-  _duplicateHandler(e) {
+  [duplicateHandlerSymbol](e) {
     const index = Number(e.target.dataset.index);
     if (isNaN(index)) {
       return;
@@ -226,18 +255,19 @@ export class RequestActionsPanel extends LitElement {
     return html`
     <div class="tutorial-section">
       <p class="content">
-        ${this._introTextTemplate()}
+        ${this[introTextTplSymbol]()}
       </p>
       <anypoint-button
         ?compatibility="${compatibility}"
-        @click="${this._openTutorialHandler}"
+        @click="${this[openTutorialHandlerSymbol]}"
+        class="self-center"
       >Learn more</anypoint-button>
     </div>
     ${this[addAcrionTplSymbol]()}
     `;
   }
 
-  _introTextTemplate() {
+  [introTextTplSymbol]() {
     const { type } = this;
     let label;
     if (type === 'request') {
@@ -261,7 +291,7 @@ export class RequestActionsPanel extends LitElement {
         closeOnActivate
         ?outlined="${outlined}"
         ?compatibility="${compatibility}"
-        @select="${this._addHandler}"
+        @select="${this[addHandlerSymbol]}"
       >
         <anypoint-button
           slot="dropdown-trigger"
@@ -313,9 +343,9 @@ export class RequestActionsPanel extends LitElement {
       ?outlined="${outlined}"
       ?compatibility="${compatibility}"
       data-index="${index}"
-      @remove="${this._removeHandler}"
-      @change="${this._changeHandler}"
-      @duplicate="${this._duplicateHandler}"
+      @remove="${this[removeHandlerSymbol]}"
+      @change="${this[changeHandlerSymbol]}"
+      @duplicate="${this[duplicateHandlerSymbol]}"
     ></action-editor>`;
   }
 }
