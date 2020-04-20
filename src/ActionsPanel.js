@@ -4,9 +4,10 @@ import '@anypoint-web-components/anypoint-menu-button/anypoint-menu-button.js';
 import '@anypoint-web-components/anypoint-listbox/anypoint-listbox.js';
 import '@anypoint-web-components/anypoint-item/anypoint-item.js';
 import { ArcAction } from './ArcAction.js';
-import styles from './RequestActionsPanel.styles.js';
+import styles from './ActionsPanel.styles.js';
 import commonStyles from './ActionPanels-common.style.js';
 import '../action-editor.js';
+import { mapActions, allowedActions } from './Utils.js';
 
 const tutorialTplSymbol = Symbol();
 const addAcrionTplSymbol = Symbol();
@@ -20,50 +21,16 @@ const removeHandlerSymbol = Symbol();
 const addHandlerSymbol = Symbol();
 const openTutorialHandlerSymbol = Symbol();
 
-/**
- * Maps actions list to a list of `ArcAction` instances.
- * If an item is not an instance of `ArcAction` then it creates an instance of it
- * by passing the map as an argument.
- *
- * @param {Array<Object>} value Passed list of actions.
- * @return {Array<ArcAction>} Mapped actions.
- */
-const mapActions = (value) => {
-  if (!Array.isArray(value)) {
-    return null;
-  }
-  return value.map((item) => {
-    if (!(item instanceof ArcAction)) {
-      item = new ArcAction(item);
-    }
-    return item;
-  });
-}
+/** @typedef {import('./ArcAction.js').ArcAction} ArcAction */
+/** @typedef {import('./ArcActions.js').ArcResponseActions} ArcResponseActions */
 
-/**
- * A list of actions names that are supported by this element.
- * @type {Array<String>}
- */
-export const allowedActions = [
-  'set-variable',
-  'set-cookie',
-  'delete-cookie',
-];
-
-export class RequestActionsPanel extends LitElement {
+export class ActionsPanel extends LitElement {
   static get styles() {
-    return [
-      styles,
-      commonStyles,
-    ];
+    return [styles, commonStyles];
   }
 
   static get properties() {
     return {
-      /**
-       * A list of actions
-       */
-      actions: { type: Array },
       /**
        * Enables compatybility with the Anypoint theme
        */
@@ -80,10 +47,16 @@ export class RequestActionsPanel extends LitElement {
     };
   }
 
+  /**
+   * @return {Array<ArcResponseActions|ArcAction>|null} Rendered list of actions
+   */
   get actions() {
     return this._actions;
   }
 
+  /**
+   * @param {Array<ArcResponseActions|ArcAction>|null} value List of actions to render.
+   */
   set actions(value) {
     const old = this._actions;
     const actions = mapActions(value);
@@ -102,11 +75,16 @@ export class RequestActionsPanel extends LitElement {
     return !!(actions && actions.length);
   }
 
+  /**
+   * @return {Boolean} Determines whether the actions are part of the conditions.
+   */
+  get hasConditions() {
+    const { type } = this;
+    return type === 'response';
+  }
+
   constructor() {
     super();
-    /**
-     * @type {Array<Object>}
-     */
     this.actions = null;
     this.type = null;
     this.compatibility = false;
@@ -200,22 +178,24 @@ export class RequestActionsPanel extends LitElement {
       return;
     }
     const item = this.actions[index];
-    const { prop='' } = e.detail;
+    const { prop = '' } = e.detail;
     if (prop.indexOf('.') === -1) {
       item[prop] = target[prop];
     } else {
       let tmp = item;
       let last = '';
-      String(prop).split('.').forEach((item, index, arr) => {
-        if (arr.length === index + 1) {
-          last = item;
-          return;
-        }
-        if (!tmp[item]) {
-          tmp[item] = {};
-        }
-        tmp = tmp[item];
-      });
+      String(prop)
+        .split('.')
+        .forEach((item, index, arr) => {
+          if (arr.length === index + 1) {
+            last = item;
+            return;
+          }
+          if (!tmp[item]) {
+            tmp[item] = {};
+          }
+          tmp = tmp[item];
+        });
       tmp[last] = target[last];
     }
     this[notifyChangeSymbol]();
@@ -242,8 +222,7 @@ export class RequestActionsPanel extends LitElement {
   render() {
     const { hasActions } = this;
     return html`
-      ${this[tutorialTplSymbol]()}
-      ${hasActions ? this[actionsListTplSymbol]() : ''}
+      ${this[tutorialTplSymbol]()} ${hasActions ? this[actionsListTplSymbol]() : ''}
     `;
   }
 
@@ -253,17 +232,18 @@ export class RequestActionsPanel extends LitElement {
   [tutorialTplSymbol]() {
     const { compatibility } = this;
     return html`
-    <div class="tutorial-section">
-      <p class="content">
-        ${this[introTextTplSymbol]()}
-      </p>
-      <anypoint-button
-        ?compatibility="${compatibility}"
-        @click="${this[openTutorialHandlerSymbol]}"
-        class="self-center"
-      >Learn more</anypoint-button>
-    </div>
-    ${this[addAcrionTplSymbol]()}
+      <div class="tutorial-section">
+        <p class="content">
+          ${this[introTextTplSymbol]()}
+        </p>
+        <anypoint-button
+          ?compatibility="${compatibility}"
+          @click="${this[openTutorialHandlerSymbol]}"
+          class="self-center"
+          >Learn more</anypoint-button
+        >
+      </div>
+      ${this[addAcrionTplSymbol]()}
     `;
   }
 
@@ -277,7 +257,9 @@ export class RequestActionsPanel extends LitElement {
       label = `Response actions allow to execute some predefined logic after the response is ready.
       When an action fails then the request is reported as an error.`;
     }
-    return html`<p class="content">${label}</p>`;
+    return html`
+      <p class="content">${label}</p>
+    `;
   }
 
   /**
@@ -286,28 +268,21 @@ export class RequestActionsPanel extends LitElement {
   [addAcrionTplSymbol]() {
     const { outlined, compatibility } = this;
     return html`
-    <div class="add-action-line">
-      <anypoint-menu-button
-        closeOnActivate
-        ?outlined="${outlined}"
-        ?compatibility="${compatibility}"
-        @select="${this[addHandlerSymbol]}"
-      >
-        <anypoint-button
-          slot="dropdown-trigger"
-          ?compatibility="${compatibility}"
-        >Add action</anypoint-button>
-        <anypoint-listbox
+      <div class="add-action-line">
+        <anypoint-menu-button
+          closeOnActivate
           ?outlined="${outlined}"
           ?compatibility="${compatibility}"
-          slot="dropdown-content"
+          @select="${this[addHandlerSymbol]}"
         >
-          <anypoint-item data-name="set-variable" ?compatibility="${compatibility}">Set variable</anypoint-item>
-          <anypoint-item data-name="set-cookie" ?compatibility="${compatibility}">Set cookie</anypoint-item>
-          <anypoint-item data-name="delete-cookie" ?compatibility="${compatibility}">Delete cookie</anypoint-item>
-        </anypoint-listbox>
-      </anypoint-menu-button>
-    </div>
+          <anypoint-button slot="dropdown-trigger" ?compatibility="${compatibility}">Add action</anypoint-button>
+          <anypoint-listbox ?outlined="${outlined}" ?compatibility="${compatibility}" slot="dropdown-content">
+            <anypoint-item data-name="set-variable" ?compatibility="${compatibility}">Set variable</anypoint-item>
+            <anypoint-item data-name="set-cookie" ?compatibility="${compatibility}">Set cookie</anypoint-item>
+            <anypoint-item data-name="delete-cookie" ?compatibility="${compatibility}">Delete cookie</anypoint-item>
+          </anypoint-listbox>
+        </anypoint-menu-button>
+      </div>
     `;
   }
 
@@ -315,37 +290,40 @@ export class RequestActionsPanel extends LitElement {
    * @return {Array<Object|String>} List of templates for current actions.
    */
   [actionsListTplSymbol]() {
-    const { actions } = this;
-    return actions.map((action, index) => this[actionTplSymbol](action, index));
+    const { actions, hasConditions } = this;
+    return actions.map((action, index) => this[actionTplSymbol](hasConditions, action, index));
   }
 
   /**
+   * @param {boolean} hasCondition
    * @param {Object} action An action definition
    * @param {Number} index Action's index in the `actions` array.
    * @return {String|Object} Template for an action
    */
-  [actionTplSymbol](action, index) {
-    const { name, type, enabled, priority, config, sync, failOnError, view={} } = action;
+  [actionTplSymbol](hasCondition, action, index) {
+    const { name, type, enabled, priority, config, sync, failOnError, view = {} } = action;
     if (allowedActions.indexOf(name) === -1) {
       return '';
     }
+    // TODO: render conditions for response actions.
     const { outlined, compatibility } = this;
     return html`
-    <action-editor
-      name="${name}"
-      type="${type}"
-      ?enabled="${enabled}"
-      priority="${priority}"
-      .config="${config}"
-      ?sync="${sync}"
-      ?failOnError="${failOnError}"
-      ?opened="${view.opened}"
-      ?outlined="${outlined}"
-      ?compatibility="${compatibility}"
-      data-index="${index}"
-      @remove="${this[removeHandlerSymbol]}"
-      @change="${this[changeHandlerSymbol]}"
-      @duplicate="${this[duplicateHandlerSymbol]}"
-    ></action-editor>`;
+      <action-editor
+        name="${name}"
+        type="${type}"
+        ?enabled="${enabled}"
+        priority="${priority}"
+        .config="${config}"
+        ?sync="${sync}"
+        ?failOnError="${failOnError}"
+        ?opened="${view.opened}"
+        ?outlined="${outlined}"
+        ?compatibility="${compatibility}"
+        data-index="${index}"
+        @remove="${this[removeHandlerSymbol]}"
+        @change="${this[changeHandlerSymbol]}"
+        @duplicate="${this[duplicateHandlerSymbol]}"
+      ></action-editor>
+    `;
   }
 }

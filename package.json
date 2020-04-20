@@ -27,6 +27,7 @@
   "dependencies": {
     "@advanced-rest-client/arc-icons": "^3.0.5",
     "@advanced-rest-client/events-target-mixin": "^3.1.1",
+    "@advanced-rest-client/headers-parser-mixin": "^3.1.0",
     "@advanced-rest-client/variables-evaluator": "^3.1.0",
     "@anypoint-web-components/anypoint-button": "^1.0.15",
     "@anypoint-web-components/anypoint-checkbox": "^1.0.2",

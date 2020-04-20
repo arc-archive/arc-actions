@@ -1,7 +1,7 @@
 import { html, css, LitElement } from 'lit-element';
 import '@anypoint-web-components/anypoint-tabs/anypoint-tabs.js';
 import '@anypoint-web-components/anypoint-tabs/anypoint-tab.js';
-import '../request-actions-panel.js';
+import '../actions-panel.js';
 
 const actionChangeEvent = 'actionchange';
 const selectedChangeEvent = 'selectedchange';
@@ -15,6 +15,32 @@ const reqestActionsTplSymbol = Symbol();
 const responseActionsTplSymbol = Symbol();
 const panelTplSymbol = Symbol();
 
+/** @typedef {import('./ArcAction.js').ArcAction} ArcAction */
+/** @typedef {import('./ActionEditor.js').OperatorEnum} OperatorEnum */
+
+/**
+ * @typedef {string} ConditionSourceEnum
+ * @property {string} url "url"
+ * @property {string} statuscode "statuscode"
+ * @property {string} headers "headers"
+ * @property {string} body "body"
+ */
+
+/**
+ * @typedef {Object} ResponseCondition
+ * @param {ConditionSourceEnum} source Path to the data source value.
+ * @param {string=} path Optional path to the data. It is required for url, headers, and body.
+ * @param {string|number} value The value to compare to the value.
+ * @param {OperatorEnum} operator The condition operator.
+ */
+
+/**
+ * @typedef {Object} ArcResponseActions
+ * @property {ResponseCondition} condition A response condition
+ * @property {Array<ArcAction>} actions List of actions to run in the condition.
+ * @property {boolean} enabled Whether the conditions and the actions are enabled.
+ */
+
 export class ArcActions extends LitElement {
   static get styles() {
     return css`
@@ -26,10 +52,6 @@ export class ArcActions extends LitElement {
 
   static get properties() {
     return {
-      /**
-       * A list of request actions
-       */
-      requestActions: { type: Array },
       /**
        * A list of response actions
        */
@@ -45,8 +67,47 @@ export class ArcActions extends LitElement {
       /**
        * Currently selected tab.
        */
-      selected: { type: Number, reflect: true },
+      selected: { type: Number, reflect: true }
     };
+  }
+  /**
+   * A list of request actions.
+   * @return {Array<ArcAction>}
+   */
+  get requestActions() {
+    return this._requestActions;
+  }
+
+  /**
+   * @param {Array<ArcAction>} value List of request actions to render.
+   */
+  set requestActions(value) {
+    const old = this._requestActions;
+    if (old === value) {
+      return;
+    }
+    this._requestActions = value;
+    this.requestUpdate();
+  }
+
+  /**
+   * A list of request actions.
+   * @return {Array<ArcResponseActions>}
+   */
+  get responseActions() {
+    return this._responseActions;
+  }
+
+  /**
+   * @param {Array<ArcResponseActions>} value List of request actions to render.
+   */
+  set responseActions(value) {
+    const old = this._responseActions;
+    if (old === value) {
+      return;
+    }
+    this._responseActions = value;
+    this.requestUpdate();
   }
 
   get onactionchange() {
@@ -63,7 +124,7 @@ export class ArcActions extends LitElement {
       return;
     }
     this._onactionchange = value;
-    this.addEventListener(actionChangeEvent, value)
+    this.addEventListener(actionChangeEvent, value);
   }
 
   get onselectedchange() {
@@ -80,7 +141,7 @@ export class ArcActions extends LitElement {
       return;
     }
     this._onselectedchange = value;
-    this.addEventListener(selectedChangeEvent, value)
+    this.addEventListener(selectedChangeEvent, value);
   }
 
   constructor() {
@@ -88,8 +149,8 @@ export class ArcActions extends LitElement {
     this.selected = 0;
     this.compatibility = false;
     this.outlined = false;
-    this.requestActions = null;
-    this.responseActions = null;
+    this._requestActions = null;
+    this._responseActions = null;
   }
 
   [tabHandlerSymbol](e) {
@@ -105,40 +166,42 @@ export class ArcActions extends LitElement {
   }
 
   [notifyChangeSymbol](type) {
-    this.dispatchEvent(new CustomEvent(actionChangeEvent, {
-      detail: {
-        type
-      }
-    }));
+    this.dispatchEvent(
+      new CustomEvent(actionChangeEvent, {
+        detail: {
+          type
+        }
+      })
+    );
   }
 
   render() {
     return html`
-      ${this[tutorialTplSymbol]()}
-      ${this[tabsTplSymbol]()}
-      ${this[reqestActionsTplSymbol]()}
+      ${this[tutorialTplSymbol]()} ${this[tabsTplSymbol]()} ${this[reqestActionsTplSymbol]()}
       ${this[responseActionsTplSymbol]()}
     `;
   }
 
   [tutorialTplSymbol]() {
-    return html`<p class="actions-intro">
-    Actions runs a logic related to the current request.
-    When they fail the request is reported as errored.
-    </p>`;
+    return html`
+      <p class="actions-intro">
+        Actions runs a logic related to the current request. When they fail the request is reported as errored.
+      </p>
+    `;
   }
 
   [tabsTplSymbol]() {
     const { selected, compatibility } = this;
     return html`
-    <anypoint-tabs
-      .selected="${selected}"
-      ?compatibility="${compatibility}"
-      @selected-changed="${this[tabHandlerSymbol]}"
-    >
-      <anypoint-tab ?compatibility="${compatibility}">Request actions</anypoint-tab>
-      <anypoint-tab ?compatibility="${compatibility}">Response actions</anypoint-tab>
-    </anypoint-tabs>`;
+      <anypoint-tabs
+        .selected="${selected}"
+        ?compatibility="${compatibility}"
+        @selected-changed="${this[tabHandlerSymbol]}"
+      >
+        <anypoint-tab ?compatibility="${compatibility}">Request actions</anypoint-tab>
+        <anypoint-tab ?compatibility="${compatibility}">Response actions</anypoint-tab>
+      </anypoint-tabs>
+    `;
   }
 
   [reqestActionsTplSymbol]() {
@@ -158,12 +221,13 @@ export class ArcActions extends LitElement {
   [panelTplSymbol](actions, type) {
     const { compatibility, outlined } = this;
     return html`
-    <request-actions-panel
-      ?compatibility="${compatibility}"
-      ?outlined="${outlined}"
-      type="${type}"
-      @change="${this[actionsHandlerSymbol]}"
-      .actions="${actions}"
-    ></request-actions-panel>`;
+      <actions-panel
+        ?compatibility="${compatibility}"
+        ?outlined="${outlined}"
+        type="${type}"
+        @change="${this[actionsHandlerSymbol]}"
+        .actions="${actions}"
+      ></actions-panel>
+    `;
   }
 }

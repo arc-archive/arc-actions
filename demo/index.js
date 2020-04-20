@@ -5,18 +5,14 @@ import '../arc-actions.js';
 
 const cacheKeys = Object.freeze({
   request: 'cache.request.actions',
-  response: 'cache.response.actions',
+  response: 'cache.response.actions'
 });
 
 class ComponentDemo extends DemoPage {
   constructor() {
     super();
-    this.initObservableProperties([
-      'outlined',
-      'requestActions',
-      'responseActions',
-    ]);
-    this.componentName = 'arc-actions/request-actions-panel';
+    this.initObservableProperties(['outlined', 'requestActions', 'responseActions']);
+    this.componentName = 'arc-actions';
     this.demoStates = ['Filled', 'Outlined', 'Anypoint'];
     this._actionsChange = this._actionsChange.bind(this);
     this.requestActions = null;
@@ -74,20 +70,12 @@ class ComponentDemo extends DemoPage {
   }
 
   _demoTemplate() {
-    const {
-      demoStates,
-      darkThemeActive,
-      compatibility,
-      outlined,
-      requestActions,
-      responseActions,
-    } = this;
+    const { demoStates, darkThemeActive, compatibility, outlined, requestActions, responseActions } = this;
     return html`
       <section class="documentation-section">
         <h3>Interactive demo</h3>
         <p>
-          This demo lets you preview the request actions panel element with various
-          configuration options.
+          This demo lets you preview the request actions panel element with various configuration options.
         </p>
         <arc-interactive-demo
           .states="${demoStates}"
