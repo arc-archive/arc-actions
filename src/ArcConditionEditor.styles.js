@@ -6,28 +6,35 @@ export default css`
 }
 
 anypoint-input {
+  display: inline-flex;
   width: auto;
   max-width: 700px;
-  margin: 0px 8px 20px 8px;
+  margin: 8px 8px 12px 8px;
 }
 
-anypoint-input[compatibility] {
-  margin-top: 20px;
+anypoint-input[type=number] {
+  width: auto;
+  max-width: 200px;
 }
 
 .action-card {
   margin: 8px 12px;
 }
 
-:host([opened]) .action-card {
+.action-card.opened {
   box-shadow: var(--box-shadow-2dp);
   padding: 8px;
 }
 
-.action-title {
-  margin: 8px 12px;
-  font-weight: 500;
-  font-size: 1rem;
+.action-card.closed {
+  display: flex;
+  align-items: center;
+  background-color: #E0E0E0;
+  padding-left: 8px;
+}
+
+.closed strong {
+  margin: 0 4px;
 }
 
 .action-footer {
@@ -42,16 +49,12 @@ anypoint-input[compatibility] {
   margin-left: auto;
 }
 
-.closed-title,
-.opened-title {
-  display: flex;
-  align-items: center;
+.editor-contents {
+
 }
 
-.iterator-block {
-  padding-left: 8px;
-  border-left: 1px #FFA031 solid;
-  margin-left: 12px;
+anypoint-dropdown-menu {
+  margin: 8px;
 }
 
 .form-row,
@@ -62,13 +65,6 @@ anypoint-input[compatibility] {
 
 .form-row > anypoint-input {
   flex: 1;
-}
-
-.icon {
-  width: 24px;
-  height: 24px;
-  display: inline-block;
-  fill: currentColor;
 }
 
 .icon.help {

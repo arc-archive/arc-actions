@@ -25,11 +25,11 @@
     "email": "arc@mulesoft.com"
   },
   "dependencies": {
-    "@advanced-rest-client/arc-icons": "^3.0.5",
-    "@advanced-rest-client/events-target-mixin": "^3.1.1",
-    "@advanced-rest-client/headers-parser-mixin": "^3.1.0",
-    "@advanced-rest-client/variables-evaluator": "^3.1.0",
-    "@anypoint-web-components/anypoint-button": "^1.0.15",
+    "@advanced-rest-client/arc-icons": "^3.1.0",
+    "@advanced-rest-client/events-target-mixin": "^3.2.0",
+    "@advanced-rest-client/headers-parser-mixin": "^3.2.0",
+    "@advanced-rest-client/variables-evaluator": "^4.0.0",
+    "@anypoint-web-components/anypoint-button": "^1.1.1",
     "@anypoint-web-components/anypoint-checkbox": "^1.0.2",
     "@anypoint-web-components/anypoint-dropdown-menu": "^0.1.14",
     "@anypoint-web-components/anypoint-input": "^0.2.14",
@@ -42,23 +42,29 @@
     "lit-html": "^1.1.2"
   },
   "devDependencies": {
-    "@advanced-rest-client/arc-demo-helper": "^2.1.3",
-    "@advanced-rest-client/eslint-config": "^1.1.4",
-    "@advanced-rest-client/prettier-config": "^0.1.0",
-    "@advanced-rest-client/testing-karma-sl": "^1.2.0",
-    "@commitlint/cli": "^8.3.5",
-    "@commitlint/config-conventional": "^8.3.4",
-    "@open-wc/demoing-storybook": "^1.15.2",
-    "@open-wc/testing": "^2.5.11",
-    "@open-wc/testing-karma": "^3.3.12",
+    "@advanced-rest-client/arc-demo-helper": "^2.1.4",
+    "@advanced-rest-client/testing-karma-sl": "^1.3.1",
+    "@babel/core": "^7.9.6",
+    "@babel/preset-env": "^7.9.6",
+    "@open-wc/eslint-config": "^2.0.0",
+    "@open-wc/testing": "^2.5.16",
+    "@open-wc/testing-karma": "^3.3.19",
+    "@pika/web": "^0.6.1",
+    "babel-plugin-minify-mangle-names": "^0.5.0",
+    "browserify": "^16.5.1",
     "deepmerge": "^4.2.2",
-    "es-dev-server": "^1.46.2",
-    "eslint": "^6.1.0",
+    "es-dev-server": "^1.48.1",
+    "eslint": "^7.0.0",
+    "eslint-config-prettier": "^6.11.0",
+    "fs-extra": "^9.0.0",
     "husky": "^4.2.5",
-    "lint-staged": "^10.1.3",
+    "jexl": "^2.2.2",
+    "lint-staged": "^10.2.2",
+    "prettier": "^2.0.5",
     "sinon": "^9.0.2",
     "typescript": "^3.8.3",
-    "typescript-lit-html-plugin": "^0.9.0"
+    "typescript-lit-html-plugin": "^0.9.0",
+    "uglify-js": "^3.9.2"
   },
   "scripts": {
     "start": "es-dev-server --app-index demo/index.html --node-resolve --open --watch",
@@ -70,14 +76,50 @@
     "format": "npm run format:eslint && npm run format:prettier",
     "test": "karma start --coverage",
     "test:watch": "karma start --auto-watch=true --single-run=false",
-    "storybook": "start-storybook --node-resolve --watch --open",
-    "storybook:build": "build-storybook",
-    "lint:types": "tsc"
+    "test:sl": "karma start karma.sl.config.js --compatibility auto --coverage",
+    "lint:types": "tsc",
+    "prepare": "pika-web && node dev-lib/prepare.js"
+  },
+  "@pika/web": {
+    "webDependencies": [
+      "jexl/lib/Jexl.js"
+    ]
+  },
+  "eslintConfig": {
+    "extends": [
+      "@open-wc/eslint-config",
+      "eslint-config-prettier"
+    ],
+    "overrides": [
+      {
+        "files": [
+          "**/demo/**/*.js",
+          "**/demo/**/*.html",
+          "dev-lib/"
+        ],
+        "rules": {
+          "no-console": "off",
+          "no-unused-expressions": "off",
+          "class-methods-use-this": "off",
+          "import/no-extraneous-dependencies": "off"
+        }
+      }
+    ]
+  },
+  "prettier": {
+    "singleQuote": true,
+    "arrowParens": "avoid"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
   },
   "lint-staged": {
     "*.js": [
       "eslint --fix",
-      "prettier --write"
+      "prettier --write",
+      "git add"
     ]
   }
 }

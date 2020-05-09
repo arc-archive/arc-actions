@@ -1,5 +1,7 @@
 import { ArcAction } from './ArcAction.js';
 
+/* eslint-disable no-param-reassign */
+
 /**
  * An enum with supported actions.
  * @readonly
@@ -39,12 +41,12 @@ export const actionNamesMap = (input) => {
  * If an item is not an instance of `ArcAction` then it creates an instance of it
  * by passing the map as an argument.
  *
- * @param {Array<Object>} value Passed list of actions.
- * @return {Array<ArcAction>} Mapped actions.
+ * @param {Object[]} value Passed list of actions.
+ * @return {ArcAction[]} Mapped actions.
  */
 export const mapActions = (value) => {
   if (!Array.isArray(value)) {
-    return null;
+    return [];
   }
   return value.map((item) => {
     if (!(item instanceof ArcAction)) {

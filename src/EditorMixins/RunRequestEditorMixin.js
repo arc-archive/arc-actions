@@ -1,5 +1,7 @@
 import { html } from 'lit-element';
-export const renderRunRequestEditor = Symbol();
+
+export const renderRunRequestEditor = Symbol('renderRunRequestEditor');
+
 /**
  * Mixin that adds support for run-request type action editor.
  *

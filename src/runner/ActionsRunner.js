@@ -1,24 +1,54 @@
 import { EventsTargetMixin } from '@advanced-rest-client/events-target-mixin';
 import { VariablesMixin } from '@advanced-rest-client/variables-evaluator/index.js';
 import { mapActions } from '../Utils.js';
+import { ActionRunner } from './ActionRunner.js';
+
+/* eslint-disable no-await-in-loop */
+/* eslint-disable no-plusplus */
+/* eslint-disable no-continue */
+/* eslint-disable no-param-reassign */
 
 /** @typedef {import('../ArcAction.js').ArcAction} ArcAction */
 /** @typedef {import('../ArcAction.js').ArcActionConfiguration} ArcActionConfiguration */
 
+/**
+ * @typedef {Object} ActionsRunnerConfig
+ * @property {HTMLElement|Window=} config.eventsTarget A node to be used to dispat events on.
+ * @property {Object=} config.context Variables context
+ * @property {String=} config.jexlPath JavaScript path to Jexl library
+ * @property {Object=} config.jexl A reference to Jexl object. When set `jexlPath` is not needed.
+ */
+
+/**
+ * Runs acrions recuresively until all actions are executed.
+ * @param {Array<ArcAction>} actions Action definition
+ * @param {Object} request ARC request object
+ * @param {Object=} response ARC response object
+ * @return {Promise}
+ */
+async function runActions(actions, request, response) {
+ if (!actions || !actions.length) {
+   return;
+ }
+ for (let i = 0; i < actions.length; i++) {
+   const action = actions[i];
+   const runner = new ActionRunner(action);
+   await runner.run(request, response);
+ }
+}
+
+/**
+ * @mixes EventsTargetMixin
+ * @mixes VariablesMixin
+ */
 export class ActionsRunner extends VariablesMixin(EventsTargetMixin(Object)) {
   /**
-   * @param {?Object} config Configuration options
-   * @param {?Node} config.eventsTarget A node to be used to dispat events on.
-   * @param {?Object} config.context Variables context
-   * @param {?Object} config.cache Variables cache object
-   * @param {?String} config.jexlPath JavaScript path to Jexl library
-   * @param {?Object} config.jexl A reference to Jexl object. When set `jexlPath` is not needed.
+   * @param {ActionsRunnerConfig=} config Configuration options
    */
   constructor(config = {}) {
-    const { context, cache, jexlPath, jexl, eventsTarget } = config;
+    const { context, jexlPath, jexl, eventsTarget } = config;
     super();
     this.context = context;
-    this.cache = cache;
     this.jexlPath = jexlPath;
     this.jexl = jexl;
     this.eventsTarget = eventsTarget;
@@ -51,6 +81,7 @@ export class ActionsRunner extends VariablesMixin(EventsTargetMixin(Object)) {
       }
       actions[i] = await this._evaluateAction(action);
     }
+    return runActions(actions, request);
   }
 
   /**
@@ -66,16 +97,30 @@ export class ActionsRunner extends VariablesMixin(EventsTargetMixin(Object)) {
     if (!actions || !request || !response) {
       throw new Error('Expecting 3 arguments.');
     }
+    const arcActions = mapActions(actions);
+    for (let i = 0, len = arcActions.length; i < len; i++) {
+      const action = arcActions[i];
+      if (action.enabled === false) {
+        continue;
+      }
+      actions[i] = await this._evaluateAction(action);
+    }
+    return runActions(actions, request, response);
   }
 
   /**
    * Evaluates variables in the action.
    * @param {ArcAction} action An action to evaluate.
-   * @return {Promise} Resolved to an action without variables.
+   * @return {Promise<ArcAction>} Resolved to an action without variables.
    */
   async _evaluateAction(action) {
-    // const copy = action.clone();
-    // const mainProps = ['name', 'source', 'url', 'expires'];
-    // const iteratorProps = ['condition', 'source'];
+    const copy = action.clone();
+    const { config } = copy;
+    await this.evaluateVariables(config);
+    const { source } = /** @type any */ (config);
+    if (source && source.iterator) {
+      await this.evaluateVariables(source.iterator,);
+    }
+    return copy;
   }
 }

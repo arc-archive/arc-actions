@@ -1,12 +1,12 @@
 import { html } from 'lit-element';
 import { configCheckbox, configInput } from './Utils.js';
 
-export const renderDeleteCookieEditor = Symbol();
+export const renderDeleteCookieEditor = Symbol('renderDeleteCookieEditor');
 // Templates
-const useRequestUrlTplSymbol = Symbol();
-const urlTplSymbol = Symbol();
-const removeAllTplSymbol = Symbol();
-const nameTplSymbol = Symbol();
+const useRequestUrlTplSymbol = Symbol('useRequestUrlTplSymbol');
+const urlTplSymbol = Symbol('urlTplSymbol');
+const removeAllTplSymbol = Symbol('removeAllTplSymbol');
+const nameTplSymbol = Symbol('nameTplSymbol');
 
 /** @typedef {import('lit-html').TemplateResult} TemplateResult */
 

@@ -1,14 +1,10 @@
 coverage/
 test/
 demo/
-gen-tsd.json
+dev-lib/
+web_modules/
 CONTRIBUTING.md
 .travis.yml
-index.html
 polymer.json
 karma.*
-husky.*
-commitlint.*
 .*
-*.config.*
-prettier.config.js

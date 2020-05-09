@@ -2,41 +2,45 @@ import { html } from 'lit-element';
 import {
   configInput,
   configCheckbox,
-  dataSourceSelector,
   dataIteratorTplSymbol,
   iteratorTemplateSymbol,
-  dataSourcePathTplSymbol
+  dataSourcePathTplSymbol,
+  dataSourceHandlerSymbol,
 } from './Utils.js';
 
-export const renderSetCookieEditor = Symbol();
+import {
+  dataSourceSelector,
+} from '../CommonTemplates.js';
+
+export const renderSetCookieEditor = Symbol('renderSetCookieEditor');
 
 // Templates
-const cnameTplSymbol = Symbol();
-const curlTplSymbol = Symbol();
-const cexpiresTplSymbol = Symbol();
-const chostOnlyTplSymbol = Symbol();
-const chttpOnlyTplSymbol = Symbol();
-const csecureTplSymbol = Symbol();
-const csessionTplSymbol = Symbol();
-const sourceTplSymbol = Symbol();
-const arraySearchTplSymbol = Symbol();
-const useRequestUrlTplSymbol = Symbol();
-const failTplSymbol = Symbol();
+const cnameTplSymbol = Symbol('cnameTplSymbol');
+const curlTplSymbol = Symbol('curlTplSymbol');
+const cexpiresTplSymbol = Symbol('cexpiresTplSymbol');
+const chostOnlyTplSymbol = Symbol('chostOnlyTplSymbol');
+const chttpOnlyTplSymbol = Symbol('chttpOnlyTplSymbol');
+const csecureTplSymbol = Symbol('csecureTplSymbol');
+const csessionTplSymbol = Symbol('csessionTplSymbol');
+const sourceTplSymbol = Symbol('sourceTplSymbol');
+const arraySearchTplSymbol = Symbol('arraySearchTplSymbol');
+const useRequestUrlTplSymbol = Symbol('useRequestUrlTplSymbol');
+const failTplSymbol = Symbol('failTplSymbol');
 
 /** @typedef {import('lit-html').TemplateResult} TemplateResult */
 /** @typedef {import('../ActionEditor.js').DataSourceConfiguration} DataSourceConfiguration */
 
 /**
  * @typedef {Object} SetCookieConfig
- * @property {?boolean} useRequestUrl When set it uses request URL instead of defined URL in the action
- * @property {?string} url An URL associated with the cookie
  * @property {string} name Name of the cookie
- * @property {?string} expires The cookie expiration time
- * @property {?boolean} hostOnly Whather the cookie is host only
- * @property {?boolean} httpOnly Whather the cookie is HTTP only
- * @property {?boolean} secure Whather the cookie is HTTPS only
- * @property {?boolean} session Whather the cookie is a session cookie
  * @property {DataSourceConfiguration} source Source of the cookie value
+ * @property {boolean=} useRequestUrl When set it uses request URL instead of defined URL in the action
+ * @property {string=} url An URL associated with the cookie
+ * @property {string=} expires The cookie expiration time
+ * @property {boolean=} hostOnly Whather the cookie is host only
+ * @property {boolean=} httpOnly Whather the cookie is HTTP only
+ * @property {boolean=} secure Whather the cookie is HTTPS only
+ * @property {boolean=} session Whather the cookie is a session cookie
  */
 
 /**
@@ -179,8 +183,12 @@ export const SetCookieEditorMixin = (superClass) =>
     [sourceTplSymbol](config) {
       const configSource = /** @type {DataSourceConfiguration} */ (config.source || {});
       const { source } = configSource;
+      const { type } = this;
       // @ts-ignore
-      return this[dataSourceSelector](source);
+      return dataSourceSelector(source, this[dataSourceHandlerSymbol], {
+        requestOptions: type === 'request',
+        responseOptions: type === 'response',
+      });
     }
 
     /**
@@ -198,9 +206,7 @@ export const SetCookieEditorMixin = (superClass) =>
       // @ts-ignore
       const itTpl = iteratorEnabled ? this[iteratorTemplateSymbol](iterator) : '';
       // @ts-ignore
-      return html`
-        ${this[dataIteratorTplSymbol](iteratorEnabled)} ${itTpl}
-      `;
+      return html`${this[dataIteratorTplSymbol](iteratorEnabled)} ${itTpl}`;
     }
 
     /**

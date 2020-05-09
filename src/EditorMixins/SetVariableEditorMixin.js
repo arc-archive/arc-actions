@@ -2,17 +2,21 @@ import { html } from 'lit-element';
 import {
   configInput,
   configCheckbox,
-  dataSourceSelector,
   dataIteratorTplSymbol,
   iteratorTemplateSymbol,
-  dataSourcePathTplSymbol
+  dataSourcePathTplSymbol,
+  dataSourceHandlerSymbol,
 } from './Utils.js';
 
-export const renderSetVariableEditor = Symbol();
-const nameTplSymbol = Symbol();
-const sourceTplSymbol = Symbol();
-const arraySearchTplSymbol = Symbol();
-const failTplSymbol = Symbol();
+import {
+  dataSourceSelector,
+} from '../CommonTemplates.js';
+
+export const renderSetVariableEditor = Symbol('renderSetVariableEditor');
+const nameTplSymbol = Symbol('nameTplSymbol');
+const sourceTplSymbol = Symbol('sourceTplSymbol');
+const arraySearchTplSymbol = Symbol('arraySearchTplSymbol');
+const failTplSymbol = Symbol('failTplSymbol');
 
 /** @typedef {import('lit-html').TemplateResult} TemplateResult */
 /** @typedef {import('../ActionEditor.js').DataSourceConfiguration} DataSourceConfiguration */
@@ -41,6 +45,7 @@ export const SetVariableEditorMixin = (superClass) =>
         ${dataSourceTemplate} ${this[failTplSymbol](this)}
       `;
     }
+
     /**
      * Renders a template for the variable's name input.
      *
@@ -64,8 +69,12 @@ export const SetVariableEditorMixin = (superClass) =>
     [sourceTplSymbol](config) {
       const configSource = /** @type {DataSourceConfiguration} */ (config.source || {});
       const { source } = configSource;
+      const { type } = this;
       // @ts-ignore
-      return this[dataSourceSelector](source);
+      return dataSourceSelector(source, this[dataSourceHandlerSymbol], {
+        requestOptions: type === 'request',
+        responseOptions: type === 'response',
+      });
     }
 
     /**
