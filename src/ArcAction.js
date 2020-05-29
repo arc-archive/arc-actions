@@ -3,52 +3,20 @@ function recursiveDeepCopy(obj) {
   return Object.keys(obj).reduce(
     (v, d) =>
       Object.assign(v, {
-        [d]: obj[d].constructor === Object ? recursiveDeepCopy(obj[d]) : obj[d]
+        [d]: obj[d].constructor === Object ? recursiveDeepCopy(obj[d]) : obj[d],
       }),
     {}
   );
 }
 
-/** @typedef {import('./EditorMixins/SetCookieEditorMixin.js').SetCookieConfig} SetCookieConfig */
-/** @typedef {import('./EditorMixins/DeleteCookieEditorMixin.js').DeleteCookieConfig} DeleteCookieConfig */
-/** @typedef {import('./EditorMixins/SetVariableEditorMixin.js').SetVariableConfig} SetVariableConfig */
+/** @typedef {import('../types').SetCookieConfig} SetCookieConfig */
+/** @typedef {import('../types').DeleteCookieConfig} DeleteCookieConfig */
+/** @typedef {import('../types').SetVariableConfig} SetVariableConfig */
+/** @typedef {import('../types').ActionConfiguration} ActionConfiguration */
+/** @typedef {import('../types').ArcActionViewConfiguration} ArcActionViewConfiguration */
+/** @typedef {import('../types').ArcActionConfiguration} ArcActionConfiguration */
+/** @typedef {import('../types').TypeEnum} TypeEnum */
 /** @typedef {import('./Utils.js').SupportedActions} SupportedActions */
-
-/**
- * @typedef {Object} ArcActionViewConfiguration
- * @property {?boolean} [opened=true] Whether the action is "opened" in the editor UI.
- */
-
-/**
- * @typedef {Object |
- *  SetCookieConfig |
- *  SetVariableConfig |
- *  DeleteCookieConfig} ActionConfiguration
- */
-
-/**
- * @typedef {Object} ArcActionConfiguration
- * @property {TypeEnum} [type=TypeEnum.request] Type of the action.
- * Can be either `request` or `response`. Default to request.
- * @property {?SupportedActions} [name=null] Action name. Default to `null` which is unknown action.
- * @property {?boolean} [enabled=false] Whether the action is enabled. `false` by default.
- * @property {?number} [priority=5] Execution priority.
- * @property {ActionConfiguration} [config={}] Action configuration.
- * Depends on `name`.
- * @property {?boolean} [sync=true] Whether or not the action is executed synchronously to request / response
- * @property {?boolean} [failOnError=true]]
- * @property {?ArcActionViewConfiguration} [view={ opened: true }] View configuration unrelated to action logic.
- */
-
-/**
- * Enum for action type
- * @readonly
- * @enum {string}
- */
-export const TypeEnum = {
-  request: 'request',
-  response: 'response'
-};
 
 /**
  * A class describing a runnable action in Advanced REST Client.
@@ -60,11 +28,11 @@ export const TypeEnum = {
  */
 export class ArcAction {
   /**
-   * @param {?ArcActionConfiguration} init The initialization object with predefined values
+   * @param {ArcActionConfiguration} init The initialization object with predefined values
    */
-  constructor(init = {}) {
+  constructor(init) {
     const {
-      type = TypeEnum.request,
+      type = 'request',
       name = null,
       enabled = false,
       priority = 5,
@@ -72,8 +40,8 @@ export class ArcAction {
       sync = true,
       failOnError = true,
       view = {
-        opened: true
-      }
+        opened: true,
+      },
     } = init;
     /**
      * Type of the action. Can be either `request` or `response`. Default to
@@ -98,7 +66,7 @@ export class ArcAction {
     this.priority = priority;
     /**
      * Action configuration
-     * @type {SetCookieConfig|SetVariableConfig|DeleteCookieConfig}
+     * @type {ActionConfiguration}
      */
     this.config = config;
     /**

@@ -1,35 +1,19 @@
 import { LitElement, html } from 'lit-element';
-import '@anypoint-web-components/anypoint-button';
-import '@anypoint-web-components/anypoint-dropdown-menu/anypoint-dropdown-menu.js';
-import '@anypoint-web-components/anypoint-menu-button/anypoint-menu-button.js';
-import '@anypoint-web-components/anypoint-listbox/anypoint-listbox.js';
-import '@anypoint-web-components/anypoint-item/anypoint-item.js';
-import '@anypoint-web-components/anypoint-checkbox/anypoint-checkbox.js';
-import '@anypoint-web-components/anypoint-input/anypoint-input.js';
-import '@anypoint-web-components/anypoint-switch/anypoint-switch.js';
-import { helpOutline } from '@advanced-rest-client/arc-icons/ArcIcons.js';
+import { ScopedElementsMixin } from '@open-wc/scoped-elements';
+import { AnypointButton } from '@anypoint-web-components/anypoint-button';
+import { AnypointDropdownMenu } from '@anypoint-web-components/anypoint-dropdown-menu';
+import { AnypointMenuButton } from '@anypoint-web-components/anypoint-menu-button';
+import { AnypointListbox } from '@anypoint-web-components/anypoint-listbox';
+import { AnypointItem } from '@anypoint-web-components/anypoint-item';
+import { AnypointCheckbox } from '@anypoint-web-components/anypoint-checkbox';
+import { AnypointInput } from '@anypoint-web-components/anypoint-input';
+import { AnypointSwitch } from '@anypoint-web-components/anypoint-switch';
 import styles from './ActionEditor.styles.js';
 import tooltipStyles from './Tooltip.styles.js';
-
-import {
-  notifyChangeSymbol,
-  configInput,
-  inputHandlerSymbol,
-  configCheckbox,
-  configChangeHandlerSymbol,
-  dataSourceHandlerSymbol,
-  dataIteratorTplSymbol,
-  iteratorTemplateSymbol,
-  dataSourcePathTplSymbol
-} from './EditorMixins/Utils.js';
 import { actionNamesMap } from './Utils.js';
-import { SetCookieEditorMixin, renderSetCookieEditor } from './EditorMixins/SetCookieEditorMixin.js';
-import { SetVariableEditorMixin, renderSetVariableEditor } from './EditorMixins/SetVariableEditorMixin.js';
-import { DeleteCookieEditorMixin, renderDeleteCookieEditor } from './EditorMixins/DeleteCookieEditorMixin.js';
-import {
-  operatorTemplate,
-  inputTemplate,
-} from './CommonTemplates.js'
+import setCookieTemplate from './EditorMixins/SetCookieTemplate.js';
+import setVariableTemplate from './EditorMixins/SetVariableTemplate.js';
+import deleteCookieTemplate from './EditorMixins/DeleteCookieTemplate.js';
 
 const configProperty = 'config';
 
@@ -37,9 +21,13 @@ const helpBase = 'https://docs.advancedrestclient.com/arc-actions/';
 const helpMap = {
   'set-cookie': `${helpBase}introduction/set-cookie-action`,
   'set-variable': `${helpBase}introduction/set-variable-action`,
-  'delete-cookie': `${helpBase}introduction/remove-cookie-s-action`
+  'delete-cookie': `${helpBase}introduction/remove-cookie-s-action`,
 };
 
+const notifyChangeSymbol = Symbol('notifyChangeSymbol');
+const inputHandlerSymbol = Symbol('inputHandlerSymbol');
+const configChangeHandlerSymbol = Symbol('configChangeHandlerSymbol');
+const dataSourceHandlerSymbol = Symbol('dataSourceHandlerSymbol');
 const actionHelpTplAymbol = Symbol('actionHelpTplAymbol');
 const updateDeepPropertySymbol = Symbol('updateDeepPropertySymbol');
 const enabledHandlerSymbol = Symbol('enabledHandlerSymbol');
@@ -57,56 +45,14 @@ const enableSwitchTemplate = Symbol('enableSwitchTemplate');
 const deleteButtonTemplate = Symbol('deleteButtonTemplate');
 const duplicateButtonTemplate = Symbol('duplicateButtonTemplate');
 const closeButtonTemplate = Symbol('closeButtonTemplate');
-const iteratorOperatorTemplate = Symbol('iteratorOperatorTemplate');
-const iteratorPathTemplate = Symbol('iteratorPathTemplate');
-const iteratorConditionTemplate = Symbol('iteratorConditionTemplate');
 
 /** @typedef {import('lit-html').TemplateResult} TemplateResult */
-
-/**
- * @typedef {string} RequestDataSourceEnum
- * @property {string} requesturl "request.url"
- * @property {string} requestmethod "request.method"
- * @property {string} requestheaders "request.headers"
- * @property {string} requestbody "request.body"
- */
-/**
- * @typedef {string} ResponseDataSourceEnum
- * @property {string} responseurl "response.url"
- * @property {string} responsemethod "response.method"
- * @property {string} responseheaders "response.headers"
- * @property {string} responsebody "response.body"
- */
-/**
- * @typedef {string} OperatorEnum
- * @property {string} equal "equal"
- * @property {string} notequal "not-equal"
- * @property {string} greaterthan "greater-than"
- * @property {string} greaterthanequal "greater-than-equal"
- * @property {string} lessthan "less-than"
- * @property {string} lessthanequal "less-than-equal"
- * @property {string} contains "contains"
- * @property {string} regex "regex"
- */
-/**
- * @typedef {Object} IteratorConfiguration
- * @property {string} path The path to the property to use in the comparison.
- * @property {string} condition The value of the condition.
- * @property {OperatorEnum} operator The comparison operator.
- */
-/**
- * @typedef {Object} DataSourceConfiguration
- * @property {RequestDataSourceEnum|ResponseDataSourceEnum} source Source of the data.
- * @property {boolean=} iteratorEnabled When set the iterator configuration is enabled
- * @property {IteratorConfiguration=} iterator Array search configuration.
- * @property {string=} path The path to the data. When `iteratorEnabled` is set then this
- * is a path counting from an array item. When not set an entire value of `source` is used.
- */
-
-/** @typedef {import('./EditorMixins/SetCookieEditorMixin.js').SetCookieConfig} SetCookieConfig */
-/** @typedef {import('./EditorMixins/DeleteCookieEditorMixin.js').DeleteCookieConfig} DeleteCookieConfig */
-/** @typedef {import('./EditorMixins/SetVariableEditorMixin.js').SetVariableConfig} SetVariableConfig */
-/** @typedef {import('./ArcAction.js').ActionConfiguration} ActionConfiguration */
+/** @typedef {import('../types').DataSourceConfiguration} DataSourceConfiguration */
+/** @typedef {import('../types').IteratorConfiguration} IteratorConfiguration */
+/** @typedef {import('../types').SetCookieConfig} SetCookieConfig */
+/** @typedef {import('../types').DeleteCookieConfig} DeleteCookieConfig */
+/** @typedef {import('../types').SetVariableConfig} SetVariableConfig */
+/** @typedef {import('../types').ActionConfiguration} ActionConfiguration */
 
 /**
  * @param {string} name
@@ -114,14 +60,25 @@ const iteratorConditionTemplate = Symbol('iteratorConditionTemplate');
  */
 const closedCardTitleTemplate = (name) => {
   const label = actionNamesMap(name);
-  return html`
-    <div class="action-title">${label}</div>
-  `;
-}
+  return html` <div class="action-title">${label}</div> `;
+};
 
-export class ARCActionEditorElement extends DeleteCookieEditorMixin(SetVariableEditorMixin(SetCookieEditorMixin(LitElement))) {
+export class ARCActionEditorElement extends ScopedElementsMixin(LitElement) {
   static get styles() {
     return [styles, tooltipStyles];
+  }
+
+  static get scopedElements() {
+    return {
+      'anypoint-button': AnypointButton,
+      'anypoint-dropdown-menu': AnypointDropdownMenu,
+      'anypoint-menu-button': AnypointMenuButton,
+      'anypoint-listbox': AnypointListbox,
+      'anypoint-input': AnypointInput,
+      'anypoint-item': AnypointItem,
+      'anypoint-checkbox': AnypointCheckbox,
+      'anypoint-switch': AnypointSwitch,
+    };
   }
 
   static get properties() {
@@ -164,7 +121,6 @@ export class ARCActionEditorElement extends DeleteCookieEditorMixin(SetVariableE
       priority: { type: Number, reflect: true },
       /**
        * The configuration of an action. The type depends on the `name` property.
-       * @type {ActionConfiguration}
        */
       config: { type: Object },
 
@@ -179,8 +135,24 @@ export class ARCActionEditorElement extends DeleteCookieEditorMixin(SetVariableE
       /**
        * Enables outlined MD theme
        */
-      outlined: { type: Boolean, reflect: true }
+      outlined: { type: Boolean, reflect: true },
+      readOnly: { type: Boolean, reflect: true },
+      disabled: { type: Boolean, reflect: true },
     };
+  }
+
+  constructor() {
+    super();
+    this.compatibility = false;
+    this.outlined = false;
+    this.opened = false;
+    this.priority = 5;
+    this.failOnError = false;
+    this.readOnly = false;
+    this.disabled = false;
+    this.name = undefined;
+    this.type = undefined;
+    this.config = undefined;
   }
 
   /**
@@ -191,8 +163,8 @@ export class ARCActionEditorElement extends DeleteCookieEditorMixin(SetVariableE
     this.dispatchEvent(
       new CustomEvent('change', {
         detail: {
-          prop
-        }
+          prop,
+        },
       })
     );
   }
@@ -349,8 +321,8 @@ export class ARCActionEditorElement extends DeleteCookieEditorMixin(SetVariableE
       cancelable: true,
       composed: true,
       detail: {
-        url
-      }
+        url,
+      },
     });
     this.dispatchEvent(ev);
     if (ev.defaultPrevented) {
@@ -376,21 +348,57 @@ export class ARCActionEditorElement extends DeleteCookieEditorMixin(SetVariableE
    * @return {TemplateResult} Template for opened action view.
    */
   [openedCardTemplate]() {
-    const { name = '' } = this;
+    const {
+      name = '',
+      type,
+      failOnError,
+      config,
+      outlined,
+      compatibility,
+      readOnly,
+      disabled,
+    } = this;
     const lowerName = String(name).toLowerCase();
+    const inputHandler = this[inputHandlerSymbol];
+    const changeHandler = this[configChangeHandlerSymbol];
+    const dataSourceHandler = this[dataSourceHandlerSymbol];
+    const inputConfig = {
+      outlined,
+      compatibility,
+      readOnly,
+      disabled,
+    };
     let content;
     switch (lowerName) {
       case 'set-cookie':
-        // @ts-ignore
-        content = this[renderSetCookieEditor]();
+        content = setCookieTemplate(
+          failOnError,
+          config,
+          type,
+          inputHandler,
+          changeHandler,
+          dataSourceHandler,
+          inputConfig
+        );
         break;
       case 'set-variable':
-        // @ts-ignore
-        content = this[renderSetVariableEditor]();
+        content = setVariableTemplate(
+          failOnError,
+          config,
+          type,
+          inputHandler,
+          changeHandler,
+          dataSourceHandler,
+          inputConfig
+        );
         break;
       case 'delete-cookie':
-        // @ts-ignore
-        content = this[renderDeleteCookieEditor]();
+        content = deleteCookieTemplate(
+          config,
+          inputHandler,
+          changeHandler,
+          inputConfig
+        );
         break;
       default:
         return html``;
@@ -408,8 +416,7 @@ export class ARCActionEditorElement extends DeleteCookieEditorMixin(SetVariableE
     const lowerName = String(name).toLowerCase();
     return html`
       <div class="closed-title">
-        ${closedCardTitleTemplate(lowerName)}
-        ${this[openButtonTemplate]()}
+        ${closedCardTitleTemplate(lowerName)} ${this[openButtonTemplate]()}
       </div>
     `;
   }
@@ -435,8 +442,8 @@ export class ARCActionEditorElement extends DeleteCookieEditorMixin(SetVariableE
   [openedCardFooter]() {
     return html`
       <div class="action-footer">
-        ${this[enableSwitchTemplate]()} ${this[deleteButtonTemplate]()} ${this[duplicateButtonTemplate]()}
-        ${this[closeButtonTemplate]()}
+        ${this[enableSwitchTemplate]()} ${this[deleteButtonTemplate]()}
+        ${this[duplicateButtonTemplate]()} ${this[closeButtonTemplate]()}
       </div>
     `;
   }
@@ -450,7 +457,12 @@ export class ARCActionEditorElement extends DeleteCookieEditorMixin(SetVariableE
       return '';
     }
     return html`
-      <anypoint-button class="action-help" data-url="${url}" @click="${this[helpHandlerSymbol]}">Help</anypoint-button>
+      <anypoint-button
+        class="action-help"
+        data-url="${url}"
+        @click="${this[helpHandlerSymbol]}"
+        >Help</anypoint-button
+      >
     `;
   }
 
@@ -460,7 +472,10 @@ export class ARCActionEditorElement extends DeleteCookieEditorMixin(SetVariableE
   [enableSwitchTemplate]() {
     const { compatibility, enabled } = this;
     return html`
-      <anypoint-switch ?compatibility="${compatibility}" .checked="${enabled}" @change="${this[enabledHandlerSymbol]}"
+      <anypoint-switch
+        ?compatibility="${compatibility}"
+        .checked="${enabled}"
+        @change="${this[enabledHandlerSymbol]}"
         >Enabled</anypoint-switch
       >
     `;
@@ -492,7 +507,8 @@ export class ARCActionEditorElement extends DeleteCookieEditorMixin(SetVariableE
         title="Duplicates this action"
         ?compatibility="${compatibility}"
         @click="${this[duplicateHandlerSymbol]}"
-      >Duplicate</anypoint-button>
+        >Duplicate</anypoint-button
+      >
     `;
   }
 
@@ -506,7 +522,8 @@ export class ARCActionEditorElement extends DeleteCookieEditorMixin(SetVariableE
         title="Closes the editor"
         ?compatibility="${compatibility}"
         @click="${this[closeHandlerSymbol]}"
-      >Close</anypoint-button>
+        >Close</anypoint-button
+      >
     `;
   }
 
@@ -521,174 +538,8 @@ export class ARCActionEditorElement extends DeleteCookieEditorMixin(SetVariableE
         class="action-open"
         ?compatibility="${compatibility}"
         @click="${this[openenHandlerSymbol]}"
-      >Open</anypoint-button>
+        >Open</anypoint-button
+      >
     `;
-  }
-
-  /**
-   * Renders an input element for the action configuration.
-   * @param {String} name
-   * @param {String} value
-   * @param {String} label
-   * @param {?Object} opts
-   * @return {Object}
-   */
-  [configInput](name, value, label, opts = {}) {
-    const { outlined, compatibility, readOnly, disabled } = this;
-    const config = {
-      ...opts, outlined, compatibility, readOnly, disabled,
-    };
-    config.type = opts.type || 'text';
-    if (opts.autocomplete === undefined) {
-      config.autocomplete = true;
-    }
-    return inputTemplate(name, value, label, this[inputHandlerSymbol], config);
-  }
-
-  /**
-   * Renders an input element for the action configuration.
-   * @param {String} name
-   * @param {Boolean} checked
-   * @param {String} label
-   * @param {?Object} opts
-   * @return {Object}
-   */
-  [configCheckbox](name, checked, label, opts = {}) {
-    const { outlined, compatibility, readOnly, disabled } = this;
-    return html`
-      <div class="checkbox-container">
-        <anypoint-checkbox
-          name="${name}"
-          ?outlined="${outlined}"
-          ?compatibility="${compatibility}"
-          ?readOnly="${readOnly}"
-          ?disabled="${disabled}"
-          ?checked="${checked}"
-          @change="${this[configChangeHandlerSymbol]}"
-          data-notify="${opts.notify}"
-          data-render="${opts.render}"
-          >${label}</anypoint-checkbox
-        >
-      </div>
-    `;
-  }
-
-
-  /**
-   * @param {boolean} enabled Whether the data source iterator is enabled
-   * @return {TemplateResult} A template for the data array search switch
-   */
-  [dataIteratorTplSymbol](enabled) {
-    const { compatibility } = this;
-    return html`
-      <div class="help-hint-block">
-        <anypoint-switch
-          ?compatibility="${compatibility}"
-          .checked="${enabled}"
-          name="config.source.iteratorEnabled"
-          data-notify="config"
-          data-render="true"
-          @change="${this[configChangeHandlerSymbol]}"
-          >Array search</anypoint-switch
-        >
-        <div class="tooltip">
-          <span class="icon help">${helpOutline}</span>
-          <span class="tooltiptext">
-            Allows to search for an item in an array by checking each value against a configured condition.
-          </span>
-        </div>
-      </div>
-    `;
-  }
-
-  /**
-   * @param {ActionConfiguration} config
-   * @return {TemplateResult|string} Template for the data source's path input.
-   */
-  [dataSourcePathTplSymbol](config) {
-    const configSource = /** @type {DataSourceConfiguration} */ (config.source || {});
-    const { iteratorEnabled = false, path = '', source = '' } = configSource;
-    if (['request.method'].indexOf(source) !== -1) {
-      return '';
-    }
-    const label = iteratorEnabled ? "Array item's property for the value" : 'Path to the value';
-    const help = iteratorEnabled
-      ? 'Path to the property relative to the array item found in the search.'
-      : 'Path to the property that contains the data to extract.';
-    // @ts-ignore
-    const input = this[configInput]('config.source.path', path, label, {
-      notify: 'config'
-    });
-    return html`
-      <div class="form-row">
-        ${input}
-        <div class="tooltip">
-          <span class="icon help">${helpOutline}</span>
-          <span class="tooltiptext">
-            ${help} Example: "data.property.subproperty".
-          </span>
-        </div>
-      </div>
-    `;
-  }
-
-  /**
-   * @param {IteratorConfiguration=} config
-   * @return {TemplateResult|string} Template for the array search configuration view.
-   */
-  [iteratorTemplateSymbol](config = /** @type {IteratorConfiguration} */ ({})) {
-    return html`
-      <div class="iterator-block">
-        ${this[iteratorPathTemplate](config.path)} ${this[iteratorOperatorTemplate](config.operator)}
-        ${this[iteratorConditionTemplate](config.condition)}
-      </div>
-    `;
-  }
-
-  /**
-   * @param {string=} path
-   * @return {TemplateResult} Template for the iterator's path input.
-   */
-  [iteratorPathTemplate](path = '') {
-    const input = this[configInput]('config.source.iterator.path', path, 'Path to the property (required)', {
-      required: true,
-      autoValidate: true,
-      notify: 'config'
-    });
-    return html`
-      <div class="form-row">
-        ${input}
-        <div class="tooltip">
-          <span class="icon help">${helpOutline}</span>
-          <span class="tooltiptext">
-            Path to the property that contains the value to compare. Use star "*" to tell where the array items are.
-            Example: data.*.property.
-          </span>
-        </div>
-      </div>
-    `;
-  }
-
-  /**
-   * @param {string=} condition
-   * @return {TemplateResult} Template for the iterator's condition input.
-   */
-  [iteratorConditionTemplate](condition = '') {
-    return this[configInput]('config.source.iterator.condition', condition, 'Condition value (required)', {
-      required: true,
-      autoValidate: true,
-      notify: 'config'
-    });
-  }
-
-  /**
-   * @param {string=} operator
-   * @return {TemplateResult} Template for the iterator's operator drop down.
-   */
-  [iteratorOperatorTemplate](operator = '') {
-    const { outlined, compatibility, readOnly, disabled } = this;
-    return operatorTemplate(this[dataSourceHandlerSymbol], operator, {
-      outlined, compatibility, readOnly, disabled,
-    });
   }
 }
