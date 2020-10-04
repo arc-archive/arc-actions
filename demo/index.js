@@ -79,7 +79,7 @@ class ComponentDemo extends DemoPage {
         </p>
         <arc-interactive-demo
           .states="${demoStates}"
-          @state-chanegd="${this._demoStateHandler}"
+          @state-changed="${this._demoStateHandler}"
           ?dark="${darkThemeActive}"
         >
           <arc-actions

@@ -1,12 +1,15 @@
 import { html } from 'lit-element';
 import { classMap } from 'lit-html/directives/class-map.js';
 import { helpOutline } from '@advanced-rest-client/arc-icons/ArcIcons.js';
+import '@anypoint-web-components/anypoint-dropdown-menu/anypoint-dropdown-menu.js';
+import '@anypoint-web-components/anypoint-input/anypoint-input.js';
+import '@anypoint-web-components/anypoint-checkbox/anypoint-checkbox.js';
 
 /** @typedef {import('lit-html').TemplateResult} TemplateResult */
-/** @typedef {import('../types').DataSourceConfiguration} DataSourceConfiguration */
-/** @typedef {import('../types').SetCookieConfig} SetCookieConfig */
-/** @typedef {import('../types').SetVariableConfig} SetVariableConfig */
-/** @typedef {import('../types').IteratorConfiguration} IteratorConfiguration */
+/** @typedef {import('./types').DataSourceConfiguration} DataSourceConfiguration */
+/** @typedef {import('./types').SetCookieConfig} SetCookieConfig */
+/** @typedef {import('./types').SetVariableConfig} SetVariableConfig */
+/** @typedef {import('./types').IteratorConfiguration} IteratorConfiguration */
 
 /**
  * @param {Boolean} [compatibility=false] Compatibility mode flag.
@@ -14,30 +17,14 @@ import { helpOutline } from '@advanced-rest-client/arc-icons/ArcIcons.js';
  */
 export const operatorOptionsTemplate = (compatibility = false) => {
   return html`
-    <anypoint-item value="equal" ?compatibility="${compatibility}"
-      >Equal</anypoint-item
-    >
-    <anypoint-item value="not-equal" ?compatibility="${compatibility}"
-      >Not equal</anypoint-item
-    >
-    <anypoint-item value="greater-than" ?compatibility="${compatibility}"
-      >Greater than</anypoint-item
-    >
-    <anypoint-item value="greater-than-equal" ?compatibility="${compatibility}"
-      >Greater than or equal</anypoint-item
-    >
-    <anypoint-item value="less-than" ?compatibility="${compatibility}"
-      >Less than</anypoint-item
-    >
-    <anypoint-item value="less-than-equal" ?compatibility="${compatibility}"
-      >Less than or equal</anypoint-item
-    >
-    <anypoint-item value="contains" ?compatibility="${compatibility}"
-      >Contains</anypoint-item
-    >
-    <anypoint-item value="regex" ?compatibility="${compatibility}"
-      >Regular expression</anypoint-item
-    >
+    <anypoint-item data-value="equal" ?compatibility="${compatibility}">Equal</anypoint-item>
+    <anypoint-item data-value="not-equal" ?compatibility="${compatibility}">Not equal</anypoint-item>
+    <anypoint-item data-value="greater-than" ?compatibility="${compatibility}">Greater than</anypoint-item>
+    <anypoint-item data-value="greater-than-equal" ?compatibility="${compatibility}">Greater than or equal</anypoint-item>
+    <anypoint-item data-value="less-than" ?compatibility="${compatibility}">Less than</anypoint-item>
+    <anypoint-item data-value="less-than-equal" ?compatibility="${compatibility}">Less than or equal</anypoint-item>
+    <anypoint-item data-value="contains" ?compatibility="${compatibility}">Contains</anypoint-item>
+    <anypoint-item data-value="regex" ?compatibility="${compatibility}">Regular expression</anypoint-item>
   `;
 };
 
@@ -54,34 +41,31 @@ export const operatorOptionsTemplate = (compatibility = false) => {
  * @param {Function} changeHandler A handler for the change event
  * @param {string=} operator Selected operator
  * @param {OperatorConfiguration=} [opts={}] Additional options
- * @return {TemplateResult} Template for the iterator's operator drop down.
+ * @return {TemplateResult} Template for the iterator operator drop down.
  */
 export const operatorTemplate = (changeHandler, operator, opts = {}) => {
   const {
     name = 'config.source.iterator.operator',
     outlined,
     compatibility,
-    readOnly,
     disabled,
   } = opts;
   return html`
     <anypoint-dropdown-menu
       aria-label="Select data source"
       required
-      autovalidate
+      autoValidate
       name="${name}"
       ?outlined="${outlined}"
       ?compatibility="${compatibility}"
-      ?readOnly="${readOnly}"
       ?disabled="${disabled}"
     >
       <label slot="label">Condition</label>
       <anypoint-listbox
         slot="dropdown-content"
         tabindex="-1"
-        attrforselected="value"
+        attrforselected="data-value"
         .selected="${operator}"
-        ?outlined="${outlined}"
         ?compatibility="${compatibility}"
         @selected-changed="${changeHandler}"
         data-notify="config"
@@ -94,8 +78,8 @@ export const operatorTemplate = (changeHandler, operator, opts = {}) => {
 
 /**
  * @typedef {Object} InputConfiguration
- * @property {string=} type Type of the control
- * @property {boolean=} autocomplete Whether `autocomplete` is on. Default to `true`.
+ * @property {any=} type Type of the control
+ * @property {any=} autocomplete Whether `autocomplete` is on. Default to `on`.
  * @property {boolean=} outlined
  * @property {boolean=} compatibility
  * @property {boolean=} readOnly
@@ -122,7 +106,7 @@ export const inputTemplate = (name, value, label, inputHandler, opts = {}) => {
   const config = { ...opts };
   config.type = opts.type || 'text';
   if (opts.autocomplete === undefined) {
-    config.autocomplete = true;
+    config.autocomplete = 'on';
   }
   const { outlined, compatibility, readOnly, disabled } = config;
   return html`
@@ -133,7 +117,7 @@ export const inputTemplate = (name, value, label, inputHandler, opts = {}) => {
       type="${opts.type}"
       ?required="${opts.required}"
       ?autoValidate="${opts.autoValidate}"
-      ?autocomplete="${opts.autocomplete}"
+      .autocomplete="${opts.autocomplete}"
       .outlined="${outlined}"
       .compatibility="${compatibility}"
       ?readOnly="${readOnly}"
@@ -154,18 +138,10 @@ export const inputTemplate = (name, value, label, inputHandler, opts = {}) => {
  */
 export const requestSourceOptions = (compatibility = false) => {
   return html`
-    <anypoint-item value="request.url" ?compatibility="${compatibility}"
-      >URL</anypoint-item
-    >
-    <anypoint-item value="request.method" ?compatibility="${compatibility}"
-      >Method</anypoint-item
-    >
-    <anypoint-item value="request.headers" ?compatibility="${compatibility}"
-      >Headers</anypoint-item
-    >
-    <anypoint-item value="request.body" ?compatibility="${compatibility}"
-      >Body</anypoint-item
-    >
+    <anypoint-item data-value="request.url" ?compatibility="${compatibility}">URL</anypoint-item>
+    <anypoint-item data-value="request.method" ?compatibility="${compatibility}">Method</anypoint-item>
+    <anypoint-item data-value="request.headers" ?compatibility="${compatibility}">Headers</anypoint-item>
+    <anypoint-item data-value="request.body" ?compatibility="${compatibility}">Body</anypoint-item>
   `;
 };
 
@@ -175,18 +151,10 @@ export const requestSourceOptions = (compatibility = false) => {
  */
 export const responseSourceOptions = (compatibility = false) => {
   return html`
-    <anypoint-item value="response.url" ?compatibility="${compatibility}"
-      >URL</anypoint-item
-    >
-    <anypoint-item value="response.status" ?compatibility="${compatibility}"
-      >Status code</anypoint-item
-    >
-    <anypoint-item value="response.headers" ?compatibility="${compatibility}"
-      >Headers</anypoint-item
-    >
-    <anypoint-item value="response.body" ?compatibility="${compatibility}"
-      >Body</anypoint-item
-    >
+    <anypoint-item data-value="response.url" ?compatibility="${compatibility}">URL</anypoint-item>
+    <anypoint-item data-value="response.status" ?compatibility="${compatibility}">Status code</anypoint-item>
+    <anypoint-item data-value="response.headers" ?compatibility="${compatibility}">Headers</anypoint-item>
+    <anypoint-item data-value="response.body" ?compatibility="${compatibility}">Body</anypoint-item>
   `;
 };
 
@@ -214,27 +182,24 @@ export const dataSourceSelector = (selected, selectHandler, opts = {}) => {
     responseOptions = false,
     outlined,
     compatibility,
-    readOnly,
     disabled,
   } = opts;
   return html`
     <anypoint-dropdown-menu
       aria-label="Select data source"
       required
-      autovalidate
+      autoValidate
       name="${name}"
       ?outlined="${outlined}"
       ?compatibility="${compatibility}"
-      ?readOnly="${readOnly}"
       ?disabled="${disabled}"
     >
       <label slot="label">Data source</label>
       <anypoint-listbox
         slot="dropdown-content"
         tabindex="-1"
-        attrforselected="value"
+        attrforselected="data-value"
         .selected="${selected}"
-        ?outlined="${outlined}"
         ?compatibility="${compatibility}"
         @selected-changed="${selectHandler}"
         data-notify="config"
@@ -254,8 +219,7 @@ export const dataSourceSelector = (selected, selectHandler, opts = {}) => {
  * @return {TemplateResult|string} Template for the data source's path input.
  */
 export function dataSourcePathTemplate(config, inputHandler, inputConfig = {}) {
-  const configSource = /** @type {DataSourceConfiguration} */ (config.source ||
-    {});
+  const configSource = /** @type {DataSourceConfiguration} */ (config.source ||{});
   const { iteratorEnabled = false, path = '', source = '' } = configSource;
   if (['request.method'].indexOf(source) !== -1) {
     return '';
@@ -266,7 +230,6 @@ export function dataSourcePathTemplate(config, inputHandler, inputConfig = {}) {
   const help = iteratorEnabled
     ? 'Path to the property relative to the array item found in the search.'
     : 'Path to the property that contains the data to extract.';
-
   const cnf = {
     ...inputConfig,
     notify: 'config',
@@ -308,8 +271,7 @@ export function dataIteratorTemplate(enabled, changeHandler, inputConfig = {}) {
         data-notify="config"
         data-render="true"
         @change="${changeHandler}"
-        >Array search</anypoint-switch
-      >
+      >Array search</anypoint-switch>
       <div class="tooltip">
         <span class="icon help">${helpOutline}</span>
         <span class="tooltiptext">
@@ -325,7 +287,7 @@ export function dataIteratorTemplate(enabled, changeHandler, inputConfig = {}) {
  * @param {Function} inputHandler Handler for the input event.
  * @param {string=} path
  * @param {InputConfiguration=} inputConfig
- * @return {TemplateResult} Template for the iterator's path input.
+ * @return {TemplateResult} Template for the iterator path input.
  */
 function iteratorPathTemplate(inputHandler, path = '', inputConfig) {
   const cnf = {
@@ -359,7 +321,7 @@ function iteratorPathTemplate(inputHandler, path = '', inputConfig) {
  * @param {Function} inputHandler Handler for the input event.
  * @param {string=} condition
  * @param {InputConfiguration=} inputConfig
- * @return {TemplateResult} Template for the iterator's condition input.
+ * @return {TemplateResult} Template for the iterator condition input.
  */
 export function iteratorConditionTemplate(
   inputHandler,
@@ -428,8 +390,6 @@ export function iteratorTemplate(
 
 /**
  * @typedef {Object} CheckboxConfiguration
- * @property {boolean=} outlined
- * @property {boolean=} compatibility
  * @property {boolean=} readOnly
  * @property {boolean=} disabled
  * @property {string=} notify When set it notifies given path.
@@ -446,14 +406,11 @@ export function iteratorTemplate(
  * @return {TemplateResult}
  */
 export function configCheckbox(name, checked, label, changeHandler, opts = {}) {
-  const { outlined, compatibility, readOnly, disabled, notify, render } = opts;
+  const { disabled, notify, render } = opts;
   return html`
     <div class="checkbox-container">
       <anypoint-checkbox
         name="${name}"
-        ?outlined="${outlined}"
-        ?compatibility="${compatibility}"
-        ?readOnly="${readOnly}"
         ?disabled="${disabled}"
         ?checked="${checked}"
         @change="${changeHandler}"

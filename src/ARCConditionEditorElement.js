@@ -1,14 +1,15 @@
 import { html, LitElement } from 'lit-element';
 import '@advanced-rest-client/arc-icons/arc-icon.js';
-import styles from './ArcConditionEditor.styles.js';
-import tooltipStyles from './Tooltip.styles.js';
+import '@anypoint-web-components/anypoint-switch/anypoint-switch.js';
+import styles from './styles/ArcConditionEditor.styles.js';
+import tooltipStyles from './styles/Tooltip.styles.js';
 import {
   dataSourceSelector,
   operatorTemplate,
   inputTemplate,
 } from './CommonTemplates.js';
 
-/** @typedef {import('./types').ActionsCondition} ActionsCondition */
+/** @typedef {import('./types').ConditionSchema} ConditionSchema */
 /** @typedef {import('./types').ConditionSourceEnum} ConditionSourceEnum */
 /** @typedef {import('lit-html').TemplateResult} TemplateResult */
 
@@ -24,7 +25,7 @@ export class ARCConditionEditorElement extends LitElement {
        */
       condition: { type: Object },
       /**
-       * Enables compatybility with the Anypoint theme
+       * Enables compatibility with the Anypoint theme
        */
       compatibility: { type: Boolean, reflect: true },
       /**
@@ -40,14 +41,14 @@ export class ARCConditionEditorElement extends LitElement {
   }
 
   /**
-   * @return {ActionsCondition} A condition to render.
+   * @return {ConditionSchema} A condition to render.
    */
   get condition() {
     return this._condition;
   }
 
   /**
-   * @param {ActionsCondition} value A condition to render.
+   * @param {ConditionSchema} value A condition to render.
    */
   set condition(value) {
     const old = this._condition;
@@ -123,7 +124,7 @@ export class ARCConditionEditorElement extends LitElement {
    * A handler for the open action button click. Updates the `opened` value
    * on the `view` property.
    */
-  _openenHandler() {
+  _openedHandler() {
     const { condition } = this;
     if (!condition.view) {
       condition.view = {};
@@ -319,7 +320,7 @@ export class ARCConditionEditorElement extends LitElement {
         title="Opens the editor"
         class="action-open"
         ?compatibility="${compatibility}"
-        @click="${this._openenHandler}"
+        @click="${this._openedHandler}"
       >Open</anypoint-button>
     `;
   }

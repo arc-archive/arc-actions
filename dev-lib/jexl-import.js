@@ -1,4 +1,5 @@
-const Jexl = require('../node_modules/jexl/lib/Jexl.js');
+const Jexl = require('../node_modules/jexl/dist/Jexl.js');
+
 window.ArcVariables = {
   JexlDev: Jexl
 };

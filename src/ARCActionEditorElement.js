@@ -1,19 +1,33 @@
 import { LitElement, html } from 'lit-element';
-import { ScopedElementsMixin } from '@open-wc/scoped-elements';
-import { AnypointButton } from '@anypoint-web-components/anypoint-button';
-import { AnypointDropdownMenu } from '@anypoint-web-components/anypoint-dropdown-menu';
-import { AnypointMenuButton } from '@anypoint-web-components/anypoint-menu-button';
-import { AnypointListbox } from '@anypoint-web-components/anypoint-listbox';
-import { AnypointItem } from '@anypoint-web-components/anypoint-item';
-import { AnypointCheckbox } from '@anypoint-web-components/anypoint-checkbox';
-import { AnypointInput } from '@anypoint-web-components/anypoint-input';
-import { AnypointSwitch } from '@anypoint-web-components/anypoint-switch';
-import styles from './ActionEditor.styles.js';
-import tooltipStyles from './Tooltip.styles.js';
+import styles from './styles/ActionEditor.styles.js';
+import tooltipStyles from './styles/Tooltip.styles.js';
 import { actionNamesMap } from './Utils.js';
 import setCookieTemplate from './EditorMixins/SetCookieTemplate.js';
 import setVariableTemplate from './EditorMixins/SetVariableTemplate.js';
 import deleteCookieTemplate from './EditorMixins/DeleteCookieTemplate.js';
+import {
+  notifyChange,
+  inputHandler,
+  configChangeHandler,
+  dataSourceHandler,
+  actionHelpTpl,
+  updateDeepProperty,
+  enabledHandler,
+  deleteHandler,
+  duplicateHandler,
+  closeHandler,
+  openedHandler,
+  helpHandler,
+  openedCardTemplate,
+  closedCardTemplate,
+  openedCardTitle,
+  openedCardFooter,
+  openButtonTemplate,
+  enableSwitchTemplate,
+  deleteButtonTemplate,
+  duplicateButtonTemplate,
+  closeButtonTemplate,
+} from './internals.js';
 
 const configProperty = 'config';
 
@@ -24,35 +38,13 @@ const helpMap = {
   'delete-cookie': `${helpBase}introduction/remove-cookie-s-action`,
 };
 
-const notifyChangeSymbol = Symbol('notifyChangeSymbol');
-const inputHandlerSymbol = Symbol('inputHandlerSymbol');
-const configChangeHandlerSymbol = Symbol('configChangeHandlerSymbol');
-const dataSourceHandlerSymbol = Symbol('dataSourceHandlerSymbol');
-const actionHelpTplAymbol = Symbol('actionHelpTplAymbol');
-const updateDeepPropertySymbol = Symbol('updateDeepPropertySymbol');
-const enabledHandlerSymbol = Symbol('enabledHandlerSymbol');
-const deleteHandlerSymbol = Symbol('deleteHandlerSymbol');
-const duplicateHandlerSymbol = Symbol('duplicateHandlerSymbol');
-const closeHandlerSymbol = Symbol('closeHandlerSymbol');
-const openenHandlerSymbol = Symbol('openenHandlerSymbol');
-const helpHandlerSymbol = Symbol('helpHandlerSymbol');
-const openedCardTemplate = Symbol('openedCardTemplate');
-const closedCardTemplate = Symbol('closedCardTemplate');
-const openedCardTitle = Symbol('openedCardTitle');
-const openedCardFooter = Symbol('openedCardFooter');
-const openButtonTemplate = Symbol('openButtonTemplate');
-const enableSwitchTemplate = Symbol('enableSwitchTemplate');
-const deleteButtonTemplate = Symbol('deleteButtonTemplate');
-const duplicateButtonTemplate = Symbol('duplicateButtonTemplate');
-const closeButtonTemplate = Symbol('closeButtonTemplate');
-
 /** @typedef {import('lit-html').TemplateResult} TemplateResult */
-/** @typedef {import('../types').DataSourceConfiguration} DataSourceConfiguration */
-/** @typedef {import('../types').IteratorConfiguration} IteratorConfiguration */
-/** @typedef {import('../types').SetCookieConfig} SetCookieConfig */
-/** @typedef {import('../types').DeleteCookieConfig} DeleteCookieConfig */
-/** @typedef {import('../types').SetVariableConfig} SetVariableConfig */
-/** @typedef {import('../types').ActionConfiguration} ActionConfiguration */
+/** @typedef {import('./types').DataSourceConfiguration} DataSourceConfiguration */
+/** @typedef {import('./types').IteratorConfiguration} IteratorConfiguration */
+/** @typedef {import('./types').SetCookieConfig} SetCookieConfig */
+/** @typedef {import('./types').DeleteCookieConfig} DeleteCookieConfig */
+/** @typedef {import('./types').SetVariableConfig} SetVariableConfig */
+/** @typedef {import('./types').ActionConfiguration} ActionConfiguration */
 
 /**
  * @param {string} name
@@ -63,22 +55,9 @@ const closedCardTitleTemplate = (name) => {
   return html` <div class="action-title">${label}</div> `;
 };
 
-export class ARCActionEditorElement extends ScopedElementsMixin(LitElement) {
+export class ARCActionEditorElement extends LitElement {
   static get styles() {
     return [styles, tooltipStyles];
-  }
-
-  static get scopedElements() {
-    return {
-      'anypoint-button': AnypointButton,
-      'anypoint-dropdown-menu': AnypointDropdownMenu,
-      'anypoint-menu-button': AnypointMenuButton,
-      'anypoint-listbox': AnypointListbox,
-      'anypoint-input': AnypointInput,
-      'anypoint-item': AnypointItem,
-      'anypoint-checkbox': AnypointCheckbox,
-      'anypoint-switch': AnypointSwitch,
-    };
   }
 
   static get properties() {
@@ -129,7 +108,7 @@ export class ARCActionEditorElement extends ScopedElementsMixin(LitElement) {
        */
       opened: { type: Boolean, reflect: true },
       /**
-       * Enables compatybility with the Anypoint theme
+       * Enables compatibility with the Anypoint theme
        */
       compatibility: { type: Boolean, reflect: true },
       /**
@@ -159,7 +138,7 @@ export class ARCActionEditorElement extends ScopedElementsMixin(LitElement) {
    * Dispatches the `change` event with the name of the property that changed.
    * @param {string} prop Name of changed property.
    */
-  [notifyChangeSymbol](prop) {
+  [notifyChange](prop) {
     this.dispatchEvent(
       new CustomEvent('change', {
         detail: {
@@ -173,14 +152,14 @@ export class ARCActionEditorElement extends ScopedElementsMixin(LitElement) {
    * A handler for the
    * @param {Event} e
    */
-  [inputHandlerSymbol](e) {
+  [inputHandler](e) {
     const { target } = e;
     const targetElement = /** @type {HTMLInputElement} */ (target);
     const { name, value } = targetElement;
-    this[updateDeepPropertySymbol](name, value);
+    this[updateDeepProperty](name, value);
     const { notify } = targetElement.dataset;
     if (notify) {
-      this[notifyChangeSymbol](notify);
+      this[notifyChange](notify);
     }
   }
 
@@ -188,14 +167,14 @@ export class ARCActionEditorElement extends ScopedElementsMixin(LitElement) {
    * A handler for checkbox / switch change event for the action configuration.
    * @param {Event} e
    */
-  [configChangeHandlerSymbol](e) {
+  [configChangeHandler](e) {
     const { target } = e;
     const targetElement = /** @type {HTMLInputElement} */ (target);
     const { name, checked } = targetElement;
-    this[updateDeepPropertySymbol](name, checked);
+    this[updateDeepProperty](name, checked);
     const { notify, render } = targetElement.dataset;
     if (notify) {
-      this[notifyChangeSymbol](notify);
+      this[notifyChange](notify);
     }
     if (render) {
       this.requestUpdate();
@@ -206,18 +185,18 @@ export class ARCActionEditorElement extends ScopedElementsMixin(LitElement) {
    * A handler for the data source selector for action configuration.
    * @param {Event} e
    */
-  [dataSourceHandlerSymbol](e) {
+  [dataSourceHandler](e) {
     const { target } = e;
     const targetElement = /** @type {HTMLInputElement} */ (target);
     const parent = /** @type {HTMLFormElement} */ (targetElement.parentElement);
     const { name } = parent;
     // @ts-ignore
     const value = targetElement.selected;
-    this[updateDeepPropertySymbol](name, value);
-    this[notifyChangeSymbol](configProperty);
+    this[updateDeepProperty](name, value);
+    this[notifyChange](configProperty);
     const { notify, render } = targetElement.dataset;
     if (notify) {
-      this[notifyChangeSymbol](notify);
+      this[notifyChange](notify);
     }
     if (render) {
       this.requestUpdate();
@@ -231,13 +210,13 @@ export class ARCActionEditorElement extends ScopedElementsMixin(LitElement) {
    * For example, to set a top level property use the property name.
    *
    * ```
-   * this[updateDeepPropertySymbol]('priority', 10);
+   * this[updateDeepProperty]('priority', 10);
    * ```
    *
-   * To change an object proeprty separate names with a dot:
+   * To change an object property separate names with a dot:
    *
    * ```
-   * this[updateDeepPropertySymbol]('config.enabled', true);
+   * this[updateDeepProperty]('config.enabled', true);
    * ```
    *
    * This function builds the path if it doesn't exist.
@@ -245,7 +224,7 @@ export class ARCActionEditorElement extends ScopedElementsMixin(LitElement) {
    * @param {string} name
    * @param {string|boolean} value
    */
-  [updateDeepPropertySymbol](name, value) {
+  [updateDeepProperty](name, value) {
     let tmp = this;
     let last = '';
     String(name)
@@ -267,16 +246,16 @@ export class ARCActionEditorElement extends ScopedElementsMixin(LitElement) {
    * A handler for the action enable switch.
    * @param {Event} e
    */
-  [enabledHandlerSymbol](e) {
+  [enabledHandler](e) {
     this.enabled = /** @type {HTMLInputElement} */ (e.target).checked;
-    this[notifyChangeSymbol]('enabled');
+    this[notifyChange]('enabled');
   }
 
   /**
    * A handler for the delete action button click. Dispatches the `remove`
    * custom event.
    */
-  [deleteHandlerSymbol]() {
+  [deleteHandler]() {
     this.dispatchEvent(new CustomEvent('remove'));
   }
 
@@ -284,7 +263,7 @@ export class ARCActionEditorElement extends ScopedElementsMixin(LitElement) {
    * A handler for the duplicate action button click. Dispatches the `duplicate`
    * custom event.
    */
-  [duplicateHandlerSymbol]() {
+  [duplicateHandler]() {
     this.dispatchEvent(new CustomEvent('duplicate'));
   }
 
@@ -292,18 +271,18 @@ export class ARCActionEditorElement extends ScopedElementsMixin(LitElement) {
    * A handler for the close action button click. Updates the `opened` value
    * on the `view` property.
    */
-  [closeHandlerSymbol]() {
+  [closeHandler]() {
     this.opened = false;
-    this[notifyChangeSymbol]('view.opened');
+    this[notifyChange]('view.opened');
   }
 
   /**
    * A handler for the open action button click. Updates the `opened` value
    * on the `view` property.
    */
-  [openenHandlerSymbol]() {
+  [openedHandler]() {
     this.opened = true;
-    this[notifyChangeSymbol]('view.opened');
+    this[notifyChange]('view.opened');
   }
 
   /**
@@ -314,7 +293,7 @@ export class ARCActionEditorElement extends ScopedElementsMixin(LitElement) {
    * @param {Event} e
    * @return {Window|null} Returns created window if `window.open` was called.
    */
-  [helpHandlerSymbol](e) {
+  [helpHandler](e) {
     const { url } = /** @type {HTMLInputElement} */ (e.target).dataset;
     const ev = new CustomEvent('open-external-url', {
       bubbles: true,
@@ -359,9 +338,7 @@ export class ARCActionEditorElement extends ScopedElementsMixin(LitElement) {
       disabled,
     } = this;
     const lowerName = String(name).toLowerCase();
-    const inputHandler = this[inputHandlerSymbol];
-    const changeHandler = this[configChangeHandlerSymbol];
-    const dataSourceHandler = this[dataSourceHandlerSymbol];
+    const changeHandler = this[configChangeHandler];
     const inputConfig = {
       outlined,
       compatibility,
@@ -375,9 +352,9 @@ export class ARCActionEditorElement extends ScopedElementsMixin(LitElement) {
           failOnError,
           config,
           type,
-          inputHandler,
+          this[inputHandler],
           changeHandler,
-          dataSourceHandler,
+          this[dataSourceHandler],
           inputConfig
         );
         break;
@@ -386,16 +363,16 @@ export class ARCActionEditorElement extends ScopedElementsMixin(LitElement) {
           failOnError,
           config,
           type,
-          inputHandler,
+          this[inputHandler],
           changeHandler,
-          dataSourceHandler,
+          this[dataSourceHandler],
           inputConfig
         );
         break;
       case 'delete-cookie':
         content = deleteCookieTemplate(
           config,
-          inputHandler,
+          this[inputHandler],
           changeHandler,
           inputConfig
         );
@@ -431,7 +408,7 @@ export class ARCActionEditorElement extends ScopedElementsMixin(LitElement) {
     return html`
       <div class="opened-title">
         <div class="action-title">${label}</div>
-        ${this[actionHelpTplAymbol](helpUrl)}
+        ${this[actionHelpTpl](helpUrl)}
       </div>
     `;
   }
@@ -452,7 +429,7 @@ export class ARCActionEditorElement extends ScopedElementsMixin(LitElement) {
    * @param {string} url The URL to use to render the action.
    * @return {TemplateResult|string} Template for the help button.
    */
-  [actionHelpTplAymbol](url) {
+  [actionHelpTpl](url) {
     if (!url) {
       return '';
     }
@@ -460,7 +437,7 @@ export class ARCActionEditorElement extends ScopedElementsMixin(LitElement) {
       <anypoint-button
         class="action-help"
         data-url="${url}"
-        @click="${this[helpHandlerSymbol]}"
+        @click="${this[helpHandler]}"
         >Help</anypoint-button
       >
     `;
@@ -475,7 +452,7 @@ export class ARCActionEditorElement extends ScopedElementsMixin(LitElement) {
       <anypoint-switch
         ?compatibility="${compatibility}"
         .checked="${enabled}"
-        @change="${this[enabledHandlerSymbol]}"
+        @change="${this[enabledHandler]}"
         >Enabled</anypoint-switch
       >
     `;
@@ -491,7 +468,7 @@ export class ARCActionEditorElement extends ScopedElementsMixin(LitElement) {
         title="Removes this action"
         class="action-delete"
         ?compatibility="${compatibility}"
-        @click="${this[deleteHandlerSymbol]}"
+        @click="${this[deleteHandler]}"
         >Delete</anypoint-button
       >
     `;
@@ -506,7 +483,7 @@ export class ARCActionEditorElement extends ScopedElementsMixin(LitElement) {
       <anypoint-button
         title="Duplicates this action"
         ?compatibility="${compatibility}"
-        @click="${this[duplicateHandlerSymbol]}"
+        @click="${this[duplicateHandler]}"
         >Duplicate</anypoint-button
       >
     `;
@@ -521,7 +498,7 @@ export class ARCActionEditorElement extends ScopedElementsMixin(LitElement) {
       <anypoint-button
         title="Closes the editor"
         ?compatibility="${compatibility}"
-        @click="${this[closeHandlerSymbol]}"
+        @click="${this[closeHandler]}"
         >Close</anypoint-button
       >
     `;
@@ -537,7 +514,7 @@ export class ARCActionEditorElement extends ScopedElementsMixin(LitElement) {
         title="Opens the editor"
         class="action-open"
         ?compatibility="${compatibility}"
-        @click="${this[openenHandlerSymbol]}"
+        @click="${this[openedHandler]}"
         >Open</anypoint-button
       >
     `;

@@ -1,30 +1,14 @@
-// https://www.measurethat.net/Benchmarks/ShowResult/25487
-function recursiveDeepCopy(obj) {
-  return Object.keys(obj).reduce(
-    (v, d) =>
-      Object.assign(v, {
-        [d]: obj[d].constructor === Object ? recursiveDeepCopy(obj[d]) : obj[d],
-      }),
-    {}
-  );
-}
+import { recursiveDeepCopy } from './Copy.js';
 
-/** @typedef {import('../types').SetCookieConfig} SetCookieConfig */
-/** @typedef {import('../types').DeleteCookieConfig} DeleteCookieConfig */
-/** @typedef {import('../types').SetVariableConfig} SetVariableConfig */
-/** @typedef {import('../types').ActionConfiguration} ActionConfiguration */
-/** @typedef {import('../types').ArcActionViewConfiguration} ArcActionViewConfiguration */
-/** @typedef {import('../types').ArcActionConfiguration} ArcActionConfiguration */
-/** @typedef {import('../types').TypeEnum} TypeEnum */
-/** @typedef {import('./Utils.js').SupportedActions} SupportedActions */
+/** @typedef {import('./types').SetCookieConfig} SetCookieConfig */
+/** @typedef {import('./types').DeleteCookieConfig} DeleteCookieConfig */
+/** @typedef {import('./types').SetVariableConfig} SetVariableConfig */
+/** @typedef {import('./types').ActionConfiguration} ActionConfiguration */
+/** @typedef {import('./types').ArcActionViewConfiguration} ArcActionViewConfiguration */
+/** @typedef {import('./types').ArcActionConfiguration} ArcActionConfiguration */
 
 /**
  * A class describing a runnable action in Advanced REST Client.
- *
- * The difference to using regular object is that it contains utility methods
- * for generating JSON and cloning the object.
- *
- * @module src/ArcAction
  */
 export class ArcAction {
   /**
@@ -46,12 +30,12 @@ export class ArcAction {
     /**
      * Type of the action. Can be either `request` or `response`. Default to
      * request.
-     * @type {TypeEnum}
+     * @type {string}
      */
     this.type = type;
     /**
      * Action name.
-     * @type {SupportedActions}
+     * @type {string}
      */
     this.name = name;
     /**

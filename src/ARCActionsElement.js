@@ -2,45 +2,23 @@ import { html, css, LitElement } from 'lit-element';
 import '@anypoint-web-components/anypoint-tabs/anypoint-tabs.js';
 import '@anypoint-web-components/anypoint-tabs/anypoint-tab.js';
 import '../arc-actions-panel.js';
+import {
+  tabHandler,
+  actionsHandler,
+  notifyChange,
+  tabsTpl,
+  requestActionsTpl,
+  responseActionsTpl,
+  panelTpl,
+} from './internals.js';
 
 const actionChangeEvent = 'actionchange';
 const selectedChangeEvent = 'selectedchange';
 
-const tabHandlerSymbol = Symbol('tabHandlerSymbol');
-const actionsHandlerSymbol = Symbol('notifyChangeSymbol');
-const notifyChangeSymbol = Symbol('notifyChangeSymbol');
-const tabsTplSymbol = Symbol('tabsTplSymbol');
-const reqestActionsTplSymbol = Symbol('reqestActionsTplSymbol');
-const responseActionsTplSymbol = Symbol('responseActionsTplSymbol');
-const panelTplSymbol = Symbol('panelTplSymbol');
-
-/** @typedef {import('./ArcAction.js').ArcAction} ArcAction */
-/** @typedef {import('./ArcActions').ArcActions} ArcActions */
-/** @typedef {import('./ARCActionEditorElement.js').OperatorEnum} OperatorEnum */
+/** @typedef {import('./ArcAction').ArcAction} ArcAction */
+/** @typedef {import('./ActionCondition').ActionCondition} ActionCondition */
+/** @typedef {import('./types').OperatorEnum} OperatorEnum */
 /** @typedef {import('lit-element').TemplateResult} TemplateResult */
-
-/**
- * @typedef {string} ConditionSourceEnum
- * @property {string} url "url"
- * @property {string} statuscode "statuscode"
- * @property {string} headers "headers"
- * @property {string} body "body"
- */
-
-/**
- * @typedef {Object} ResponseCondition
- * @property {ConditionSourceEnum} source Path to the data source value.
- * @property {string=} path Optional path to the data. It is required for url, headers, and body.
- * @property {string|number} value The value to compare to the value.
- * @property {OperatorEnum} operator The condition operator.
- */
-
-/**
- * @typedef {Object} ArcResponseActions
- * @property {ResponseCondition} condition A response condition
- * @property {Array<ArcAction>} actions List of actions to run in the condition.
- * @property {boolean} enabled Whether the conditions and the actions are enabled.
- */
 
 /**
  * @return {TemplateResult} Template for the tutorial
@@ -48,7 +26,7 @@ const panelTplSymbol = Symbol('panelTplSymbol');
 const tutorialTemplate = () => {
   return html`
     <p class="actions-intro">
-      Actions runs a logic related to the current request. When they fail the request is reported as errored.
+      Actions runs a logic related to the current request. When they fail the request is reported as error.
     </p>
   `;
 }
@@ -73,7 +51,7 @@ export class ARCActionsElement extends LitElement {
        */
       responseActions: { type: Array },
       /**
-       * Enables compatybility with the Anypoint theme
+       * Enables compatibility with the Anypoint theme
        */
       compatibility: { type: Boolean, reflect: true },
       /**
@@ -89,14 +67,14 @@ export class ARCActionsElement extends LitElement {
 
   /**
    * A list of request actions.
-   * @return {Array<ArcActions>}
+   * @return {ActionCondition[]}
    */
   get requestActions() {
     return this._requestActions;
   }
 
   /**
-   * @param {Array<ArcActions>} value List of request actions to render.
+   * @param {ActionCondition[]} value List of request actions to render.
    */
   set requestActions(value) {
     const old = this._requestActions;
@@ -109,14 +87,14 @@ export class ARCActionsElement extends LitElement {
 
   /**
    * A list of request actions.
-   * @return {Array<ArcActions>}
+   * @return {ActionCondition[]}
    */
   get responseActions() {
     return this._responseActions;
   }
 
   /**
-   * @param {Array<ArcActions>} value List of request actions to render.
+   * @param {ActionCondition[]} value List of request actions to render.
    */
   set responseActions(value) {
     const old = this._responseActions;
@@ -170,19 +148,19 @@ export class ARCActionsElement extends LitElement {
     this._responseActions = null;
   }
 
-  [tabHandlerSymbol](e) {
+  [tabHandler](e) {
     this.selected = e.detail.value;
     this.dispatchEvent(new CustomEvent(selectedChangeEvent));
   }
 
-  [actionsHandlerSymbol](e) {
+  [actionsHandler](e) {
     const { actions, type } = e.target;
     const key = type === 'request' ? 'requestActions' : 'responseActions';
     this[key] = actions;
-    this[notifyChangeSymbol](type);
+    this[notifyChange](type);
   }
 
-  [notifyChangeSymbol](type) {
+  [notifyChange](type) {
     this.dispatchEvent(
       new CustomEvent(actionChangeEvent, {
         detail: {
@@ -195,19 +173,19 @@ export class ARCActionsElement extends LitElement {
   render() {
     return html`
       ${tutorialTemplate()}
-      ${this[tabsTplSymbol]()}
-      ${this[reqestActionsTplSymbol]()}
-      ${this[responseActionsTplSymbol]()}
+      ${this[tabsTpl]()}
+      ${this[requestActionsTpl]()}
+      ${this[responseActionsTpl]()}
     `;
   }
 
-  [tabsTplSymbol]() {
+  [tabsTpl]() {
     const { selected, compatibility } = this;
     return html`
       <anypoint-tabs
         .selected="${selected}"
         ?compatibility="${compatibility}"
-        @selected-changed="${this[tabHandlerSymbol]}"
+        @selected-changed="${this[tabHandler]}"
       >
         <anypoint-tab ?compatibility="${compatibility}">Request actions</anypoint-tab>
         <anypoint-tab ?compatibility="${compatibility}">Response actions</anypoint-tab>
@@ -215,28 +193,28 @@ export class ARCActionsElement extends LitElement {
     `;
   }
 
-  [reqestActionsTplSymbol]() {
+  [requestActionsTpl]() {
     if (this.selected !== 0) {
       return '';
     }
-    return this[panelTplSymbol](this.requestActions, 'request');
+    return this[panelTpl](this.requestActions, 'request');
   }
 
-  [responseActionsTplSymbol]() {
+  [responseActionsTpl]() {
     if (this.selected !== 1) {
       return '';
     }
-    return this[panelTplSymbol](this.responseActions, 'response');
+    return this[panelTpl](this.responseActions, 'response');
   }
 
-  [panelTplSymbol](actions, type) {
+  [panelTpl](actions, type) {
     const { compatibility, outlined } = this;
     return html`
       <arc-actions-panel
         ?compatibility="${compatibility}"
         ?outlined="${outlined}"
         type="${type}"
-        @change="${this[actionsHandlerSymbol]}"
+        @change="${this[actionsHandler]}"
         .actions="${actions}"
       ></arc-actions-panel>
     `;

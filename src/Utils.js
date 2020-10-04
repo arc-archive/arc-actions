@@ -18,7 +18,7 @@ export const SupportedActions = {
 };
 
 /**
- * Maps an action name to a coresponding label.
+ * Maps an action name to a corresponding label.
  * @param {String} input The action name
  * @return {String} Mapped action label.
  */
@@ -58,6 +58,6 @@ export const mapActions = (value) => {
 
 /**
  * A list of actions names that are supported by this element.
- * @type {Array<String>}
+ * @type {string[]}
  */
 export const allowedActions = Object.values(SupportedActions);
