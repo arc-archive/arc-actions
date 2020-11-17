@@ -1,6 +1,8 @@
-import { ConditionSchema, ArcActionsOptions } from './types';
-import { ARCHistoryRequest } from '@advanced-rest-client/arc-models';
+// import { ConditionSchema, ArcActionsOptions } from './types';
 import { ArcAction } from './ArcAction';
+import { RunnableAction, Condition, Action, ActionType } from '@advanced-rest-client/arc-types/src/actions/Actions';
+import { ArcBaseRequest, ARCSavedRequest, ARCHistoryRequest, TransportRequest } from '@advanced-rest-client/arc-types/src/request/ArcRequest';
+import { ErrorResponse, Response } from '@advanced-rest-client/arc-types/src/request/ArcResponse';
 
 /**
  * A class that represents ARC actions that run after meeting a condition.
@@ -8,23 +10,19 @@ import { ArcAction } from './ArcAction';
 export declare class ActionCondition {
   /**
    * Creates a default value for a condition.
-   * @param defType The type of the condition.
+   * @param type The type of the condition.
    */
-  static defaultCondition(defType?: string): ConditionSchema;
+  static defaultCondition(type?: ActionType): Condition;
 
   /**
-   * Creates a list of actions from an external source.
+   * Creates a default configuration of an action
+   * @param type The type of the action.
    */
-  static importExternal(actions: any[]): ActionCondition[];
+  static defaultAction(type?: ActionType): Action;
 
-  /**
-   * @return {ActionCondition} Instance of ActionCondition from passed values.
-   */
-  static importAction(item: any): ArcAction;
+  condition: Condition;
   
-  condition: ConditionSchema;
-  
-  type: string;
+  type: ActionType;
   
   actions: ArcAction[];
   
@@ -34,7 +32,7 @@ export declare class ActionCondition {
    * @param type The type of actions held in the `actions`. Either `request` or `response`.
    * @param opts Optional parameters
    */
-  constructor(condition: ConditionSchema, type: string, opts?: ArcActionsOptions);
+  constructor(init: RunnableAction);
 
   /**
    * Tests whether the condition is satisfied for request and/or response.
@@ -43,7 +41,7 @@ export declare class ActionCondition {
    * @param response The ARC response object, if available.
    * @returns True when the condition is satisfied.
    */
-  satisfied(request: ARCHistoryRequest, response: Object): boolean;
+  satisfied(request: ArcBaseRequest | ARCSavedRequest | ARCHistoryRequest | TransportRequest | TransportRequest, response?: Response|ErrorResponse): boolean;
 
   /**
    * Adds a new, empty action to the list of actions.
@@ -58,3 +56,14 @@ export declare class ActionCondition {
    */
   clone(): ActionCondition;
 }
+
+
+/**
+ * Maps runnables interface to 
+ * If an item is not an instance of `ArcAction` then it creates an instance of it
+ * by passing the map as an argument.
+ *
+ * @param value Passed list of actions.
+ * @returns Mapped actions.
+ */
+export declare function mapRunnables(value: (RunnableAction|ActionCondition)[]): ActionCondition[];

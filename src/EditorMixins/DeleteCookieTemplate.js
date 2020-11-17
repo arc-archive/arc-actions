@@ -1,7 +1,7 @@
 import { inputTemplate, configCheckbox } from '../CommonTemplates.js';
 
 /** @typedef {import('lit-html').TemplateResult} TemplateResult */
-/** @typedef {import('../../types').DeleteCookieConfig} DeleteCookieConfig */
+/** @typedef {import('../types').DeleteCookieConfig} DeleteCookieConfig */
 /** @typedef {import('../CommonTemplates').InputConfiguration} InputConfiguration */
 /** @typedef {import('../CommonTemplates').CheckboxConfiguration} CheckboxConfiguration */
 
@@ -11,11 +11,7 @@ import { inputTemplate, configCheckbox } from '../CommonTemplates.js';
  * @param {CheckboxConfiguration} inputConfig
  * @return {TemplateResult} The template for the name input.
  */
-function useRequestUrlTemplate(
-  useRequestUrl = false,
-  changeHandler,
-  inputConfig
-) {
+function useRequestUrlTemplate(useRequestUrl = false, changeHandler, inputConfig) {
   const cnf = {
     ...inputConfig,
     notify: 'config',
@@ -47,7 +43,7 @@ function urlTemplate(config, inputHandler, inputConfig) {
     required: true,
     autoValidate: true,
     type: 'url',
-    infoMessage: 'The URL associatied with the cookie.',
+    infoMessage: 'The URL associated with the cookie.',
     notify: 'config',
   };
   return inputTemplate(

@@ -1,4 +1,5 @@
-import { ArcAction } from './ArcAction.js';
+/** @typedef {import('@advanced-rest-client/arc-types').Actions.RunnableAction} RunnableAction */
+/** @typedef {import('@advanced-rest-client/arc-types').Actions.Action} Action */
 
 /* eslint-disable no-param-reassign */
 
@@ -34,26 +35,6 @@ export const actionNamesMap = (input) => {
     default:
       return input;
   }
-};
-
-/**
- * Maps actions list to a list of `ArcAction` instances.
- * If an item is not an instance of `ArcAction` then it creates an instance of it
- * by passing the map as an argument.
- *
- * @param {Object[]} value Passed list of actions.
- * @return {ArcAction[]} Mapped actions.
- */
-export const mapActions = (value) => {
-  if (!Array.isArray(value)) {
-    return [];
-  }
-  return value.map((item) => {
-    if (!(item instanceof ArcAction)) {
-      item = new ArcAction(item);
-    }
-    return item;
-  });
 };
 
 /**

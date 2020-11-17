@@ -1,13 +1,19 @@
-import { ArcAction } from './ArcAction.js';
+/* eslint-disable no-param-reassign */
+import { ArcAction, mapActions } from './ArcAction.js';
 import { RequestDataExtractor } from './runner/RequestDataExtractor.js';
 import { checkCondition } from './runner/ConditionRunner.js';
-import { mapActions } from './Utils.js';
 import { recursiveDeepCopy } from './Copy.js';
 
-/** @typedef {import('./types').ConditionSchema} ConditionSchema */
-/** @typedef {import('./types').ArcActionsOptions} ArcActionsOptions */
-/** @typedef {import('./types').ConditionSourceEnum} ConditionSourceEnum */
-/** @typedef {import('./types').OperatorEnum} OperatorEnum */
+/** @typedef {import('@advanced-rest-client/arc-types').Actions.RunnableAction} RunnableAction */
+/** @typedef {import('@advanced-rest-client/arc-types').Actions.Condition} Condition */
+/** @typedef {import('@advanced-rest-client/arc-types').Actions.Action} Action */
+/** @typedef {import('@advanced-rest-client/arc-types').Actions.ActionType} ActionType */
+/** @typedef {import('@advanced-rest-client/arc-types').ArcRequest.ArcBaseRequest} ArcBaseRequest */
+/** @typedef {import('@advanced-rest-client/arc-types').ArcRequest.ARCSavedRequest} ARCSavedRequest */
+/** @typedef {import('@advanced-rest-client/arc-types').ArcRequest.ARCHistoryRequest} ARCHistoryRequest */
+/** @typedef {import('@advanced-rest-client/arc-types').ArcRequest.TransportRequest} TransportRequest */
+/** @typedef {import('@advanced-rest-client/arc-types').ArcResponse.Response} Response */
+/** @typedef {import('@advanced-rest-client/arc-types').ArcResponse.ErrorResponse} ErrorResponse */
 
 /**
  * A class that represents ARC condition that runs actions when the condition is met.
@@ -15,14 +21,13 @@ import { recursiveDeepCopy } from './Copy.js';
 export class ActionCondition {
   /**
    * Creates a default value for a condition.
-   * @param {string} [defType='response'] The type of the condition.
-   * @return {ConditionSchema}
+   * @param {ActionType} [type='response'] The type of the condition.
+   * @return {Condition}
    */
-  static defaultCondition(defType='response') {
+  static defaultCondition(type='response') {
     const source = 'url';
     const operator = 'equal';
-    const type = defType;
-    const result = {
+    const result = /** @type Condition */ ({
       type,
       alwaysPass: true,
       source,
@@ -31,64 +36,55 @@ export class ActionCondition {
       view: {
         opened: true,
       }
-    };
+    });
     return result;
   }
 
   /**
-   * Creates a list of actions from an external source.
-   *
-   * @param {any[]} actions
-   * @return {ActionCondition[]}
+   * Creates a default configuration of an action
+   * @param {ActionType} [type='response'] The type of the action.
+   * @return {Action}
    */
-  static importExternal(actions) {
-    if (!Array.isArray(actions)) {
-      return [];
-    }
-    return actions.map((item) => ActionCondition.importAction(item));
+  static defaultAction(type='response') {
+    return {
+      type,
+      name: 'New action',
+      config: {},
+      failOnError: false,
+      priority: 0,
+      sync: false,
+      view: {},
+      enabled: true,
+    };
   }
-
+  
   /**
-   * @param {any} item
-   * @return {ActionCondition} Instance of ArcActions from passed values.
+   * @param {RunnableAction} init The condition configuration.
    */
-  static importAction(item) {
-    const { condition = ActionCondition.defaultCondition(), type = 'request', actions, enabled } = item;
-    return new ActionCondition(condition, type, {
-      actions,
-      enabled,
-    });
-  }
-
-  /**
-   * @param {ConditionSchema} condition The condition definition
-   * @param {string} type The type of actions held in the `actions`. Either `request` or `response`.
-   * @param {ArcActionsOptions} [opts={}] Optional parameters
-   */
-  constructor(condition, type, opts={}) {
+  constructor(init) {
     /**
-     * @type {ConditionSchema}
+     * @type {Condition}
      */
-    this.condition = condition;
+    this.condition = init.condition;
     /**
-     * @type {string}
+     * @type {ActionType}
      */
-    this.type = type;
+    this.type = init.type;
     /**
      * @type {ArcAction[]}
      */
-    this.actions = mapActions(opts.actions);
+    this.actions = mapActions(init.actions);
     /**
      * @type {boolean}
      */
-    this.enabled = opts.enabled || false;
+    this.enabled = init.enabled || false;
   }
 
   /**
    * Tests whether the condition is satisfied for request and/or response.
    *
-   * @param {Object} request The ARC request object.
-   * @param {Object=} response The ARC response object, if available.
+   * @param {ArcBaseRequest | ARCSavedRequest | ARCHistoryRequest | TransportRequest} request The ARC request object.
+   * @param {Response|ErrorResponse=} response The ARC response object, if available.
    * @return {boolean} True when the condition is satisfied.
    */
   satisfied(request, response) {
@@ -109,16 +105,18 @@ export class ActionCondition {
 
   /**
    * Adds a new, empty action to the list of actions.
-   * If actions list hasn't been initialized then it creates it.
+   * If actions list hasn't been initialized then it creates the list.
    *
-   * @param {String} name The name of the action to add.
+   * @param {string} name The name of the action to add.
    */
   add(name) {
     if (!Array.isArray(this.actions)) {
       this.actions = [];
     }
     const { type } = this;
-    const action = new ArcAction({ name, type });
+    const init = ActionCondition.defaultAction(type);
+    init.name = name;
+    const action = new ArcAction(init);
     this.actions.push(action);
   }
 
@@ -128,9 +126,28 @@ export class ActionCondition {
    */
   clone() {
     const init = recursiveDeepCopy(this);
-    const copy = new ActionCondition(init.condition, init.type);
-    copy.actions = init.actions;
-    copy.enabled = init.enabled;
+    const copy = new ActionCondition(init);
     return copy;
   }
 }
+
+
+/**
+ * Maps runnables interface to 
+ * If an item is not an instance of `ArcAction` then it creates an instance of it
+ * by passing the map as an argument.
+ *
+ * @param {(RunnableAction|ActionCondition)[]} value Passed list of actions.
+ * @returns {ActionCondition[]} Mapped actions.
+ */
+export const mapRunnables = (value) => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  return value.map((item) => {
+    if (!(item instanceof ActionCondition)) {
+      return new ActionCondition(item);
+    }
+    return item;
+  });
+};

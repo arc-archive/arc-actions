@@ -1,8 +1,8 @@
 /**
  * Checks if values equal.
- * @param {String|any=} value Value to compare
- * @param {String|any=} condition Comparator value
- * @return {Boolean} True if objects matches.
+ * @param {string|any=} value Value to compare
+ * @param {string|any=} condition Comparator value
+ * @return {boolean} True if objects matches.
  */
 export function isEqual(value, condition) {
   let valueTyped = value;
@@ -21,11 +21,11 @@ export function isEqual(value, condition) {
 }
 
 /**
- * Oposite of `isEqual()`.
+ * Opposite of `isEqual()`.
  *
- * @param {String|any} value Value to compare
- * @param {String|any} condition Comparator value
- * @return {Boolean} False if objects matches.
+ * @param {string|any} value Value to compare
+ * @param {string|any} condition Comparator value
+ * @return {boolean} False if objects matches.
  */
 export function isNotEqual(value, condition) {
   return !isEqual(value, condition);
@@ -34,9 +34,9 @@ export function isNotEqual(value, condition) {
 /**
  * Checks if value is less than comparator.
  *
- * @param {String|any} value Value to compare
- * @param {String|any} condition Comparator value
- * @return {Boolean} True if value is less than condition.
+ * @param {string|any} value Value to compare
+ * @param {string|any} condition Comparator value
+ * @return {boolean} True if value is less than condition.
  */
 export function isLessThan(value, condition) {
   const valueNumber = Number(value);
@@ -53,9 +53,9 @@ export function isLessThan(value, condition) {
 /**
  * Checks if value is less than or equal to comparator.
  *
- * @param {String|any} value Value to compare
- * @param {String|any} condition Comparator value
- * @return {Boolean} True if value is less than or equal to `condition`.
+ * @param {string|any} value Value to compare
+ * @param {string|any} condition Comparator value
+ * @return {boolean} True if value is less than or equal to `condition`.
  */
 export function isLessThanEqual(value, condition) {
   const valueNumber = Number(value);
@@ -72,9 +72,9 @@ export function isLessThanEqual(value, condition) {
 /**
  * Checks if value is greater than comparator.
  *
- * @param {String|any} value Value to compare
- * @param {String|any} condition Comparator value
- * @return {Boolean} True if value is greater than `condition`.
+ * @param {string|any} value Value to compare
+ * @param {string|any} condition Comparator value
+ * @return {boolean} True if value is greater than `condition`.
  */
 export function isGreaterThan(value, condition) {
   const valueNumber = Number(value);
@@ -91,9 +91,9 @@ export function isGreaterThan(value, condition) {
 /**
  * Checks if value is greater than or equal to comparator.
  *
- * @param {String|any} value Value to compare
- * @param {String|any} condition Comparator value
- * @return {Boolean} True if value is greater than or equal to `condition`.
+ * @param {string|any} value Value to compare
+ * @param {string|any} condition Comparator value
+ * @return {boolean} True if value is greater than or equal to `condition`.
  */
 export function isGreaterThanEqual(value, condition) {
   const valueNumber = Number(value);
@@ -111,9 +111,9 @@ export function isGreaterThanEqual(value, condition) {
  * Checks if value contains the `condition`.
  * It works on strings, arrays and objects.
  *
- * @param {String|any} value Value to compare
- * @param {String|any} condition Comparator value
- * @return {Boolean} True if value contains the `condition`.
+ * @param {string|any} value Value to compare
+ * @param {string|any} condition Comparator value
+ * @return {boolean} True if value contains the `condition`.
  */
 export function contains(value, condition) {
   if (!value) {
@@ -138,11 +138,11 @@ export function contains(value, condition) {
 }
 
 /**
- * Checks if `value` can be tested agains regular expression.
+ * Checks if `value` can be tested against regular expression.
  *
- * @param {String|any} value Value to compare
- * @param {String|any} condition Comparator value - regex string.
- * @return {Boolean} Value of calling `test()` function on stirng.
+ * @param {string|any} value Value to compare
+ * @param {string|any} condition Comparator value - regex string.
+ * @return {Boolean} Value of calling `test()` function on string.
  */
 export function isRegex(value, condition) {
   let re;
@@ -158,8 +158,8 @@ export function isRegex(value, condition) {
 /**
  * Checks if given condition is satisfied by both value and operator.
  *
- * @param {any} value Value rread from the response / request object
- * @param {string} operator Comparition term.
+ * @param {any} value Value read from the response / request object
+ * @param {string} operator Comparison term.
  * @param {string|number} condition Value to compare.
  * @return {Boolean} True if the condition is satisfied and false otherwise.
  */

@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable class-methods-use-this */
 /* eslint-disable import/no-extraneous-dependencies */
 const path = require('path');
@@ -29,7 +30,7 @@ class ComponentPrepare {
 
   uglyContent(content) {
     const result = UglifyJS.minify(content, {
-      compress: true
+      compress: {}
     });
     if (result.error) {
       throw result.error;
@@ -45,7 +46,7 @@ class ComponentPrepare {
         ]],
         'plugins': ['minify-mangle-names']
       };
-      babel.transform(code, cnf, function(err, result) {
+      babel.transform(code, cnf, (err, result) => {
         if (err) {
           reject(err);
         } else {

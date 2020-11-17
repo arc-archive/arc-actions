@@ -39,10 +39,10 @@ export class RequestLogicCondition {
   }
 
   /**
-   * Checks if the condition has been satified for current request and response
+   * Checks if the condition has been satisfied for current request and response
    * objects.
    *
-   * @param {Object} request The ARC request object. Comnatins `url`, `method`,
+   * @param {Object} request The ARC request object. Contains `url`, `method`,
    * `headers` and `payload` (all strings)
    * @param {Object=} response ARC Response object as defined in
    * https://github.com/advanced-rest-client/api-components-api/blob/master/

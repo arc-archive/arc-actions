@@ -1,4 +1,4 @@
-import { ActionConfiguration, ArcActionViewConfiguration, ArcActionConfiguration } from './types';
+import { Action, ActionConfiguration, ActionViewConfiguration } from '@advanced-rest-client/arc-types/src/actions/Actions';
 
 /**
  * A class describing a runnable action in Advanced REST Client.
@@ -39,14 +39,30 @@ export declare class ArcAction {
   /**
    * The view configuration
    */
-  view: ArcActionViewConfiguration;
+  view: ActionViewConfiguration;
   /**
    * @param init The initialization object with predefined values
    */
-  constructor(init: ArcActionConfiguration);
+  constructor(init: Action);
 
   /**
    * Returns a clone if this object.
    */
   clone(): ArcAction;
 }
+
+
+/**
+ * Maps actions list to a list of `ArcAction` instances.
+ * If an item is not an instance of `ArcAction` then it creates an instance of it
+ * by passing the map as an argument.
+ *
+ * @param value Passed list of actions.
+ * @returns Mapped actions.
+ */
+export declare function mapActions(value: (Action|ArcAction)[]): ArcAction[];
+
+/**
+ * Sort function for actions to sort them for the execution order.
+ */
+export declare function sortActions(a: ArcAction, b: ArcAction): number;
