@@ -20,6 +20,16 @@ export declare class ActionCondition {
    */
   static defaultAction(type?: ActionType): Action;
 
+  /**
+   * Creates a list of actions from an external source.
+   */
+  static importExternal(actions: (RunnableAction|ActionCondition)[]): ActionCondition[];
+
+  /**
+   * @returns Instance of ArcActions from passed values.
+   */
+  static importAction(item: RunnableAction|ActionCondition): ActionCondition;
+
   condition: Condition;
   
   type: ActionType;
@@ -41,7 +51,7 @@ export declare class ActionCondition {
    * @param response The ARC response object, if available.
    * @returns True when the condition is satisfied.
    */
-  satisfied(request: ArcBaseRequest | ARCSavedRequest | ARCHistoryRequest | TransportRequest | TransportRequest, response?: Response|ErrorResponse): boolean;
+  satisfied(request: ArcBaseRequest | ARCSavedRequest | ARCHistoryRequest | TransportRequest, executed?: TransportRequest, response?: Response|ErrorResponse): boolean;
 
   /**
    * Adds a new, empty action to the list of actions.

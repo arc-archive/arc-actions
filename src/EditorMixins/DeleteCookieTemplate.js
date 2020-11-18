@@ -1,7 +1,7 @@
 import { inputTemplate, configCheckbox } from '../CommonTemplates.js';
 
 /** @typedef {import('lit-html').TemplateResult} TemplateResult */
-/** @typedef {import('../types').DeleteCookieConfig} DeleteCookieConfig */
+/** @typedef {import('@advanced-rest-client/arc-types').Actions.DeleteCookieConfig} DeleteCookieConfig */
 /** @typedef {import('../CommonTemplates').InputConfiguration} InputConfiguration */
 /** @typedef {import('../CommonTemplates').CheckboxConfiguration} CheckboxConfiguration */
 

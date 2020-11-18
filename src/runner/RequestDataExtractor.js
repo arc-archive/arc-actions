@@ -2,6 +2,15 @@ import * as DataUtils from './DataUtils.js';
 
 /* eslint-disable no-param-reassign */
 
+/** @typedef {import('@advanced-rest-client/arc-types').ArcRequest.ArcBaseRequest} ArcBaseRequest */
+/** @typedef {import('@advanced-rest-client/arc-types').ArcRequest.ARCSavedRequest} ARCSavedRequest */
+/** @typedef {import('@advanced-rest-client/arc-types').ArcRequest.ARCHistoryRequest} ARCHistoryRequest */
+/** @typedef {import('@advanced-rest-client/arc-types').ArcRequest.TransportRequest} TransportRequest */
+/** @typedef {import('@advanced-rest-client/arc-types').ArcResponse.Response} Response */
+/** @typedef {import('@advanced-rest-client/arc-types').ArcResponse.ErrorResponse} ErrorResponse */
+/** @typedef {import('@advanced-rest-client/arc-types').Actions.IteratorConfiguration} IteratorConfiguration */
+/** @typedef {import('../types').DataExtractorInit} DataExtractorInit */
+
 /**
  * A class to extract data from JSON or XML body.
  *
@@ -23,67 +32,97 @@ import * as DataUtils from './DataUtils.js';
  */
 export class RequestDataExtractor {
   /**
-   * @param {Object} args
-   * @param {Object=} args.request ARC request object
-   * @param {Object=} args.response ARC response object
-   * @param {String=} [args.pathDelimiter='.'] Source path delimiter
-   * @param {Array<String>|String=} args.path Source data path. Either array of path segments
-   * or full path as string.
+   * @param {DataExtractorInit} init
    */
-  constructor({ request, response, pathDelimiter = '.', path }) {
+  constructor({ request, executedRequest, response, pathDelimiter = '.', path, iterator }) {
     /**
      * Source path delimiter
-     * @type {String}
+     * @type {string}
      */
     this.pathDelimiter = pathDelimiter;
     /**
      * Source data path. Either array of path segments
      * or full path as string.
      *
-     * @type {Array<String>|String}
+     * @type {string}
      */
     this.path = path;
     /**
      * ARC request object
-     * @type {Object}
+     * @type {(ArcBaseRequest | ARCSavedRequest | ARCHistoryRequest)}
      */
     this.request = request;
     /**
+     * ARC request object
+     * @type {TransportRequest}
+     */
+    this.executedRequest = executedRequest;
+    /**
      * ARC response object
-     * @type {Object}
+     * @type {Response | ErrorResponse}
      */
     this.response = response;
+
+    /**
+     * The iterator to search in array values.
+     * @type {IteratorConfiguration}
+     */
+    this.iterator = iterator;
   }
 
   /**
    * Gets the data from selected path.
-   *
-   * @param {Object=} iterator Iterator model. Used only with response body.
    * @return {String|Number|URLSearchParams|Headers|undefined} Data to be processed
    */
-  extract(iterator) {
-    let { path } = this;
-    if (typeof path === 'string') {
-      path = path.split(this.pathDelimiter);
-    }
-    let source;
-    if (path[0] === 'request') {
-      source = this.request;
-      iterator = undefined;
-    } else {
-      source = this.response;
-    }
-    switch (path[1]) {
+  extract() {
+    const { path } = this;
+    const parts = path.split(this.pathDelimiter);
+    const [baseSource, typeSource, ...args] = parts;
+    switch (typeSource) {
       case 'url':
-        return DataUtils.getDataUrl(source.url, path.slice(2));
+        return DataUtils.getDataUrl(this.getUrl(baseSource), args);
       case 'headers':
-        return DataUtils.getDataHeaders(source, path.slice(2));
+        return DataUtils.getDataHeaders(this.getHeaders(baseSource), args);
       case 'status':
-        return source.status;
+        return this.response.status;
       case 'body':
-        return DataUtils.getDataPayload(source, path, iterator, this.request, this.response);
+        return DataUtils.getDataPayload(this.getBody(baseSource), this.getHeaders(baseSource), args, this.iterator);
       default:
         throw new Error(`Unknown path ${path[1]} for source ${path[0]}`);
     }
+  }
+
+  /**
+   * @param {string} source The source name 
+   * @returns {string} The URL of executed request (or request to be executed)
+   */
+  getUrl(source) {
+    if (source === 'request') {
+      return this.request.url;
+    }
+    return this.executedRequest.url;
+  }
+
+  /**
+   * @param {string} source The source name 
+   * @returns {string} The headers from the request / response
+   */
+  getHeaders(source) {
+    if (source === 'request') {
+      return (this.executedRequest || this.request).headers;
+    }
+    return this.response.headers;
+  }
+  
+  /**
+   * @param {string} source The source name 
+   * @returns {string | File | Blob | Buffer | ArrayBuffer | FormData} The headers from the request / response
+   */
+  getBody(source) {
+    if (source === 'request') {
+      return this.request.payload;
+    }
+    // @ts-ignore
+    return this.response.payload;
   }
 }

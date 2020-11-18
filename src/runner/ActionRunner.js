@@ -2,6 +2,7 @@ import { DeleteCookieAction } from '../actions/DeleteCookieAction.js';
 import { SetCookieAction } from '../actions/SetCookieAction.js';
 
 /** @typedef {import('../ArcAction').ArcAction} ArcAction */
+/** @typedef {import('../types').ArcExecutableInit} ArcExecutableInit */
 /** @typedef {import('@advanced-rest-client/arc-types').ArcRequest.ArcBaseRequest} ArcBaseRequest */
 /** @typedef {import('@advanced-rest-client/arc-types').ArcRequest.ARCSavedRequest} ARCSavedRequest */
 /** @typedef {import('@advanced-rest-client/arc-types').ArcRequest.ARCHistoryRequest} ARCHistoryRequest */
@@ -17,25 +18,25 @@ export class ActionRunner {
   /**
    * @param {ArcAction} action The action configuration
    * @param {EventTarget} eventTarget An target to use to dispatch DOM events.
+   * @param {ArcExecutableInit=} init
    */
-  constructor(action, eventTarget) {
+  constructor(action, eventTarget, init) {
     this.action = action;
     this.eventTarget = eventTarget;
+    this.init = init;
   }
 
   /**
    * Runs the request hook action.
-   *
-   * @param {ArcBaseRequest | ARCSavedRequest | ARCHistoryRequest | TransportRequest} request ARC request object
-   * @param {Response|ErrorResponse=} response ARC response object
+   * 
    * @return {Promise<void>} Promise resolved when the actions is executed.
    */
-  async run(request, response) {
+  async run() {
     const { name } = this.action;
     let instance;
     switch (name)  {
-      case 'set-cookie': instance = new SetCookieAction(this.action, request, response, this.eventTarget); break;
-      case 'delete-cookie': instance = new DeleteCookieAction(this.action, request, this.eventTarget); break;
+      case 'set-cookie': instance = new SetCookieAction(this.action, this.eventTarget, this.init); break;
+      case 'delete-cookie': instance = new DeleteCookieAction(this.action, this.eventTarget, this.init); break;
       default: return;
     }
     await instance.execute();

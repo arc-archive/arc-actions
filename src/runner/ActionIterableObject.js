@@ -1,8 +1,8 @@
 /**
  * @typedef {Object} IterableConfig
  * @property {string[]|string=} config.source Source of the data split by `.` character
- * @property {string=} config.operator Comparision operator
- * @property {string|number=} config.condition Comparision value
+ * @property {string=} config.operator Comparison operator
+ * @property {string|number=} config.condition Comparison value
  */
 
 /**
@@ -49,7 +49,7 @@ export class ActionIterableObject {
    */
   constructor(config = {}) {
     /**
-     * Thether the configuration is valid or not.
+     * Whether the configuration is valid or not.
      * @type {Boolean}
      */
     this.valid = validate(config);
@@ -63,16 +63,16 @@ export class ActionIterableObject {
     }
     /**
      * Source of the data split by `.` character
-     * @type {Array<String>}
+     * @type {string[]}
      */
     this.source = src;
     /**
-     * Comparision operator
+     * Comparison operator
      * @type {String}
      */
     this.operator = operator;
     /**
-     * Comparision value
+     * Comparison value
      * @type {String|Number}
      */
     this.condition = condition;

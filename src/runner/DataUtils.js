@@ -2,23 +2,56 @@ import { toJSON, contentType } from '@advanced-rest-client/headers-parser-mixin/
 import { JsonExtractor } from './JsonExtractor.js';
 import { XmlExtractor } from './XmlExtractor.js';
 
+/** @typedef {import('@advanced-rest-client/arc-types').Actions.IteratorConfiguration} IteratorConfiguration */
+
 /* eslint-disable no-plusplus */
+
+/**
+ * @param {string|Buffer|ArrayBuffer|File|Blob|FormData} body The body 
+ * @returns {string|undefined}
+ */
+export function readBodyString(body) {
+  if (body instanceof File || body instanceof Blob || body instanceof FormData) {
+    return undefined;
+  }
+  const type = typeof body;
+  if (['string', 'boolean', 'undefined'].includes(type)) {
+    return String(body);
+  }
+  let typed = /** @type Buffer|ArrayBuffer */(body);
+  // don't remember. I think it's either Node's or ARC's property.
+  // @ts-ignore
+  if (typed && typed.type === 'Buffer') {
+    // @ts-ignore
+    typed = new Uint8Array(typed.data);
+  }
+  const decoder = new TextDecoder();
+  try {
+    return decoder.decode(typed);
+  } catch (e) {
+    return '';
+  }
+}
+
 
 /**
  * Gets a value from a text for current path. Path is part of the
  * configuration object passed to the constructor.
  *
- * @param {string} data Payload value.
+ * @param {string | File | Blob | Buffer | ArrayBuffer | FormData} data Payload value.
  * @param {string} ct Body content type.
  * @param {string[]} path Remaining path to follow
- * @param {Object} iterator Iterator model
- * @return {String|undefined} Value for given path.
+ * @param {IteratorConfiguration} iterator Iterator model
+ * @return {string|undefined} Value for given path.
  */
 export function getPayloadValue(data, ct, path, iterator) {
   if (!path || !path.length || !data) {
-    return data;
+    return undefined;
   }
-  const typedData = String(data);
+  const typedData = readBodyString(data);
+  if (!typedData) {
+    return typedData;
+  }
   if (ct.indexOf('application/json') !== -1) {
     const extractor = new JsonExtractor(typedData, path, iterator);
     return extractor.extract();
@@ -40,9 +73,8 @@ export function getPayloadValue(data, ct, path, iterator) {
  * The `?` at the beginning of the query string is removed.
  *
  * @param {URL} url The URL object instance
- * @param {?String} param Param name to return. If not set then it returns
- * whole query string value.
- * @return {String} Full query string value if `param` is not set or paramter
+ * @param {string=} param Param name to return. If not set then it returns  whole query string value.
+ * @return {string} Full query string value if `param` is not set or paramter
  * value. This function does not returns `null` values.
  */
 export function readUrlQueryValue(url, param) {
@@ -69,9 +101,8 @@ export function readUrlQueryValue(url, param) {
  * parameters string and parses it to get the value.
  *
  * @param {URL} url The URL object instance
- * @param {?String} param Param name to return. If not set then it returns
- * whole hash string value.
- * @return {String} Hash parameter or whole hash value.
+ * @param {string=} param Param name to return. If not set then it returns whole hash string value.
+ * @return {string} Hash parameter or whole hash value.
  */
 export function readUrlHashValue(url, param) {
   let value = (url.hash || '').substr(1);
@@ -89,8 +120,8 @@ export function readUrlHashValue(url, param) {
 /**
  * Returns the value for path for given source object
  *
- * @param {String} url An url to parse.
- * @param {?Array<String>} path Path to the object
+ * @param {string} url An url to parse.
+ * @param {string[]} path Path to the data
  * @return {String|URLSearchParams|Number} Value for the path.
  */
 export function getDataUrl(url, path) {
@@ -117,12 +148,12 @@ export function getDataUrl(url, path) {
 /**
  * Returns a value for the headers.
  *
- * @param {Request|Response} source An object to read the headers value from.
+ * @param {string} source HTTP headers string
  * @param {string[]} path Path to the object
  * @return {string|undefined} Value for the path.
  */
 export function getDataHeaders(source, path) {
-  const headers = toJSON(source.headers);
+  const headers = toJSON(source);
   if (!path || !path.length || !path[0] || !headers || !headers.length) {
     return undefined;
   }
@@ -138,23 +169,16 @@ export function getDataHeaders(source, path) {
 /**
  * Returns a value for the payload field.
  *
- * @param {Object} source An object to read the url value from.
+ * @param {string | File | Blob | Buffer | ArrayBuffer | FormData} payload The payload in the original form
+ * @param {string} headers The associated with the payload headers
  * @param {string[]} path Path to the object
- * @param {Object} iterator Iterator model. Used only with response body.
- * @param {Object} request The request object
- * @param {Object=} response The resposne object
+ * @param {IteratorConfiguration=} iterator Iterator model. Used only with response body.
  * @return {String} Value for the path.
  */
-export function getDataPayload(source, path, iterator, request, response={}) {
-  const ct = contentType(source.headers);
+export function getDataPayload(payload, headers, path, iterator) {
+  const ct = contentType(headers);
   if (!ct) {
     return undefined;
   }
-  let data;
-  if (path[0] === 'request') {
-    data = request.payload;
-  } else {
-    data = response.payload;
-  }
-  return getPayloadValue(data, ct, path.slice(2), iterator);
+  return getPayloadValue(payload, ct, path, iterator);
 }

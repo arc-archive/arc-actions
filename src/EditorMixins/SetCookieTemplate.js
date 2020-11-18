@@ -12,8 +12,8 @@ import {
 } from '../CommonTemplates.js';
 
 /** @typedef {import('lit-html').TemplateResult} TemplateResult */
-/** @typedef {import('../../types').SetCookieConfig} SetCookieConfig */
-/** @typedef {import('../../types').DataSourceConfiguration} DataSourceConfiguration */
+/** @typedef {import('@advanced-rest-client/arc-types').Actions.SetCookieConfig} SetCookieConfig */
+/** @typedef {import('@advanced-rest-client/arc-types').Actions.DataSourceConfiguration} DataSourceConfiguration */
 /** @typedef {import('../CommonTemplates').InputConfiguration} InputConfiguration */
 /** @typedef {import('../CommonTemplates').CheckboxConfiguration} CheckboxConfiguration */
 
@@ -80,7 +80,7 @@ function cookieNameTemplate(name = '', inputHandler, inputConfig) {
  * @param {InputConfiguration} inputConfig
  * @return {TemplateResult|String} Empty string when `useRequestUrl` is set on the config.
  */
-function cookieUrlTtemplate(
+function cookieUrlTemplate(
   { useRequestUrl = false, url = '' },
   inputHandler,
   inputConfig
@@ -197,7 +197,7 @@ function sessionTemplate(session = false, changeHandler, inputConfig) {
 }
 
 /**
- * Renders a template for the data source seelctor.
+ * Renders a template for the data source selector.
  * @param {string} type
  * @param {DataSourceConfiguration} configSource
  * @param {Function} dataSourceHandler
@@ -273,7 +273,7 @@ export default function render(
   return [
     cookieNameTemplate(name, inputHandler, inputConfig),
     useRequestUrlTemplate(type, useRequestUrl, changeHandler, inputConfig),
-    cookieUrlTtemplate(config, changeHandler, inputConfig),
+    cookieUrlTemplate(config, changeHandler, inputConfig),
     cookieExpiresTemplate(expires, changeHandler, inputConfig),
     hostOnlyTemplate(hostOnly, changeHandler, inputConfig),
     httpOnlyTemplate(httpOnly, changeHandler, inputConfig),

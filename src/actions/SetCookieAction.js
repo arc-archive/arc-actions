@@ -1,34 +1,18 @@
 /* eslint-disable class-methods-use-this */
 import { SessionCookieEvents } from '@advanced-rest-client/arc-events';
 import { RequestDataExtractor } from '../runner/RequestDataExtractor.js';
+import { ArcExecutable } from './ArcExecutable.js';
 
 /** @typedef {import('../ArcAction').ArcAction} ArcAction */
+/** @typedef {import('../types').ArcExecutableInit} ArcExecutableInit */
 /** @typedef {import('@advanced-rest-client/arc-types').Actions.SetCookieConfig} SetCookieConfig */
 /** @typedef {import('@advanced-rest-client/arc-types').Actions.DataSourceConfiguration} DataSourceConfiguration */
-/** @typedef {import('@advanced-rest-client/arc-types').ArcRequest.ArcBaseRequest} ArcBaseRequest */
-/** @typedef {import('@advanced-rest-client/arc-types').ArcRequest.ARCSavedRequest} ARCSavedRequest */
-/** @typedef {import('@advanced-rest-client/arc-types').ArcRequest.ARCHistoryRequest} ARCHistoryRequest */
-/** @typedef {import('@advanced-rest-client/arc-types').ArcRequest.TransportRequest} TransportRequest */
-/** @typedef {import('@advanced-rest-client/arc-types').ArcResponse.Response} Response */
-/** @typedef {import('@advanced-rest-client/arc-types').ArcResponse.ErrorResponse} ErrorResponse */
+
 
 /**
  * Executes the `set-cookie` action.
  */
-export class SetCookieAction {
-  /**
-   * @param {ArcAction} action The action instance.
-   * @param {ArcBaseRequest | ARCSavedRequest | ARCHistoryRequest | TransportRequest} request ARC request object
-   * @param {Response|ErrorResponse=} response ARC response object
-   * @param {EventTarget} eventTarget An target to use to dispatch DOM events.
-   */
-  constructor(action, request, response, eventTarget=window) {
-    this.action = action;
-    this.request = request;
-    this.response = response;
-    this.eventTarget = eventTarget;
-  }
-
+export class SetCookieAction extends ArcExecutable {
   async execute() {
     const cnf = /** @type SetCookieConfig */ (this.action.config);
     const value = this.readValue(cnf.source);
@@ -44,13 +28,14 @@ export class SetCookieAction {
     if (source.source === 'value') {
       value = source.value;
     } else {
+      const iterator = source.iteratorEnabled ? source.iterator : undefined;
       const extractor = new RequestDataExtractor({
-        request: this.request,
-        response: this.response,
+        request: this.init.request,
+        response: this.init.response,
         path: source.path,
+        iterator,
       });
-      const it = source.iteratorEnabled ? source.iterator : undefined;
-      value = extractor.extract(it);
+      value = extractor.extract();
     }
     return value;
   }
@@ -63,7 +48,7 @@ export class SetCookieAction {
   async setCookie(config, value) {
     let url;
     if (config.useRequestUrl) {
-      url = this.request.url;
+      url = this.init.request.url;
     } else {
       url = config.url;
     }

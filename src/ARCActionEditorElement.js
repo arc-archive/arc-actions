@@ -39,12 +39,12 @@ const helpMap = {
 };
 
 /** @typedef {import('lit-html').TemplateResult} TemplateResult */
-/** @typedef {import('./types').DataSourceConfiguration} DataSourceConfiguration */
-/** @typedef {import('./types').IteratorConfiguration} IteratorConfiguration */
-/** @typedef {import('./types').SetCookieConfig} SetCookieConfig */
-/** @typedef {import('./types').DeleteCookieConfig} DeleteCookieConfig */
-/** @typedef {import('./types').SetVariableConfig} SetVariableConfig */
-/** @typedef {import('./types').ActionConfiguration} ActionConfiguration */
+/** @typedef {import('@advanced-rest-client/arc-types').Actions.DataSourceConfiguration} DataSourceConfiguration */
+/** @typedef {import('@advanced-rest-client/arc-types').Actions.IteratorConfiguration} IteratorConfiguration */
+/** @typedef {import('@advanced-rest-client/arc-types').Actions.SetCookieConfig} SetCookieConfig */
+/** @typedef {import('@advanced-rest-client/arc-types').Actions.DeleteCookieConfig} DeleteCookieConfig */
+/** @typedef {import('@advanced-rest-client/arc-types').Actions.SetVariableConfig} SetVariableConfig */
+/** @typedef {import('@advanced-rest-client/arc-types').Actions.ActionConfiguration} ActionConfiguration */
 
 /**
  * @param {string} name

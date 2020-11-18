@@ -6,10 +6,10 @@ import '@anypoint-web-components/anypoint-input/anypoint-input.js';
 import '@anypoint-web-components/anypoint-checkbox/anypoint-checkbox.js';
 
 /** @typedef {import('lit-html').TemplateResult} TemplateResult */
-/** @typedef {import('./types').DataSourceConfiguration} DataSourceConfiguration */
-/** @typedef {import('./types').SetCookieConfig} SetCookieConfig */
-/** @typedef {import('./types').SetVariableConfig} SetVariableConfig */
-/** @typedef {import('./types').IteratorConfiguration} IteratorConfiguration */
+/** @typedef {import('@advanced-rest-client/arc-types').Actions.DataSourceConfiguration} DataSourceConfiguration */
+/** @typedef {import('@advanced-rest-client/arc-types').Actions.SetCookieConfig} SetCookieConfig */
+/** @typedef {import('@advanced-rest-client/arc-types').Actions.SetVariableConfig} SetVariableConfig */
+/** @typedef {import('@advanced-rest-client/arc-types').Actions.IteratorConfiguration} IteratorConfiguration */
 
 /**
  * @param {Boolean} [compatibility=false] Compatibility mode flag.

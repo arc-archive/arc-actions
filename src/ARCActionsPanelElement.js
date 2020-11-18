@@ -29,7 +29,7 @@ import {
 /** @typedef {import('lit-html').TemplateResult} TemplateResult */
 /** @typedef {import('@anypoint-web-components/anypoint-listbox').AnypointListbox} AnypointListbox */
 /** @typedef {import('@anypoint-web-components/anypoint-menu-button').AnypointMenuButton} AnypointMenuButton */
-/** @typedef {import('./types').ConditionSchema} ConditionSchema */
+/** @typedef {import('@advanced-rest-client/arc-types').Actions.Condition} Condition */
 
 /**
  * Reads indexes of an action editor from the editor `data-*` attributes.
@@ -99,14 +99,6 @@ export class ARCActionsPanelElement extends LitElement {
     return !!(actions && actions.length);
   }
 
-  /**
-   * @return {Boolean} Determines whether the actions are part of the conditions.
-   */
-  get hasConditions() {
-    const { type } = this;
-    return type === 'response';
-  }
-
   constructor() {
     super();
     this.actions = null;
@@ -139,8 +131,13 @@ export class ARCActionsPanelElement extends LitElement {
    * @param {string} name 
    */
   _addRequestAction(name) {
-    const cond = ActionCondition.defaultCondition('request');
-    const action = new ActionCondition(cond, this.type);
+    const condition = ActionCondition.defaultCondition('request');
+    const action = new ActionCondition({
+      condition, 
+      type: this.type,
+      actions: [],
+      enabled: true,
+    });
     action.add(name);
     this.actions.push(action);
   }
@@ -152,9 +149,14 @@ export class ARCActionsPanelElement extends LitElement {
    */
   _addResponseAction(name, index) {
     if (!this.actions.length) {
-      const cond = ActionCondition.defaultCondition(this.type);
-      cond.alwaysPass = false;
-      const action = new ActionCondition(cond, this.type);
+      const condition = ActionCondition.defaultCondition(this.type);
+      condition.alwaysPass = false;
+      const action = new ActionCondition({
+        condition, 
+        type: this.type,
+        enabled: true,
+        actions: [],
+      });
       action.add(name);
       this.actions.push(action);
     } else {
@@ -315,8 +317,13 @@ export class ARCActionsPanelElement extends LitElement {
   }
 
   _addConditionHandler() {
-    const cond = ActionCondition.defaultCondition();
-    const actions = new ActionCondition(cond, this.type);
+    const condition = ActionCondition.defaultCondition();
+    const actions = new ActionCondition({
+      condition, 
+      type: this.type,
+      enabled: true,
+      actions: [],
+    });
     if (!Array.isArray(this.actions)) {
       this.actions = [];
     }
@@ -362,7 +369,7 @@ export class ARCActionsPanelElement extends LitElement {
    * @return {TemplateResult} Template for the tutorial.
    */
   [tutorialTpl]() {
-    const { compatibility, hasConditions } = this;
+    const { compatibility } = this;
     return html`
       <div class="tutorial-section">
         <p class="content">
@@ -374,7 +381,7 @@ export class ARCActionsPanelElement extends LitElement {
           class="self-center"
         >Learn more</anypoint-button>
       </div>
-      ${hasConditions ? this[addConditionTpl]() : this[addActionTpl](0)}
+      ${this[addConditionTpl]()}
     `;
   }
 
@@ -443,30 +450,12 @@ export class ARCActionsPanelElement extends LitElement {
    * @return {TemplateResult|TemplateResult[]|string[]}
    */
   _actionsItemTemplate(conditionAction, index) {
-    const hasCondition = this.type === 'response';
-    if (!hasCondition) {
-      return this._conditionLessActionsTemplate(conditionAction, index);
-    }
     const { actions } = conditionAction;
-    // const { actions, condition } = conditionAction;
-    // const { view = {} } = condition;
-    // const { opened } = view;
     return html`
     ${this._conditionTemplate(conditionAction, index)}
     ${actions.map((action, i) => this[actionTpl](action, index, i))}
     ${this[addActionTpl](index)}
     `;
-  }
-
-  /**
-   * @param {ActionCondition} conditionAction
-   * @param {number} index
-   * @return {string[]|TemplateResult[]}
-   */
-  _conditionLessActionsTemplate(conditionAction, index) {
-    const { actions } = conditionAction;
-    const result = actions.map((action, i) => this[actionTpl](action, index, i));
-    return /** @type TemplateResult[] */ (result);
   }
 
   /**

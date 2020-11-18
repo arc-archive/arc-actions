@@ -24,7 +24,7 @@ import { ActionRunner } from './ActionRunner.js';
  */
 
 /**
- * The main class that executes actions for a request in Advanced REST Client.
+ * The main class that executes actions for a request and a response in Advanced REST Client.
  */
 export class ActionsRunner extends VariablesMixin(EventsTargetMixin(Object)) {
   /**
@@ -78,13 +78,15 @@ export class ActionsRunner extends VariablesMixin(EventsTargetMixin(Object)) {
       execs.sort(sortActions);
       for (let j = 0, eLen = execs.length; j < eLen; j++) {
         const action = await this.evaluateAction(execs[j]);
-        const runner = new ActionRunner(action, this.eventsTarget);
+        const runner = new ActionRunner(action, this.eventsTarget, {
+          request: request.request,
+        });
         if (action.sync === false) {
-          runner.run(request.request);
+          runner.run();
           continue;
         }
         try {
-          await runner.run(request.request);
+          await runner.run();
         } catch (e) {
           if (action.failOnError) {
             throw e;
@@ -129,13 +131,17 @@ export class ActionsRunner extends VariablesMixin(EventsTargetMixin(Object)) {
       execs.sort(sortActions);
       for (let j = 0, eLen = execs.length; j < eLen; j++) {
         const action = await this.evaluateAction(execs[j]);
-        const runner = new ActionRunner(action, this.eventsTarget);
+        const runner = new ActionRunner(action, this.eventsTarget, {
+          request: request.request,
+          executedRequest: executed,
+          response,
+        });
         if (action.sync === false) {
-          runner.run(executed, response);
+          runner.run();
           continue;
         }
         try {
-          await runner.run(executed, response);
+          await runner.run();
         } catch (e) {
           if (action.failOnError) {
             throw e;

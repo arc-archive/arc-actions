@@ -57,6 +57,34 @@ export class ActionCondition {
       enabled: true,
     };
   }
+
+  /**
+   * Creates a list of actions from an external source.
+   *
+   * @param {(RunnableAction|ActionCondition)[]} actions
+   * @return {ActionCondition[]}
+   */
+  static importExternal(actions) {
+    if (!Array.isArray(actions)) {
+      return [];
+    }
+    return actions.map((item) => ActionCondition.importAction(item));
+  }
+
+  /**
+   * @param {RunnableAction|ActionCondition} item
+   * @return {ActionCondition} Instance of ArcActions from passed values.
+   */
+  static importAction(item) {
+    const { condition = ActionCondition.defaultCondition(), type = 'request', actions=[], enabled } = item;
+    return new ActionCondition({
+      condition, 
+      type, 
+      // @ts-ignore
+      actions,
+      enabled,
+    });
+  }
   
   /**
    * @param {RunnableAction} init The condition configuration.
@@ -83,11 +111,12 @@ export class ActionCondition {
   /**
    * Tests whether the condition is satisfied for request and/or response.
    *
-   * @param {ArcBaseRequest | ARCSavedRequest | ARCHistoryRequest | TransportRequest} request The ARC request object.
+   * @param {ArcBaseRequest | ARCSavedRequest | ARCHistoryRequest} request The ARC request object.
+   * @param {TransportRequest=} executed The request object representing the actual request that has been executed by the transport library.
    * @param {Response|ErrorResponse=} response The ARC response object, if available.
    * @return {boolean} True when the condition is satisfied.
    */
-  satisfied(request, response) {
+  satisfied(request, executed, response) {
     if (!this.enabled) {
       return false;
     }
@@ -97,7 +126,8 @@ export class ActionCondition {
     const extractor = new RequestDataExtractor({
       request,
       response,
-      path: this.condition.source,
+      executedRequest: executed,
+      path: this.condition.path,
     });
     const value = extractor.extract();
     return checkCondition(value, this.condition.operator, this.condition.value);

@@ -11,8 +11,8 @@ import {
 } from '../CommonTemplates.js';
 
 /** @typedef {import('lit-html').TemplateResult} TemplateResult */
-/** @typedef {import('../../types').SetVariableConfig} SetVariableConfig */
-/** @typedef {import('../../types').DataSourceConfiguration} DataSourceConfiguration */
+/** @typedef {import('@advanced-rest-client/arc-types').Actions.SetVariableConfig} SetVariableConfig */
+/** @typedef {import('@advanced-rest-client/arc-types').Actions.DataSourceConfiguration} DataSourceConfiguration */
 /** @typedef {import('../CommonTemplates').InputConfiguration} InputConfiguration */
 
 /**
@@ -38,7 +38,7 @@ function nameTemplate(name, inputHandler, inputConfig) {
 }
 
 /**
- * Renders a template for the data source seelctor.
+ * Renders a template for the data source selector.
  * @param {string} type
  * @param {DataSourceConfiguration} configSource
  * @param {Function} dataSourceHandler
