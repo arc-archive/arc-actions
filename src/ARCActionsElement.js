@@ -17,7 +17,7 @@ const selectedChangeEvent = 'selectedchange';
 
 /** @typedef {import('./ArcAction').ArcAction} ArcAction */
 /** @typedef {import('./ActionCondition').ActionCondition} ActionCondition */
-/** @typedef {import('./types').OperatorEnum} OperatorEnum */
+/** @typedef {import('@advanced-rest-client/arc-types').Actions.OperatorEnum} OperatorEnum */
 /** @typedef {import('lit-element').TemplateResult} TemplateResult */
 
 /**

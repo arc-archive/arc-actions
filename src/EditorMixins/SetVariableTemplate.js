@@ -69,7 +69,7 @@ function arraySearchTpl(
   inputConfig
 ) {
   const { iteratorEnabled = false, iterator, source = '' } = configSource;
-  if (source !== 'request.body') {
+  if (source !== 'body') {
     return '';
   }
   const itTpl = iteratorEnabled

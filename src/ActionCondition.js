@@ -8,6 +8,7 @@ import { recursiveDeepCopy } from './Copy.js';
 /** @typedef {import('@advanced-rest-client/arc-types').Actions.Condition} Condition */
 /** @typedef {import('@advanced-rest-client/arc-types').Actions.Action} Action */
 /** @typedef {import('@advanced-rest-client/arc-types').Actions.ActionType} ActionType */
+/** @typedef {import('@advanced-rest-client/arc-types').Actions.OperatorEnum} OperatorEnum */
 /** @typedef {import('@advanced-rest-client/arc-types').ArcRequest.ArcBaseRequest} ArcBaseRequest */
 /** @typedef {import('@advanced-rest-client/arc-types').ArcRequest.ARCSavedRequest} ARCSavedRequest */
 /** @typedef {import('@advanced-rest-client/arc-types').ArcRequest.ARCHistoryRequest} ARCHistoryRequest */
@@ -28,11 +29,12 @@ export class ActionCondition {
     const source = 'url';
     const operator = 'equal';
     const result = /** @type Condition */ ({
+      alwaysPass: false,
       type,
-      alwaysPass: true,
       source,
       operator,
-      value: '',
+      path: '',
+      predictedValue: '',
       view: {
         opened: true,
       }
@@ -93,7 +95,7 @@ export class ActionCondition {
     /**
      * @type {Condition}
      */
-    this.condition = init.condition;
+    this.condition = { ...init.condition };
     /**
      * @type {ActionType}
      */
@@ -120,17 +122,17 @@ export class ActionCondition {
     if (!this.enabled) {
       return false;
     }
-    if (!this.condition.alwaysPass === true) {
+    if (this.condition.alwaysPass === true) {
       return true;
     }
     const extractor = new RequestDataExtractor({
       request,
       response,
       executedRequest: executed,
-      path: this.condition.path,
     });
-    const value = extractor.extract();
-    return checkCondition(value, this.condition.operator, this.condition.value);
+    const value = extractor.extract(this.condition);
+    const op = /** @type OperatorEnum */ (this.condition.operator);
+    return checkCondition(value, op, this.condition.predictedValue);
   }
 
   /**

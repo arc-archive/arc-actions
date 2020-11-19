@@ -1,19 +1,18 @@
-/**
- * @typedef {Object} IterableConfig
- * @property {string[]|string=} config.source Source of the data split by `.` character
- * @property {string=} config.operator Comparison operator
- * @property {string|number=} config.condition Comparison value
- */
+/** @typedef {import('@advanced-rest-client/arc-types').Actions.IteratorConfiguration} IteratorConfiguration */
+/** @typedef {import('@advanced-rest-client/arc-types').Actions.OperatorEnum} OperatorEnum */
 
 /**
  * Validates passed options and sets `valid` flag.
  *
- * @param {IterableConfig} opts Iterator options
+ * @param {IteratorConfiguration} opts Iterator options
  * @return {boolean} True when options are valid
  */
 export function validate(opts) {
+  if (!opts) {
+    return false;
+  }
   let valid = true;
-  if (!opts.source) {
+  if (!opts.path) {
     valid = false;
   }
   if (valid && !opts.operator) {
@@ -23,7 +22,7 @@ export function validate(opts) {
     valid = false;
   }
   if (valid) {
-    const ops = [
+    const ops = /** @type OperatorEnum[] */ ([
       'equal',
       'not-equal',
       'greater-than',
@@ -31,9 +30,9 @@ export function validate(opts) {
       'less-than',
       'less-than-equal',
       'contains',
-      'regex'
-    ];
-    if (ops.indexOf(opts.operator) === -1) {
+      'regex',
+    ]);
+    if (!ops.includes(opts.operator)) {
       valid = false;
     }
   }
@@ -45,35 +44,37 @@ export function validate(opts) {
  */
 export class ActionIterableObject {
   /**
-   * @param {IterableConfig=} [config={}] Iterator options
+   * @param {IteratorConfiguration} config Iterator options
    */
-  constructor(config = {}) {
+  constructor(config) {
     /**
      * Whether the configuration is valid or not.
-     * @type {Boolean}
+     * @type {boolean}
      */
     this.valid = validate(config);
     if (!this.valid) {
       return;
     }
-    const { source, operator, condition } = config;
-    let src = /** @type string[] */ (source);
-    if (typeof source === 'string') {
-      src = source.split('.');
+    const { path, operator, condition } = config;
+    let src = /** @type any */ (path);
+    if (typeof src === 'string') {
+      src = src.split('.');
     }
+
     /**
      * Source of the data split by `.` character
      * @type {string[]}
      */
-    this.source = src;
+    this.path = src;
+
     /**
      * Comparison operator
-     * @type {String}
+     * @type {OperatorEnum}
      */
     this.operator = operator;
     /**
      * Comparison value
-     * @type {String|Number}
+     * @type {string}
      */
     this.condition = condition;
   }

@@ -9,8 +9,9 @@ import {
   inputTemplate,
 } from './CommonTemplates.js';
 
-/** @typedef {import('./types').ConditionSchema} ConditionSchema */
-/** @typedef {import('./types').ConditionSourceEnum} ConditionSourceEnum */
+/** @typedef {import('@advanced-rest-client/arc-types').Actions.RequestDataSourceEnum} RequestDataSourceEnum */
+/** @typedef {import('@advanced-rest-client/arc-types').Actions.ResponseDataSourceEnum} ResponseDataSourceEnum */
+/** @typedef {import('@advanced-rest-client/arc-types').Actions.Condition} Condition */
 /** @typedef {import('lit-html').TemplateResult} TemplateResult */
 
 export class ARCConditionEditorElement extends LitElement {
@@ -41,14 +42,14 @@ export class ARCConditionEditorElement extends LitElement {
   }
 
   /**
-   * @return {ConditionSchema} A condition to render.
+   * @return {Condition} A condition to render.
    */
   get condition() {
     return this._condition;
   }
 
   /**
-   * @param {ConditionSchema} value A condition to render.
+   * @param {Condition} value A condition to render.
    */
   set condition(value) {
     const old = this._condition;
@@ -227,7 +228,7 @@ export class ARCConditionEditorElement extends LitElement {
   _valueTemplate() {
     const { condition, outlined, compatibility } = this;
     const { value, source } = condition;
-    const rsValue = /** @type ConditionSourceEnum */ ('response.status');
+    const rsValue = /** @type RequestDataSourceEnum | ResponseDataSourceEnum | 'value' */ ('status');
     const type = source === rsValue ? 'number' : 'text';
 
     const input = inputTemplate('value', String(value), 'Value', this._valueHandler, {

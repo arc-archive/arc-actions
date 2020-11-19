@@ -1,37 +1,11 @@
+/* eslint-disable class-methods-use-this */
 import { ActionIterableObject } from './ActionIterableObject.js';
 import * as ConditionRunner from './ConditionRunner.js';
 
+/** @typedef {import('@advanced-rest-client/arc-types').Actions.IteratorConfiguration} IteratorConfiguration */
+
 /* eslint-disable no-plusplus */
 /* eslint-disable no-continue */
-
-/**
- * Processes input JSON data and returns Array or Object. It returns
- * `undefined` if the data are empty, falsy or a primitive (except for JSON
- * strings).
- *
- * @param {Array|Object|String} data Data to process
- * @return {Array|Object|undefined} JS object or undefined if conversion
- * wasn't possible.
- */
-const processJson = (data) => {
-  if (!data) {
-    return undefined;
-  }
-
-  switch (typeof data) {
-    case 'number':
-    case 'boolean':
-      return undefined;
-    case 'string':
-      try {
-        return JSON.parse(data);
-      } catch (e) {
-        return undefined;
-      }
-    default:
-      return data;
-  }
-}
 
 /**
  * Class responsible for extracting data from JSON values.
@@ -39,16 +13,15 @@ const processJson = (data) => {
 export class JsonExtractor {
   /**
    * @constructor
-   * @param {String|Object|Array} json JSON string or object. Strings are
-   * parsed to objects.
+   * @param {string|object|any[]} json JSON string or object. Strings are parsed to objects.
    * @param {string[]|string} path Path to the data.
-   * @param {Object=} iterator Data iterator
+   * @param {IteratorConfiguration=} iterator Data iterator
    */
   constructor(json, path, iterator) {
     /**
      * JS object or array.
      */
-    this._data = processJson(json);
+    this._data = this._processJson(json);
     let pathTyped = path;
     if (typeof path === 'string') {
       pathTyped = path.split('.');
@@ -57,22 +30,54 @@ export class JsonExtractor {
     this._iterator = new ActionIterableObject(iterator);
   }
 
+  /**
+   * Processes input JSON data and returns Array or Object. It returns
+   * `undefined` if the data are empty, falsy or a primitive (except for JSON
+   * strings).
+   *
+   * @param {string|object|any[]} data Data to process
+   * @return {any[]|object|undefined} JS object or undefined if conversion  wasn't possible.
+   */
+  _processJson(data) {
+    if (!data) {
+      return undefined;
+    }
 
+    switch (typeof data) {
+      case 'number':
+      case 'boolean':
+        return undefined;
+      case 'string':
+        try {
+          return JSON.parse(data);
+        } catch (e) {
+          return undefined;
+        }
+      default:
+        return data;
+    }
+  }
 
   /**
    * Extracts the data for given conditions.
    *
-   * @return {String|undefined} Data found for given conditions.
+   * @return {string|undefined} Data found for given conditions.
    */
   extract() {
+    const path = Array.from(this._path);
     if (this._iterator.valid) {
-      const obj = this._getValue(this._data, this._iterator.source);
+      let obj;
+      if (this._iterator.path.includes('*')) {
+        obj = this._getValue(this._data, Array.from(this._iterator.path));
+      } else {
+        obj = this._getValue(this._data, path);
+      }
       if (!obj) {
         return undefined;
       }
-      return this._getValue(obj, this._path);
+      return this._getValue(obj, path);
     }
-    return this._getValue(this._data, this._path);
+    return this._getValue(this._data, path);
   }
 
   /**
@@ -81,7 +86,7 @@ export class JsonExtractor {
    * @param {Object|Array} json JSON value to read
    * @param {String[]} path Path to search for the value.
    * @param {ActionIterableObject=} iterableOptions Instance of ActionIterableObject
-   * @return {String|undefined} Value for given path.
+   * @return {string|undefined} Value for given path.
    */
   _getValue(json, path, iterableOptions) {
     if (!json || typeof json !== 'object') {
@@ -90,7 +95,7 @@ export class JsonExtractor {
     if (iterableOptions) {
       return this._getIterableValue(json, path, iterableOptions);
     }
-    let part = /** @type String|Number */ (path.shift());
+    let part = /** @type string|number */ (path.shift());
     if (!part) {
       return json;
     }
@@ -99,15 +104,20 @@ export class JsonExtractor {
       return this._getValue(json, path, it);
     }
     let isNumber = false;
-    if (!Number.isNaN(/** @type any */ (part))) {
-      part = Number(/** @type any */ (part));
+    const typedNumber = Number(part);
+    if (!Number.isNaN(typedNumber)) {
       isNumber = true;
+      part = typedNumber;
     }
-    if (json instanceof Array && !isNumber && !iterableOptions) {
+    if (Array.isArray(json) && !isNumber && !iterableOptions) {
       return undefined;
     }
     return this._getValue(json[part], path, iterableOptions);
   }
+
+  // _getValueWithIterator() {
+
+  // }
 
   /**
    * Searches for a value in iterable object.
@@ -120,10 +130,17 @@ export class JsonExtractor {
    */
   _getIterableValue(json, path, iterable) {
     const pathCopy = Array.from(path);
-    if (json instanceof Array) {
-      return this._getIterableValueArray(json, pathCopy, iterable);
+    if (Array.isArray(json)) {
+      if (iterable.path.includes('*')) {
+        // this is the old weird system with unnatural paths
+        return this._getIterableValueArray(json, pathCopy, iterable);
+      }
+      return this._getIterableValueArray(json, iterable.path, iterable);
     }
-    return this._getIterableValueObject(json, pathCopy, iterable);
+    if (iterable.path.includes('*')) {
+      return this._getIterableValueObject(json, pathCopy, iterable);
+    }
+    return this._getIterableValueObject(json, iterable.path, iterable);
   }
 
   /**

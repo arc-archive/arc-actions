@@ -33,14 +33,11 @@ export class SetVariableAction extends ArcExecutable {
     if (source.source === 'value') {
       value = source.value;
     } else {
-      const iterator = source.iteratorEnabled ? source.iterator : undefined;
       const extractor = new RequestDataExtractor({
         request: this.init.request,
         response: this.init.response,
-        path: source.path,
-        iterator,
       });
-      value = extractor.extract();
+      value = extractor.extract(source);
     }
     return value;
   }

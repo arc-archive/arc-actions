@@ -9,6 +9,7 @@ import * as DataUtils from './DataUtils.js';
 /** @typedef {import('@advanced-rest-client/arc-types').ArcResponse.Response} Response */
 /** @typedef {import('@advanced-rest-client/arc-types').ArcResponse.ErrorResponse} ErrorResponse */
 /** @typedef {import('@advanced-rest-client/arc-types').Actions.IteratorConfiguration} IteratorConfiguration */
+/** @typedef {import('@advanced-rest-client/arc-types').Actions.DataSourceConfiguration} DataSourceConfiguration */
 /** @typedef {import('../types').DataExtractorInit} DataExtractorInit */
 
 /**
@@ -34,19 +35,7 @@ export class RequestDataExtractor {
   /**
    * @param {DataExtractorInit} init
    */
-  constructor({ request, executedRequest, response, pathDelimiter = '.', path, iterator }) {
-    /**
-     * Source path delimiter
-     * @type {string}
-     */
-    this.pathDelimiter = pathDelimiter;
-    /**
-     * Source data path. Either array of path segments
-     * or full path as string.
-     *
-     * @type {string}
-     */
-    this.path = path;
+  constructor({ request, executedRequest, response }) {
     /**
      * ARC request object
      * @type {(ArcBaseRequest | ARCSavedRequest | ARCHistoryRequest)}
@@ -62,33 +51,32 @@ export class RequestDataExtractor {
      * @type {Response | ErrorResponse}
      */
     this.response = response;
-
-    /**
-     * The iterator to search in array values.
-     * @type {IteratorConfiguration}
-     */
-    this.iterator = iterator;
   }
 
   /**
    * Gets the data from selected path.
+   * @param {DataSourceConfiguration} config The configuration of the data source
    * @return {String|Number|URLSearchParams|Headers|undefined} Data to be processed
    */
-  extract() {
-    const { path } = this;
-    const parts = path.split(this.pathDelimiter);
-    const [baseSource, typeSource, ...args] = parts;
-    switch (typeSource) {
+  extract(config) {
+    const { type, source, path, value, iteratorEnabled, iterator } = config;
+    // @ts-ignore
+    if (source === 'value') {
+      return value;
+    }
+    const it = iteratorEnabled === false ? undefined : iterator;
+    const args = path ? path.split('.') : [];
+    switch (source) {
       case 'url':
-        return DataUtils.getDataUrl(this.getUrl(baseSource), args);
+        return DataUtils.getDataUrl(this.getUrl(type), args);
       case 'headers':
-        return DataUtils.getDataHeaders(this.getHeaders(baseSource), args);
+        return DataUtils.getDataHeaders(this.getHeaders(type), args);
       case 'status':
         return this.response.status;
       case 'body':
-        return DataUtils.getDataPayload(this.getBody(baseSource), this.getHeaders(baseSource), args, this.iterator);
+        return DataUtils.getDataPayload(this.getBody(type), this.getHeaders(type), args, it);
       default:
-        throw new Error(`Unknown path ${path[1]} for source ${path[0]}`);
+        throw new Error(`Unknown source ${source} for ${type} data`);
     }
   }
 

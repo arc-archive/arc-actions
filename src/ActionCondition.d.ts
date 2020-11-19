@@ -51,7 +51,7 @@ export declare class ActionCondition {
    * @param response The ARC response object, if available.
    * @returns True when the condition is satisfied.
    */
-  satisfied(request: ArcBaseRequest | ARCSavedRequest | ARCHistoryRequest | TransportRequest, executed?: TransportRequest, response?: Response|ErrorResponse): boolean;
+  satisfied(request: ArcBaseRequest | ARCSavedRequest | ARCHistoryRequest, executed?: TransportRequest, response?: Response|ErrorResponse): boolean;
 
   /**
    * Adds a new, empty action to the list of actions.

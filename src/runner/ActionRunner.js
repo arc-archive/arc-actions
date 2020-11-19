@@ -1,5 +1,6 @@
 import { DeleteCookieAction } from '../actions/DeleteCookieAction.js';
 import { SetCookieAction } from '../actions/SetCookieAction.js';
+import { SetVariableAction } from '../actions/SetVariableAction.js';
 
 /** @typedef {import('../ArcAction').ArcAction} ArcAction */
 /** @typedef {import('../types').ArcExecutableInit} ArcExecutableInit */
@@ -37,6 +38,7 @@ export class ActionRunner {
     switch (name)  {
       case 'set-cookie': instance = new SetCookieAction(this.action, this.eventTarget, this.init); break;
       case 'delete-cookie': instance = new DeleteCookieAction(this.action, this.eventTarget, this.init); break;
+      case 'set-variable': instance = new SetVariableAction(this.action, this.eventTarget, this.init); break;
       default: return;
     }
     await instance.execute();

@@ -48,8 +48,9 @@ function getXmlValue(dom, path) {
   }
   let nextPart = /** @type any */ (path[0]);
   let selector = part;
-  if (!Number.isNaN(nextPart)) {
-    nextPart = /** @type Number */ (Number(nextPart));
+  const typedPart = Number(nextPart);
+  if (Number.isInteger(typedPart)) {
+    nextPart = typedPart;
     nextPart++;
     selector += `:nth-child(${nextPart})`;
     path.shift();

@@ -110,10 +110,11 @@ export const mapActions = (value) => {
     return [];
   }
   return value.map((item) => {
-    if (!(item instanceof ArcAction)) {
-      return new ArcAction(item);
-    }
-    return item;
+    return new ArcAction(item);
+    // if (!(item instanceof ArcAction)) {
+    //   return new ArcAction(item);
+    // }
+    // return item;
   });
 };
 

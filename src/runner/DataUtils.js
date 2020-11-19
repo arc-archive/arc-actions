@@ -45,22 +45,18 @@ export function readBodyString(body) {
  * @return {string|undefined} Value for given path.
  */
 export function getPayloadValue(data, ct, path, iterator) {
-  if (!path || !path.length || !data) {
-    return undefined;
+  if (!data || !path || !path.length) {
+    return String(data);
   }
   const typedData = readBodyString(data);
   if (!typedData) {
     return typedData;
   }
-  if (ct.indexOf('application/json') !== -1) {
+  if (ct.includes('application/json')) {
     const extractor = new JsonExtractor(typedData, path, iterator);
     return extractor.extract();
   }
-  if (
-    ct.indexOf('/xml') !== -1 ||
-    ct.indexOf('+xml') !== -1 ||
-    ct.indexOf('text/html') === 0
-  ) {
+  if (ct.includes('/xml') || ct.includes('+xml') || ct.startsWith('text/html')) {
     const extractor = new XmlExtractor(typedData, path, iterator);
     return extractor.extract();
   }
@@ -155,7 +151,7 @@ export function getDataUrl(url, path) {
 export function getDataHeaders(source, path) {
   const headers = toJSON(source);
   if (!path || !path.length || !path[0] || !headers || !headers.length) {
-    return undefined;
+    return source;
   }
   const lowerName = path[0].toLowerCase();
   for (let i = 0, len = headers.length; i < len; i++) {

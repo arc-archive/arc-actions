@@ -1,3 +1,6 @@
+
+/** @typedef {import('@advanced-rest-client/arc-types').Actions.OperatorEnum} OperatorEnum */
+
 /**
  * Checks if values equal.
  * @param {string|any=} value Value to compare
@@ -5,6 +8,9 @@
  * @return {boolean} True if objects matches.
  */
 export function isEqual(value, condition) {
+  if (value === condition) {
+    return true;
+  }
   let valueTyped = value;
   let conditionTyped = condition;
   if (typeof value !== 'undefined') {
@@ -13,8 +19,9 @@ export function isEqual(value, condition) {
   if (typeof condition !== 'undefined') {
     conditionTyped = String(condition);
   }
-  if (!Number.isNaN(condition)) {
-    conditionTyped = Number(conditionTyped);
+  const typedConditionNumber = Number(conditionTyped);
+  if (!Number.isNaN(typedConditionNumber)) {
+    conditionTyped = typedConditionNumber;
     valueTyped = Number(valueTyped);
   }
   return conditionTyped === valueTyped;
@@ -122,7 +129,7 @@ export function contains(value, condition) {
   if (typeof value === 'string') {
     return value.indexOf(condition) !== -1;
   }
-  if (value instanceof Array) {
+  if (Array.isArray(value)) {
     if (!Number.isNaN(condition) && typeof condition !== 'number') {
       const result = value.indexOf(Number(condition));
       if (result !== -1) {
@@ -142,7 +149,7 @@ export function contains(value, condition) {
  *
  * @param {string|any} value Value to compare
  * @param {string|any} condition Comparator value - regex string.
- * @return {Boolean} Value of calling `test()` function on string.
+ * @return {boolean} Value of calling `test()` function on string.
  */
 export function isRegex(value, condition) {
   let re;
@@ -159,9 +166,9 @@ export function isRegex(value, condition) {
  * Checks if given condition is satisfied by both value and operator.
  *
  * @param {any} value Value read from the response / request object
- * @param {string} operator Comparison term.
+ * @param {OperatorEnum} operator Comparison term.
  * @param {string|number} condition Value to compare.
- * @return {Boolean} True if the condition is satisfied and false otherwise.
+ * @return {boolean} True if the condition is satisfied and false otherwise.
  */
 export function checkCondition(value, operator, condition) {
   switch (operator) {

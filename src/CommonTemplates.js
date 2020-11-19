@@ -359,7 +359,8 @@ function defaultItConfig() {
  */
 export function defaultSourceConfig() {
   return {
-    source: 'request.body',
+    type: 'request',
+    source: 'body',
     iteratorEnabled: false,
     path: '',
   };
