@@ -13,15 +13,15 @@ import { inputTemplate, configCheckbox } from '../CommonTemplates.js';
  */
 function useRequestUrlTemplate(useRequestUrl = false, changeHandler, inputConfig) {
   const cnf = {
-    ...inputConfig,
     notify: 'config',
     render: 'true',
+    name: 'config.useRequestUrl',
+    ...inputConfig,
   };
   return configCheckbox(
-    'config.useRequestUrl',
-    useRequestUrl,
-    'Use request URL',
     changeHandler,
+    'Use request URL',
+    useRequestUrl,
     cnf
   );
 }
@@ -64,16 +64,16 @@ function urlTemplate(config, inputHandler, inputConfig) {
  */
 function removeAllTemplate(removeAll = false, changeHandler, inputConfig) {
   const cnf = {
-    ...inputConfig,
     notify: 'config',
     render: 'true',
+    name: 'config.removeAll',
+    ...inputConfig,
   };
   return configCheckbox(
-    'config.removeAll',
-    removeAll,
-    'Remove all cookies',
     changeHandler,
-    cnf
+    'Remove all cookies',
+    removeAll,
+    cnf,
   );
 }
 

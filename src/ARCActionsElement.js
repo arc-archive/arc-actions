@@ -26,7 +26,7 @@ const selectedChangeEvent = 'selectedchange';
 const tutorialTemplate = () => {
   return html`
     <p class="actions-intro">
-      Actions runs a logic related to the current request. When they fail the request is reported as error.
+      Actions run a custom logic in a context of the current request. When they fail the request is reported as error.
     </p>
   `;
 }

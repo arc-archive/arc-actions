@@ -1,12 +1,14 @@
 import { html, LitElement } from 'lit-element';
 import '@advanced-rest-client/arc-icons/arc-icon.js';
 import '@anypoint-web-components/anypoint-switch/anypoint-switch.js';
-import styles from './styles/ArcConditionEditor.styles.js';
+import elementStyles from './styles/ArcConditionEditor.styles.js';
+import cardStyles from './styles/Card.styles.js';
 import tooltipStyles from './styles/Tooltip.styles.js';
 import {
   dataSourceSelector,
   operatorTemplate,
   inputTemplate,
+  dataSourceTypeSelector,
 } from './CommonTemplates.js';
 
 /** @typedef {import('@advanced-rest-client/arc-types').Actions.RequestDataSourceEnum} RequestDataSourceEnum */
@@ -14,9 +16,12 @@ import {
 /** @typedef {import('@advanced-rest-client/arc-types').Actions.Condition} Condition */
 /** @typedef {import('lit-html').TemplateResult} TemplateResult */
 
+export const conditionValue = Symbol('conditionValue');
+export const notifyChange = Symbol('notifyChange');
+
 export class ARCConditionEditorElement extends LitElement {
   static get styles() {
-    return [styles, tooltipStyles];
+    return [elementStyles, cardStyles, tooltipStyles];
   }
 
   static get properties() {
@@ -37,7 +42,14 @@ export class ARCConditionEditorElement extends LitElement {
       /**
        * Whether or not the condition is enabled
        */
-      enabled: { type: Boolean }
+      enabled: { type: Boolean, reflect: true },
+      /** 
+       * The type of the condition that is being rendered.
+       * Either `request` or `response`.
+       * This is not the same as condition's model source type as in response action
+       * can be executed with conditions for both request and response.
+       */
+      type: { type: String, reflect: true },
     };
   }
 
@@ -45,18 +57,18 @@ export class ARCConditionEditorElement extends LitElement {
    * @return {Condition} A condition to render.
    */
   get condition() {
-    return this._condition;
+    return this[conditionValue];
   }
 
   /**
    * @param {Condition} value A condition to render.
    */
   set condition(value) {
-    const old = this._condition;
+    const old = this[conditionValue];
     if (old === value) {
       return;
     }
-    this._condition = value;
+    this[conditionValue] = value;
     this.requestUpdate('condition', old);
   }
 
@@ -74,13 +86,17 @@ export class ARCConditionEditorElement extends LitElement {
     super();
     this.compatibility = false;
     this.outlined = false;
+    /** 
+     * @type {string}
+     */
+    this.type = undefined;
   }
 
   /**
    * Dispatches the `change` event with the name of the property that changed.
    * @param {string} prop Name of changed property.
    */
-  _notifyChange(prop) {
+  [notifyChange](prop) {
     this.dispatchEvent(
       new CustomEvent('change', {
         detail: {
@@ -96,7 +112,19 @@ export class ARCConditionEditorElement extends LitElement {
    */
   _enabledHandler(e) {
     this.enabled = /** @type {HTMLInputElement} */ (e.target).checked;
-    this._notifyChange('enabled');
+    this[notifyChange]('enabled');
+  }
+
+  /**
+   * The handler for the action always pass switch.
+   * @param {Event} e
+   */
+  _alwaysPassHandler(e) {
+    const enabled = /** @type {HTMLInputElement} */ (e.target).checked;
+    const { condition  } = this;
+    condition.alwaysPass = enabled;
+    this[notifyChange]('condition');
+    this.requestUpdate();
   }
 
   /**
@@ -117,7 +145,7 @@ export class ARCConditionEditorElement extends LitElement {
       condition.view = {};
     }
     condition.view.opened = false;
-    this._notifyChange('condition');
+    this[notifyChange]('condition');
     this.requestUpdate();
   }
 
@@ -131,33 +159,40 @@ export class ARCConditionEditorElement extends LitElement {
       condition.view = {};
     }
     condition.view.opened = true;
-    this._notifyChange('condition');
+    this[notifyChange]('condition');
+    this.requestUpdate();
+  }
+
+  _dataSourceTypeHandler(e) {
+    const { condition  } = this;
+    condition.type = e.detail.value;
+    this[notifyChange]('condition');
     this.requestUpdate();
   }
 
   _dataSourceHandler(e) {
     const { condition  } = this;
     condition.source = e.detail.value;
-    this._notifyChange('condition');
+    this[notifyChange]('condition');
     this.requestUpdate();
   }
 
   _operatorHandler(e) {
     const { condition  } = this;
     condition.operator = e.detail.value;
-    this._notifyChange('condition');
+    this[notifyChange]('condition');
   }
 
   _valueHandler(e) {
     const { condition  } = this;
-    condition.value = e.target.value;
-    this._notifyChange('condition');
+    condition.predictedValue = e.target.value;
+    this[notifyChange]('condition');
   }
 
   _pathHandler(e) {
     const { condition  } = this;
     condition.path = e.target.value;
-    this._notifyChange('condition');
+    this[notifyChange]('condition');
   }
 
   render() {
@@ -174,7 +209,14 @@ export class ARCConditionEditorElement extends LitElement {
   _renderEditor() {
     return html`
     <section class="action-card opened">
+      <div class="opened-title">
+        <div class="action-title">
+          Condition editor
+        </div>
+        ${this._closeButtonTemplate()}
+      </div>
       <div class="editor-contents">
+        ${this._dataSourceTypeSelector()}
         ${this._dataSourceSelector()}
         ${this._dataPathTemplate()}
         ${this._operatorTemplate()}
@@ -182,6 +224,7 @@ export class ARCConditionEditorElement extends LitElement {
       </div>
       <div class="action-footer">
         ${this._enableSwitchTemplate()}
+        ${this._alwaysPassSwitchTemplate()}
         ${this._deleteButtonTemplate()}
         ${this._closeButtonTemplate()}
       </div>
@@ -190,23 +233,61 @@ export class ARCConditionEditorElement extends LitElement {
 
   _renderSummary() {
     const { condition } = this;
-    const { source, value, operator } = condition;
+    const { alwaysPass } = condition;
     return html`
     <section class="action-card closed">
-      When <strong>${source}</strong> is <strong>${operator}</strong> <strong>${value}</strong> then:
+      ${alwaysPass ? `Always execute the following:` : this._conditionExplained()}
       ${this._openButtonTemplate()}
     </section>`;
   }
 
-  _dataSourceSelector() {
+  _conditionExplained() {
+    const { condition } = this;
+    const { type, source, path, predictedValue, operator } = condition;
+    const parts = [];
+    if (path && !['method', 'status'].includes(source)) {
+      parts.push(html`When <strong>${type}.${source}.${path}</strong>`);
+    } else {
+      parts.push(html`When <strong>${type}.${source}</strong>`);
+    }
+    if (!['contains'].includes(operator)) {
+      parts.push(html` is`);
+    }
+    parts.push(html` <strong>${operator}</strong>`);
+    parts.push(html` <strong>${predictedValue}</strong> then:`);
+    return parts;
+  }
+
+  _dataSourceTypeSelector() {
+    const { type } = this;
+    if (type === 'request') {
+      // this can oly have the `request` as the source type.
+      return '';
+    }
     const { condition, outlined, compatibility } = this;
-    const { type, source } = condition;
+    return dataSourceTypeSelector({
+      selected: condition.type,
+      handler: this._dataSourceTypeHandler,
+      outlined, 
+      compatibility,
+      disabled: !!condition.alwaysPass,
+    });
+  }
+
+  _dataSourceSelector() {
+    const { condition, outlined, compatibility, type } = this;
+    const { type: cType, source } = condition;
+
+    const requestOptions = type === 'request' ? true : cType === 'request';
+    const responseOptions = !requestOptions && (type === 'response' ? true : cType === 'response');
 
     const input = dataSourceSelector(source, this._dataSourceHandler, {
-      outlined, compatibility,
-      requestOptions: type === 'request',
-      responseOptions: type === 'response',
-      name: 'source'
+      outlined, 
+      compatibility,
+      requestOptions,
+      responseOptions,
+      name: 'source',
+      disabled: !!condition.alwaysPass,
     });
     return html`
     <div class="form-row">${input}</div>
@@ -215,10 +296,13 @@ export class ARCConditionEditorElement extends LitElement {
 
   _operatorTemplate() {
     const { condition, outlined, compatibility } = this;
-    const { operator } = condition;
-    const input = operatorTemplate(this._operatorHandler, operator, {
+    const { operator, alwaysPass } = condition;
+    const input = operatorTemplate({
+      handler: this._operatorHandler, 
+      operator,
       outlined, compatibility,
-      name: 'operator'
+      name: 'operator',
+      disabled: !!alwaysPass,
     });
     return html`
     <div class="form-row">${input}</div>
@@ -227,14 +311,13 @@ export class ARCConditionEditorElement extends LitElement {
 
   _valueTemplate() {
     const { condition, outlined, compatibility } = this;
-    const { value, source } = condition;
-    const rsValue = /** @type RequestDataSourceEnum | ResponseDataSourceEnum | 'value' */ ('status');
-    const type = source === rsValue ? 'number' : 'text';
-
-    const input = inputTemplate('value', String(value), 'Value', this._valueHandler, {
+    const { predictedValue='', source, alwaysPass } = condition;
+    const type = source === 'status' ? 'number' : 'text';
+    const input = inputTemplate('predictedValue', String(predictedValue), 'Condition value', this._valueHandler, {
       outlined,
       compatibility,
       type,
+      disabled: !!alwaysPass,
     });
     return html`
     <div class="form-row">${input}</div>
@@ -243,8 +326,8 @@ export class ARCConditionEditorElement extends LitElement {
 
   _dataPathTemplate() {
     const { condition, outlined, compatibility } = this;
-    const { path, source } = condition;
-    if (['request.method', 'response.status'].indexOf(source) !== -1) {
+    const { path, source, alwaysPass } = condition;
+    if (['method', 'status'].indexOf(source) !== -1) {
       // these sources do not have path value.
       return '';
     }
@@ -254,6 +337,7 @@ export class ARCConditionEditorElement extends LitElement {
     const input = inputTemplate('path', path, 'Path to the value', this._pathHandler, {
       outlined,
       compatibility,
+      disabled: !!alwaysPass,
     });
     return html`
       <div class="form-row">
@@ -269,7 +353,7 @@ export class ARCConditionEditorElement extends LitElement {
   }
 
   /**
-   * @return {TemplateResult} Template for the help button.
+   * @return {TemplateResult} The template for the enabled switch.
    */
   _enableSwitchTemplate() {
     const { compatibility, enabled } = this;
@@ -279,6 +363,24 @@ export class ARCConditionEditorElement extends LitElement {
         .checked="${enabled}"
         @change="${this._enabledHandler}"
       >Enabled</anypoint-switch>
+    `;
+  }
+
+  /**
+   * @return {TemplateResult|string} Template for the "always pass" which.
+   */
+  _alwaysPassSwitchTemplate() {
+    const { compatibility, condition } = this;
+    if (!condition) {
+      return '';
+    }
+    return html`
+      <anypoint-switch
+        ?compatibility="${compatibility}"
+        .checked="${condition.alwaysPass}"
+        @change="${this._alwaysPassHandler}"
+        title="When selected it ignores the configured condition and always passes the check"
+      >Always pass</anypoint-switch>
     `;
   }
 

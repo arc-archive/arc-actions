@@ -1,4 +1,4 @@
-import { IteratorConfiguration } from "@advanced-rest-client/arc-types/src/actions/Actions";
+import { ActionType, OperatorEnum, IteratorConfiguration } from "@advanced-rest-client/arc-types/src/actions/Actions";
 import { ArcBaseRequest, ARCHistoryRequest, ARCSavedRequest, TransportRequest } from "@advanced-rest-client/arc-types/src/request/ArcRequest";
 import { ErrorResponse, Response } from "@advanced-rest-client/arc-types/src/request/ArcResponse";
 
@@ -43,6 +43,66 @@ export declare interface ActionsRunnerInit {
    * A reference to Jexl object. When set `jexlPath` is not needed.
    */
   jexl: any;
+}
+
+export declare interface InputOptions {
+  outlined?: boolean;
+  compatibility?: boolean;
+  disabled?: boolean;
+  readOnly?: boolean;
+  /**
+   * When set it notifies given path.
+   */
+  notify?: string;
+  render?: string;
+}
+
+export declare interface CheckboxConfiguration extends InputOptions {
+  name?: string;
+}
+
+export declare interface BaseTemplateOptions extends InputOptions {
+  /**
+   * Selection or change handler function
+   */
+  handler?: Function;
+}
+
+export declare interface DataSourceTypeSelectorOptions extends BaseTemplateOptions {
+  /**
+   * Currently selected option.
+   */
+  selected: ActionType;
+  /**
+   * input name
+   */
+  name?: string;
+}
+
+export declare interface OperatorTemplateOptions extends BaseTemplateOptions {
+  /**
+   * Currently selected value
+   */
+  operator: OperatorEnum;
+  /**
+   * input name
+   */
+  name?: string;
+}
+export declare interface IteratorTemplateOptions extends BaseTemplateOptions {
+  /**
+   * Iterator configuration
+   */
+  config: IteratorConfiguration;
+  /**
+   * Handler for the inputs change event
+   */
+  inputHandler: Function;
+
+  /**
+   * Handler for the operator selection event
+   */
+  operatorHandler: Function;
 }
 
 

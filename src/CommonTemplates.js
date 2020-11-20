@@ -10,9 +10,13 @@ import '@anypoint-web-components/anypoint-checkbox/anypoint-checkbox.js';
 /** @typedef {import('@advanced-rest-client/arc-types').Actions.SetCookieConfig} SetCookieConfig */
 /** @typedef {import('@advanced-rest-client/arc-types').Actions.SetVariableConfig} SetVariableConfig */
 /** @typedef {import('@advanced-rest-client/arc-types').Actions.IteratorConfiguration} IteratorConfiguration */
+/** @typedef {import('./types').DataSourceTypeSelectorOptions} DataSourceTypeSelectorOptions */
+/** @typedef {import('./types').OperatorTemplateOptions} OperatorTemplateOptions */
+/** @typedef {import('./types').IteratorTemplateOptions} IteratorTemplateOptions */
+/** @typedef {import('./types').CheckboxConfiguration} CheckboxConfiguration */
 
 /**
- * @param {Boolean} [compatibility=false] Compatibility mode flag.
+ * @param {boolean} [compatibility=false] Compatibility mode flag.
  * @return {TemplateResult} Template for the condition's operator drop down options.
  */
 export const operatorOptionsTemplate = (compatibility = false) => {
@@ -38,23 +42,21 @@ export const operatorOptionsTemplate = (compatibility = false) => {
  */
 
 /**
- * @param {Function} changeHandler A handler for the change event
- * @param {string=} operator Selected operator
- * @param {OperatorConfiguration=} [opts={}] Additional options
+ * @param {OperatorTemplateOptions} options
  * @return {TemplateResult} Template for the iterator operator drop down.
  */
-export const operatorTemplate = (changeHandler, operator, opts = {}) => {
+export const operatorTemplate = (options) => {
   const {
-    name = 'config.source.iterator.operator',
+    handler,
+    operator,
+    name = 'iterator.operator',
     outlined,
     compatibility,
     disabled,
-  } = opts;
+  } = options;
   return html`
     <anypoint-dropdown-menu
-      aria-label="Select data source"
-      required
-      autoValidate
+      aria-label="Select the condition type"
       name="${name}"
       ?outlined="${outlined}"
       ?compatibility="${compatibility}"
@@ -67,7 +69,7 @@ export const operatorTemplate = (changeHandler, operator, opts = {}) => {
         attrforselected="data-value"
         .selected="${operator}"
         ?compatibility="${compatibility}"
-        @selected-changed="${changeHandler}"
+        @selected-changed="${handler}"
         data-notify="config"
       >
         ${operatorOptionsTemplate(compatibility)}
@@ -138,10 +140,10 @@ export const inputTemplate = (name, value, label, inputHandler, opts = {}) => {
  */
 export const requestSourceOptions = (compatibility = false) => {
   return html`
-    <anypoint-item data-value="request.url" ?compatibility="${compatibility}">URL</anypoint-item>
-    <anypoint-item data-value="request.method" ?compatibility="${compatibility}">Method</anypoint-item>
-    <anypoint-item data-value="request.headers" ?compatibility="${compatibility}">Headers</anypoint-item>
-    <anypoint-item data-value="request.body" ?compatibility="${compatibility}">Body</anypoint-item>
+    <anypoint-item data-value="url" ?compatibility="${compatibility}">URL</anypoint-item>
+    <anypoint-item data-value="method" ?compatibility="${compatibility}">Method</anypoint-item>
+    <anypoint-item data-value="headers" ?compatibility="${compatibility}">Headers</anypoint-item>
+    <anypoint-item data-value="body" ?compatibility="${compatibility}">Body</anypoint-item>
   `;
 };
 
@@ -151,10 +153,10 @@ export const requestSourceOptions = (compatibility = false) => {
  */
 export const responseSourceOptions = (compatibility = false) => {
   return html`
-    <anypoint-item data-value="response.url" ?compatibility="${compatibility}">URL</anypoint-item>
-    <anypoint-item data-value="response.status" ?compatibility="${compatibility}">Status code</anypoint-item>
-    <anypoint-item data-value="response.headers" ?compatibility="${compatibility}">Headers</anypoint-item>
-    <anypoint-item data-value="response.body" ?compatibility="${compatibility}">Body</anypoint-item>
+    <anypoint-item data-value="url" ?compatibility="${compatibility}">URL</anypoint-item>
+    <anypoint-item data-value="status" ?compatibility="${compatibility}">Status code</anypoint-item>
+    <anypoint-item data-value="headers" ?compatibility="${compatibility}">Headers</anypoint-item>
+    <anypoint-item data-value="body" ?compatibility="${compatibility}">Body</anypoint-item>
   `;
 };
 
@@ -177,7 +179,7 @@ export const responseSourceOptions = (compatibility = false) => {
  */
 export const dataSourceSelector = (selected, selectHandler, opts = {}) => {
   const {
-    name = 'config.source.source',
+    name = 'source',
     requestOptions = false,
     responseOptions = false,
     outlined,
@@ -187,8 +189,6 @@ export const dataSourceSelector = (selected, selectHandler, opts = {}) => {
   return html`
     <anypoint-dropdown-menu
       aria-label="Select data source"
-      required
-      autoValidate
       name="${name}"
       ?outlined="${outlined}"
       ?compatibility="${compatibility}"
@@ -213,6 +213,46 @@ export const dataSourceSelector = (selected, selectHandler, opts = {}) => {
 };
 
 /**
+ * @param {DataSourceTypeSelectorOptions} options
+ * @return {TemplateResult} Template for the data source type selector.
+ */
+export const dataSourceTypeSelector = (options) => {
+  const {
+    selected,
+    handler,
+    outlined,
+    compatibility,
+    disabled,
+    name='type',
+  } = options;
+  return html`
+    <anypoint-dropdown-menu
+      aria-label="Select the data source type"
+      name="${name}"
+      ?outlined="${outlined}"
+      ?compatibility="${compatibility}"
+      ?disabled="${disabled}"
+    >
+      <label slot="label">Data source type</label>
+      <anypoint-listbox
+        slot="dropdown-content"
+        tabindex="-1"
+        attrforselected="data-value"
+        .selected="${selected}"
+        ?compatibility="${compatibility}"
+        @selected-changed="${handler}"
+        data-notify="config"
+        data-render="true"
+        fallbackSelection="request"
+      >
+        <anypoint-item data-value="request" ?compatibility="${compatibility}">Request</anypoint-item>
+        <anypoint-item data-value="response" ?compatibility="${compatibility}">Response</anypoint-item>
+      </anypoint-listbox>
+    </anypoint-dropdown-menu>
+  `;
+};
+
+/**
  * @param {SetCookieConfig|SetVariableConfig} config
  * @param {Function} inputHandler Handler for the input event.
  * @param {InputConfiguration=} inputConfig
@@ -230,6 +270,7 @@ export function dataSourcePathTemplate(config, inputHandler, inputConfig = {}) {
   const help = iteratorEnabled
     ? 'Path to the property relative to the array item found in the search.'
     : 'Path to the property that contains the data to extract.';
+  const example = iteratorEnabled ? 'name' : 'person.address.street1';
   const cnf = {
     ...inputConfig,
     notify: 'config',
@@ -247,7 +288,7 @@ export function dataSourcePathTemplate(config, inputHandler, inputConfig = {}) {
       <div class="tooltip">
         <span class="icon help">${helpOutline}</span>
         <span class="tooltiptext">
-          ${help} Example: "data.property.subproperty".
+          ${help} Example: "${example}".
         </span>
       </div>
     </div>
@@ -367,47 +408,36 @@ export function defaultSourceConfig() {
 }
 
 /**
- * @param {Function} inputHandler Handler for the input event.
- * @param {Function} dataSourceHandler Handler for the data source change event (this[dataSourceHandlerSymbol]).
- * @param {IteratorConfiguration=} config
- * @param {InputConfiguration=} inputConfig
+ * @param {IteratorTemplateOptions} init
  * @return {TemplateResult|string} Template for the array search configuration view.
  */
-export function iteratorTemplate(
-  inputHandler,
-  dataSourceHandler,
-  config = defaultItConfig(),
-  inputConfig = {}
-) {
+export function iteratorTemplate(init) {
+  const { config = defaultItConfig(), inputHandler, operatorHandler, outlined, compatibility, disabled } = init;
   const { path, operator, condition } = config;
   return html`
     <div class="iterator-block">
-      ${iteratorPathTemplate(inputHandler, path, inputConfig)}
-      ${operatorTemplate(dataSourceHandler, operator, inputConfig)}
-      ${iteratorConditionTemplate(inputHandler, condition, inputConfig)}
+      ${iteratorPathTemplate(inputHandler, path, { outlined, compatibility, disabled })}
+      ${operatorTemplate({
+        handler: operatorHandler,
+        operator,
+        outlined, compatibility, disabled
+      })}
+      ${iteratorConditionTemplate(inputHandler, condition, { outlined, compatibility, disabled })}
     </div>
   `;
 }
 
-/**
- * @typedef {Object} CheckboxConfiguration
- * @property {boolean=} readOnly
- * @property {boolean=} disabled
- * @property {string=} notify When set it notifies given path.
- * @property {string=} render
- */
 
 /**
  * Renders an input element for the action configuration.
- * @param {string} name
- * @param {boolean} checked
+ * @param {Function} changeHandler
  * @param {string} label
- * @param {Function} changeHandler (this[configChangeHandlerSymbol])
+ * @param {boolean} checked
  * @param {CheckboxConfiguration=} opts
  * @return {TemplateResult}
  */
-export function configCheckbox(name, checked, label, changeHandler, opts = {}) {
-  const { disabled, notify, render } = opts;
+export function configCheckbox(changeHandler, label, checked, opts = {}) {
+  const { disabled, notify, render, name } = opts;
   return html`
     <div class="checkbox-container">
       <anypoint-checkbox
@@ -430,20 +460,16 @@ export function configCheckbox(name, checked, label, changeHandler, opts = {}) {
  * @param {CheckboxConfiguration=} checkboxOptions
  * @return {TemplateResult}
  */
-export function failTemplate(
-  changeHandler,
-  failOnError = false,
-  checkboxOptions = {}
-) {
+export function failTemplate(changeHandler, failOnError = false, checkboxOptions = {}) {
   const cnf = {
+    name: 'failOnError',
+    notify: 'failOnError',
     ...checkboxOptions,
-    notify: 'config',
   };
   return configCheckbox(
-    'failOnError',
-    failOnError,
-    'Fail when data cannot be set',
     changeHandler,
-    cnf
+    'Fail when data cannot be set',
+    failOnError,
+    cnf,
   );
 }

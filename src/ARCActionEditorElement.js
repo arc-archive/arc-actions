@@ -1,5 +1,8 @@
 import { LitElement, html } from 'lit-element';
-import styles from './styles/ActionEditor.styles.js';
+import { ArcNavigationEvents } from '@advanced-rest-client/arc-events';
+import { classMap } from 'lit-html/directives/class-map';
+import elementStyles from './styles/ActionEditor.styles.js';
+import cardStyles from './styles/Card.styles.js';
 import tooltipStyles from './styles/Tooltip.styles.js';
 import { actionNamesMap } from './Utils.js';
 import setCookieTemplate from './EditorMixins/SetCookieTemplate.js';
@@ -57,7 +60,7 @@ const closedCardTitleTemplate = (name) => {
 
 export class ARCActionEditorElement extends LitElement {
   static get styles() {
-    return [styles, tooltipStyles];
+    return [elementStyles, cardStyles, tooltipStyles];
   }
 
   static get properties() {
@@ -291,23 +294,10 @@ export class ARCActionEditorElement extends LitElement {
    * open a popup. As a fallback it uses `window.open`.
    *
    * @param {Event} e
-   * @return {Window|null} Returns created window if `window.open` was called.
    */
   [helpHandler](e) {
     const { url } = /** @type {HTMLInputElement} */ (e.target).dataset;
-    const ev = new CustomEvent('open-external-url', {
-      bubbles: true,
-      cancelable: true,
-      composed: true,
-      detail: {
-        url,
-      },
-    });
-    this.dispatchEvent(ev);
-    if (ev.defaultPrevented) {
-      return null;
-    }
-    return window.open(url);
+    ArcNavigationEvents.navigateExternal(this, url);
   }
 
   /**
@@ -316,10 +306,14 @@ export class ARCActionEditorElement extends LitElement {
    */
   render() {
     const { opened = false } = this;
+    const classes = {
+      'action-card': true, 
+      opened,
+    };
     return html`
-      <section class="action-card">
-        ${opened ? this[openedCardTemplate]() : this[closedCardTemplate]()}
-      </section>
+    <section class="${classMap(classes)}">
+      ${opened ? this[openedCardTemplate]() : this[closedCardTemplate]()}
+    </section>
     `;
   }
 
@@ -381,7 +375,11 @@ export class ARCActionEditorElement extends LitElement {
         return html``;
     }
     return html`
-      ${this[openedCardTitle](name)} ${content} ${this[openedCardFooter]()}
+      ${this[openedCardTitle](name)} 
+      <div class="action-content">
+        ${content} 
+      </div>
+      ${this[openedCardFooter]()}
     `;
   }
 
@@ -409,6 +407,7 @@ export class ARCActionEditorElement extends LitElement {
       <div class="opened-title">
         <div class="action-title">${label}</div>
         ${this[actionHelpTpl](helpUrl)}
+        ${this[closeButtonTemplate]()}
       </div>
     `;
   }
@@ -419,8 +418,10 @@ export class ARCActionEditorElement extends LitElement {
   [openedCardFooter]() {
     return html`
       <div class="action-footer">
-        ${this[enableSwitchTemplate]()} ${this[deleteButtonTemplate]()}
-        ${this[duplicateButtonTemplate]()} ${this[closeButtonTemplate]()}
+        ${this[enableSwitchTemplate]()} 
+        ${this[deleteButtonTemplate]()}
+        ${this[duplicateButtonTemplate]()} 
+        ${this[closeButtonTemplate]()}
       </div>
     `;
   }
@@ -434,12 +435,11 @@ export class ARCActionEditorElement extends LitElement {
       return '';
     }
     return html`
-      <anypoint-button
-        class="action-help"
-        data-url="${url}"
-        @click="${this[helpHandler]}"
-        >Help</anypoint-button
-      >
+    <anypoint-button
+      class="action-help"
+      data-url="${url}"
+      @click="${this[helpHandler]}"
+    >Help</anypoint-button>
     `;
   }
 
@@ -449,12 +449,11 @@ export class ARCActionEditorElement extends LitElement {
   [enableSwitchTemplate]() {
     const { compatibility, enabled } = this;
     return html`
-      <anypoint-switch
-        ?compatibility="${compatibility}"
-        .checked="${enabled}"
-        @change="${this[enabledHandler]}"
-        >Enabled</anypoint-switch
-      >
+    <anypoint-switch
+      ?compatibility="${compatibility}"
+      .checked="${enabled}"
+      @change="${this[enabledHandler]}"
+    >Enabled</anypoint-switch>
     `;
   }
 

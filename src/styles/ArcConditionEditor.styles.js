@@ -17,40 +17,21 @@ anypoint-input[type=number] {
   max-width: 200px;
 }
 
-.action-card {
-  margin: 8px 12px;
-}
-
-.action-card.opened {
-  box-shadow: var(--box-shadow-2dp);
-  padding: 8px;
-}
-
 .action-card.closed {
   display: flex;
   align-items: center;
   background-color: #E0E0E0;
-  padding-left: 8px;
+  padding: 4px 12px 4px 24px;
 }
 
 .closed strong {
   margin: 0 4px;
 }
 
-.action-footer {
-  display: flex;
-  align-items: center;
-  padding-top: 20px;
-}
-
 .action-delete,
 .action-open,
 .action-help {
   margin-left: auto;
-}
-
-.editor-contents {
-
 }
 
 anypoint-dropdown-menu {
@@ -70,5 +51,9 @@ anypoint-dropdown-menu {
 .icon.help {
   color: var(--primary-color);
   cursor: help;
+}
+
+.editor-contents {
+  padding: 8px;
 }
 `;

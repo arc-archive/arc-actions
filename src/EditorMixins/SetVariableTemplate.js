@@ -8,11 +8,13 @@ import {
   iteratorTemplate,
   failTemplate,
   defaultSourceConfig,
+  dataSourceTypeSelector
 } from '../CommonTemplates.js';
 
 /** @typedef {import('lit-html').TemplateResult} TemplateResult */
 /** @typedef {import('@advanced-rest-client/arc-types').Actions.SetVariableConfig} SetVariableConfig */
 /** @typedef {import('@advanced-rest-client/arc-types').Actions.DataSourceConfiguration} DataSourceConfiguration */
+/** @typedef {import('@advanced-rest-client/arc-types').Actions.ActionType} ActionType */
 /** @typedef {import('../CommonTemplates').InputConfiguration} InputConfiguration */
 
 /**
@@ -39,16 +41,41 @@ function nameTemplate(name, inputHandler, inputConfig) {
 
 /**
  * Renders a template for the data source selector.
+ * @param {Function} changeHandler
+ * @param {ActionType} type
+ * @param {InputConfiguration=} inputConfig
+ * @return {TemplateResult|string}
+ */
+function dataSourceTypeSelectorTemplate(changeHandler, type, inputConfig={}) {
+  if (type === 'request') {
+    // this can oly have the `request` as the source type.
+    return '';
+  }
+  const { outlined, compatibility } = inputConfig;
+  return dataSourceTypeSelector({
+    selected: type,
+    handler: changeHandler,
+    outlined, 
+    compatibility,
+    name: 'config.source.type',
+  });
+}
+
+/**
+ * Renders a template for the data source selector.
  * @param {string} type
  * @param {DataSourceConfiguration} configSource
  * @param {Function} dataSourceHandler
  * @return {TemplateResult}
  */
 function sourceTpl(type, configSource, dataSourceHandler) {
-  const { source } = configSource;
+  const { type: cType, source } = configSource;
+  const requestOptions = type === 'request' ? true : cType === 'request';
+  const responseOptions = !requestOptions && (type === 'response' ? true : cType === 'response');
   return dataSourceSelector(source, dataSourceHandler, {
-    requestOptions: type === 'request',
-    responseOptions: type === 'response',
+    requestOptions,
+    responseOptions,
+    name: 'config.source.source',
   });
 }
 
@@ -61,21 +88,17 @@ function sourceTpl(type, configSource, dataSourceHandler) {
  * @param {InputConfiguration=} inputConfig
  * @return {TemplateResult|string}
  */
-function arraySearchTpl(
-  configSource,
-  inputHandler,
-  changeHandler,
-  dataSourceHandler,
-  inputConfig
-) {
+function arraySearchTpl(configSource, inputHandler, changeHandler, dataSourceHandler, inputConfig) {
   const { iteratorEnabled = false, iterator, source = '' } = configSource;
   if (source !== 'body') {
     return '';
   }
-  const itTpl = iteratorEnabled
-    ? iteratorTemplate(inputHandler, dataSourceHandler, iterator, inputConfig)
-    : '';
-
+  const itTpl = iteratorEnabled ? iteratorTemplate({
+    inputHandler, 
+    operatorHandler: dataSourceHandler, 
+    config: iterator, 
+    ...inputConfig,
+  }) : '';
   return html`
     ${dataIteratorTemplate(iteratorEnabled, changeHandler, inputConfig)}
     ${itTpl}
@@ -85,7 +108,7 @@ function arraySearchTpl(
 /**
  * @param {Boolean} failOnError
  * @param {SetVariableConfig} config
- * @param {string} type Editor type (request or response)
+ * @param {ActionType} type Editor type (request or response)
  * @param {Function} inputHandler (this[inputHandlerSymbol])
  * @param {Function} changeHandler (this[configChangeHandlerSymbol])
  * @param {Function} dataSourceHandler (this[dataSourceHandlerSymbol])
@@ -104,6 +127,8 @@ export default function render(
   const { name, source = defaultSourceConfig() } = config;
   return [
     nameTemplate(name, inputHandler, inputConfig),
+    html`<div class="action-title">Value setting</div>`,
+    dataSourceTypeSelectorTemplate(dataSourceHandler, type, inputConfig),
     sourceTpl(type, source, dataSourceHandler),
     arraySearchTpl(
       source,
@@ -112,7 +137,7 @@ export default function render(
       dataSourceHandler,
       inputConfig
     ),
-    dataSourcePathTemplate(config, inputHandler, inputConfig),
+    source.source === 'status' ? '' : dataSourcePathTemplate(config, inputHandler, inputConfig),
     failTemplate(changeHandler, failOnError, inputConfig),
   ];
 }

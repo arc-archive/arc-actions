@@ -119,7 +119,7 @@ export class ARCActionsPanelElement extends LitElement {
       this.actions = [];
     }
     if (this.type === 'request') {
-      this._addRequestAction(name);
+      this._addRequestAction(name, index);
     } else {
       this._addResponseAction(name, index);
     }
@@ -129,17 +129,23 @@ export class ARCActionsPanelElement extends LitElement {
   /**
    * Adds a new empty action to the request actions.
    * @param {string} name 
+   * @param {number=} index For the response actions, index of the condition
    */
-  _addRequestAction(name) {
-    const condition = ActionCondition.defaultCondition('request');
-    const action = new ActionCondition({
-      condition, 
-      type: this.type,
-      actions: [],
-      enabled: true,
-    });
-    action.add(name);
-    this.actions.push(action);
+  _addRequestAction(name, index) {
+    if (!this.actions.length) {
+      const condition = ActionCondition.defaultCondition('request');
+      const action = new ActionCondition({
+        condition, 
+        type: this.type,
+        actions: [],
+        enabled: true,
+      });
+      action.add(name);
+      this.actions.push(action);
+    } else {
+      const action = this.actions[index];
+      action.add(name);
+    }
   }
 
   /**
@@ -317,7 +323,7 @@ export class ARCActionsPanelElement extends LitElement {
   }
 
   _addConditionHandler() {
-    const condition = ActionCondition.defaultCondition();
+    const condition = ActionCondition.defaultCondition(this.type);
     const actions = new ActionCondition({
       condition, 
       type: this.type,
@@ -362,6 +368,7 @@ export class ARCActionsPanelElement extends LitElement {
     return html`
       ${this[tutorialTpl]()}
       ${hasActions ? this[actionsListTpl]() : ''}
+      ${this[addConditionTpl]()}
     `;
   }
 
@@ -371,17 +378,16 @@ export class ARCActionsPanelElement extends LitElement {
   [tutorialTpl]() {
     const { compatibility } = this;
     return html`
-      <div class="tutorial-section">
-        <p class="content">
-          ${this[introTextTpl]()}
-        </p>
-        <anypoint-button
-          ?compatibility="${compatibility}"
-          @click="${this[openTutorialHandler]}"
-          class="self-center"
-        >Learn more</anypoint-button>
-      </div>
-      ${this[addConditionTpl]()}
+    <div class="tutorial-section">
+      <p class="content">
+        ${this[introTextTpl]()}
+      </p>
+      <anypoint-button
+        ?compatibility="${compatibility}"
+        @click="${this[openTutorialHandler]}"
+        class="self-center"
+      >Learn more</anypoint-button>
+    </div>
     `;
   }
 
@@ -389,10 +395,10 @@ export class ARCActionsPanelElement extends LitElement {
     const { type } = this;
     let label;
     if (type === 'request') {
-      label = `Request actions allow to execute predefined logic before the request is executed.
+      label = `Request actions allows you to execute predefined logic before the request is executed.
       When an action fails then the request is not executed.`;
     } else if (type === 'response') {
-      label = `Response actions allow to execute predefined logic after the response is ready.
+      label = `Response actions allows you to execute predefined logic after the response is ready.
       Actions are grouped into response conditions. When the condition is meet actions in this group are executed.`;
     }
     return html`
@@ -452,9 +458,11 @@ export class ARCActionsPanelElement extends LitElement {
   _actionsItemTemplate(conditionAction, index) {
     const { actions } = conditionAction;
     return html`
-    ${this._conditionTemplate(conditionAction, index)}
-    ${actions.map((action, i) => this[actionTpl](action, index, i))}
-    ${this[addActionTpl](index)}
+    <div class="condition-wrapper">
+      ${this._conditionTemplate(conditionAction, index)}
+      ${actions.map((action, i) => this[actionTpl](action, index, i))}
+      ${this[addActionTpl](index)}
+    </div>
     `;
   }
 
@@ -465,10 +473,11 @@ export class ARCActionsPanelElement extends LitElement {
    */
   _conditionTemplate(conditionAction, conditionIndex) {
     const { enabled, condition } = conditionAction;
-    const { outlined, compatibility } = this;
+    const { outlined, compatibility, type } = this;
     return html`
       <arc-condition-editor
         .condition="${condition}"
+        .type="${type}"
         ?enabled="${enabled}"
         ?outlined="${outlined}"
         ?compatibility="${compatibility}"
@@ -490,7 +499,6 @@ export class ARCActionsPanelElement extends LitElement {
     if (allowedActions.indexOf(name) === -1) {
       return '';
     }
-    // TODO: render conditions for response actions.
     const { outlined, compatibility } = this;
     return html`
       <arc-action-editor

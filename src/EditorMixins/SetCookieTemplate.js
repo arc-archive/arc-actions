@@ -9,54 +9,46 @@ import {
   failTemplate,
   configCheckbox,
   defaultSourceConfig,
+  dataSourceTypeSelector,
 } from '../CommonTemplates.js';
 
 /** @typedef {import('lit-html').TemplateResult} TemplateResult */
 /** @typedef {import('@advanced-rest-client/arc-types').Actions.SetCookieConfig} SetCookieConfig */
 /** @typedef {import('@advanced-rest-client/arc-types').Actions.DataSourceConfiguration} DataSourceConfiguration */
+/** @typedef {import('@advanced-rest-client/arc-types').Actions.ActionType} ActionType */
 /** @typedef {import('../CommonTemplates').InputConfiguration} InputConfiguration */
 /** @typedef {import('../CommonTemplates').CheckboxConfiguration} CheckboxConfiguration */
+/** @typedef {import('../types').InputOptions} InputOptions */
 
 /**
  * Renders a template for the `useRequestUrl` config property.
  *
+ * @param {Function} changeHandler
  * @param {string} type
  * @param {boolean} [useRequestUrl=false]
- * @param {Function} changeHandler (this[configChangeHandlerSymbol])
  * @param {CheckboxConfiguration} inputConfig
  * @return {TemplateResult}
  */
-function useRequestUrlTemplate(
-  type,
-  useRequestUrl = false,
-  changeHandler,
-  inputConfig
-) {
-  const label =
-    type === 'request' ? 'Use the request URL' : 'Use the final response URL';
+function useRequestUrlTemplate(changeHandler, type, useRequestUrl = false, inputConfig={}) {
+  const label = type === 'request' ? 'Use the request URL' : 'Use the final response URL';
   const cnf = {
-    ...inputConfig,
     notify: 'config',
     render: 'true',
+    name: 'config.useRequestUrl',
+    ...inputConfig,
   };
-  return configCheckbox(
-    'config.useRequestUrl',
-    useRequestUrl,
-    label,
-    changeHandler,
-    cnf
-  );
+  return configCheckbox(changeHandler, label, useRequestUrl, cnf);
 }
 
 /**
  * Renders a template for the cookie's name input.
  *
- * @param {string} [name='']
  * @param {Function} inputHandler
- * @param {InputConfiguration} inputConfig
+ * @param {string} [name='']
+ * @param {InputOptions=} inputConfig
  * @return {TemplateResult}
  */
-function cookieNameTemplate(name = '', inputHandler, inputConfig) {
+function cookieNameTemplate(inputHandler, name = '', inputConfig={}) {
   const cnf = {
     ...inputConfig,
     required: true,
@@ -75,16 +67,12 @@ function cookieNameTemplate(name = '', inputHandler, inputConfig) {
 /**
  * Renders a template for the cookie's URL input.
  *
- * @param {SetCookieConfig} config
  * @param {Function} inputHandler
- * @param {InputConfiguration} inputConfig
- * @return {TemplateResult|String} Empty string when `useRequestUrl` is set on the config.
+ * @param {SetCookieConfig=} config
+ * @param {InputConfiguration=} inputConfig
+ * @return {TemplateResult|string} Empty string when `useRequestUrl` is set on the config.
  */
-function cookieUrlTemplate(
-  { useRequestUrl = false, url = '' },
-  inputHandler,
-  inputConfig
-) {
+function cookieUrlTemplate(inputHandler, { useRequestUrl = false, url = '' }, inputConfig={}) {
   if (useRequestUrl) {
     return '';
   }
@@ -105,12 +93,12 @@ function cookieUrlTemplate(
 
 /**
  * Renders a template for the "expires" input
- * @param {string} expires
  * @param {Function} inputHandler
+ * @param {string} expires
  * @param {InputConfiguration} inputConfig
  * @return {TemplateResult}
  */
-function cookieExpiresTemplate(expires = '', inputHandler, inputConfig) {
+function cookieExpiresTemplate(inputHandler, expires = '', inputConfig={}) {
   const cnf = {
     ...inputConfig,
     type: 'datetime-local',
@@ -121,79 +109,87 @@ function cookieExpiresTemplate(expires = '', inputHandler, inputConfig) {
 
 /**
  * Renders a template for the "hostOnly" checkbox
- * @param {boolean} [hostOnly=false]
- * @param {Function} changeHandler (this[configChangeHandlerSymbol])
- * @param {CheckboxConfiguration} inputConfig
+ * @param {Function} changeHandler
+ * @param {boolean=} [hostOnly=false]
+ * @param {CheckboxConfiguration=} inputConfig
  * @return {TemplateResult}
  */
-function hostOnlyTemplate(hostOnly = false, changeHandler, inputConfig) {
+function hostOnlyTemplate(changeHandler, hostOnly = false, inputConfig={}) {
   const cnf = {
-    ...inputConfig,
+    name: 'config.hostOnly',
     notify: 'config',
+    ...inputConfig,
   };
-  return configCheckbox(
-    'config.hostOnly',
-    hostOnly,
-    'Host only',
-    changeHandler,
-    cnf
-  );
+  return configCheckbox(changeHandler, 'Host only', hostOnly, cnf);
 }
 
 /**
  * Renders a template for the "httpOnly" checkbox
+ * @param {Function} changeHandler 
  * @param {boolean} [httpOnly=false]
- * @param {Function} changeHandler (this[configChangeHandlerSymbol])
  * @param {CheckboxConfiguration} inputConfig
  * @return {TemplateResult}
  */
-function httpOnlyTemplate(httpOnly = false, changeHandler, inputConfig) {
+function httpOnlyTemplate(changeHandler, httpOnly = false, inputConfig={}) {
   const cnf = {
-    ...inputConfig,
     notify: 'config',
+    name: 'config.httpOnly',
+    ...inputConfig,
   };
-  return configCheckbox(
-    'config.httpOnly',
-    httpOnly,
-    'HTTP only',
-    changeHandler,
-    cnf
-  );
+  return configCheckbox(changeHandler, 'HTTP only', httpOnly, cnf);
 }
 
 /**
  * Renders a template for the "secure" checkbox
+ * @param {Function} changeHandler
  * @param {boolean} [secure=false]
- * @param {Function} changeHandler (this[configChangeHandlerSymbol])
- * @param {CheckboxConfiguration} inputConfig
+ * @param {CheckboxConfiguration=} inputConfig
  * @return {TemplateResult}
  */
-function secureTemplate(secure = false, changeHandler, inputConfig) {
+function secureTemplate(changeHandler, secure = false, inputConfig={}) {
   const cnf = {
-    ...inputConfig,
     notify: 'config',
+    name: 'config.secure',
+    ...inputConfig,
   };
-  return configCheckbox('config.secure', secure, 'Secure', changeHandler, cnf);
+  return configCheckbox(changeHandler, 'Secure', secure, cnf);
 }
 /**
  * Renders a template for the "secure" checkbox
+ * @param {Function} changeHandler
  * @param {boolean} [session=false]
- * @param {Function} changeHandler (this[configChangeHandlerSymbol])
- * @param {CheckboxConfiguration} inputConfig
+ * @param {CheckboxConfiguration=} inputConfig
  * @return {TemplateResult}
  */
-function sessionTemplate(session = false, changeHandler, inputConfig) {
+function sessionTemplate(changeHandler, session = false, inputConfig={}) {
   const cnf = {
-    ...inputConfig,
     notify: 'config',
+    name: 'config.session',
+    ...inputConfig,
   };
-  return configCheckbox(
-    'config.session',
-    session,
-    'Session',
-    changeHandler,
-    cnf
-  );
+  return configCheckbox(changeHandler, 'Session', session, cnf);
+}
+
+/**
+ * Renders a template for the data source selector.
+ * @param {Function} changeHandler
+ * @param {ActionType} type
+ * @param {InputConfiguration=} inputConfig
+ * @return {TemplateResult|string}
+ */
+function dataSourceTypeSelectorTemplate(changeHandler, type, inputConfig={}) {
+  if (type === 'request') {
+    // this can oly have the `request` as the source type.
+    return '';
+  }
+  const { outlined, compatibility } = inputConfig;
+  return dataSourceTypeSelector({
+    selected: type,
+    handler: changeHandler,
+    outlined, 
+    compatibility,
+    name: 'config.source.type',
+  });
 }
 
 /**
@@ -204,10 +200,14 @@ function sessionTemplate(session = false, changeHandler, inputConfig) {
  * @return {TemplateResult}
  */
 function sourceTemplate(type, configSource, dataSourceHandler) {
-  const { source } = configSource;
+  const { type: cType, source } = configSource;
+  const requestOptions = type === 'request' ? true : cType === 'request';
+  const responseOptions = !requestOptions && (type === 'response' ? true : cType === 'response');
+  
   return dataSourceSelector(source, dataSourceHandler, {
-    requestOptions: type === 'request',
-    responseOptions: type === 'response',
+    requestOptions,
+    responseOptions,
+    name: 'config.source.source',
   });
 }
 
@@ -220,21 +220,17 @@ function sourceTemplate(type, configSource, dataSourceHandler) {
  * @param {InputConfiguration=} inputConfig
  * @return {TemplateResult|string}
  */
-function arraySearchTpl(
-  configSource,
-  inputHandler,
-  changeHandler,
-  dataSourceHandler,
-  inputConfig
-) {
+function arraySearchTpl(configSource, inputHandler, changeHandler, dataSourceHandler, inputConfig) {
   const { iteratorEnabled = false, iterator, source = '' } = configSource;
   if (source !== 'body') {
     return '';
   }
-  const itTpl = iteratorEnabled
-    ? iteratorTemplate(inputHandler, dataSourceHandler, iterator, inputConfig)
-    : '';
-
+  const itTpl = iteratorEnabled ? iteratorTemplate({
+    inputHandler, 
+    operatorHandler: dataSourceHandler, 
+    config: iterator, 
+    ...inputConfig,
+  }) : '';
   return html`
     ${dataIteratorTemplate(iteratorEnabled, changeHandler, inputConfig)}
     ${itTpl}
@@ -242,24 +238,16 @@ function arraySearchTpl(
 }
 
 /**
- * @param {Boolean} failOnError
+ * @param {boolean} failOnError
  * @param {SetCookieConfig} config
- * @param {string} type Editor type (request or response)
+ * @param {ActionType} type Editor type (request or response)
  * @param {Function} inputHandler (this[inputHandlerSymbol])
  * @param {Function} changeHandler (this[configChangeHandlerSymbol])
  * @param {Function} dataSourceHandler (this[dataSourceHandlerSymbol])
- * @param {InputConfiguration=} inputConfig
+ * @param {InputOptions=} inputConfig
  * @return {Array<TemplateResult|string>} A template for the set variables editor.
  */
-export default function render(
-  failOnError,
-  config,
-  type,
-  inputHandler,
-  changeHandler,
-  dataSourceHandler,
-  inputConfig
-) {
+export default function render(failOnError, config, type, inputHandler, changeHandler, dataSourceHandler, inputConfig) {
   const {
     name,
     useRequestUrl,
@@ -271,15 +259,16 @@ export default function render(
     source = defaultSourceConfig(),
   } = config;
   return [
-    cookieNameTemplate(name, inputHandler, inputConfig),
-    useRequestUrlTemplate(type, useRequestUrl, changeHandler, inputConfig),
-    cookieUrlTemplate(config, changeHandler, inputConfig),
-    cookieExpiresTemplate(expires, changeHandler, inputConfig),
-    hostOnlyTemplate(hostOnly, changeHandler, inputConfig),
-    httpOnlyTemplate(httpOnly, changeHandler, inputConfig),
-    secureTemplate(secure, changeHandler, inputConfig),
-    sessionTemplate(session, changeHandler, inputConfig),
+    cookieNameTemplate(inputHandler, name, inputConfig),
+    useRequestUrlTemplate(changeHandler, type, useRequestUrl, inputConfig),
+    cookieUrlTemplate(inputHandler, config, inputConfig),
+    cookieExpiresTemplate(inputHandler, expires, inputConfig),
+    hostOnlyTemplate(changeHandler, hostOnly, inputConfig),
+    httpOnlyTemplate(changeHandler, httpOnly, inputConfig),
+    secureTemplate(changeHandler, secure, inputConfig),
+    sessionTemplate(changeHandler, session, inputConfig),
     html`<div class="action-title">Value setting</div>`,
+    dataSourceTypeSelectorTemplate(dataSourceHandler, type, inputConfig),
     sourceTemplate(type, source, dataSourceHandler),
     arraySearchTpl(
       source,

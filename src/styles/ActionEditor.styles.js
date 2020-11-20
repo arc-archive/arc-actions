@@ -19,31 +19,7 @@ anypoint-input[compatibility] {
   margin: 8px 12px;
 }
 
-:host([opened]) .action-card {
-  box-shadow: var(--box-shadow-2dp);
-  padding: 8px;
-}
-
-.action-title {
-  margin: 8px 12px;
-  font-weight: 500;
-  font-size: 1rem;
-}
-
-.action-footer {
-  display: flex;
-  align-items: center;
-  padding-top: 20px;
-}
-
-.action-delete,
-.action-open,
-.action-help {
-  margin-left: auto;
-}
-
-.closed-title,
-.opened-title {
+.closed-title {
   display: flex;
   align-items: center;
 }
@@ -74,5 +50,9 @@ anypoint-input[compatibility] {
 .icon.help {
   color: var(--primary-color);
   cursor: help;
+}
+
+.action-content {
+  margin: 24px 8px;
 }
 `;
