@@ -5,10 +5,13 @@ import {
   dataSourcePathTemplate,
   inputTemplate,
   dataIteratorTemplate,
-  iteratorTemplate,
+  iteratorPathTemplate,
+  operatorTemplate,
+  iteratorConditionTemplate,
   failTemplate,
   defaultSourceConfig,
-  dataSourceTypeSelector
+  dataSourceTypeSelector,
+  defaultItConfig,
 } from '../CommonTemplates.js';
 
 /** @typedef {import('lit-html').TemplateResult} TemplateResult */
@@ -16,6 +19,7 @@ import {
 /** @typedef {import('@advanced-rest-client/arc-types').Actions.DataSourceConfiguration} DataSourceConfiguration */
 /** @typedef {import('@advanced-rest-client/arc-types').Actions.ActionType} ActionType */
 /** @typedef {import('../CommonTemplates').InputConfiguration} InputConfiguration */
+/** @typedef {import('../types').IteratorTemplateOptions} IteratorTemplateOptions */
 
 /**
  * @param {string} name Current name value.
@@ -77,6 +81,29 @@ function sourceTpl(type, configSource, dataSourceHandler) {
     responseOptions,
     name: 'config.source.source',
   });
+}
+
+/**
+ * @param {IteratorTemplateOptions} init
+ * @return {TemplateResult|string} Template for the array search configuration view.
+ */
+function iteratorTemplate(init) {
+  const { config = defaultItConfig(), inputHandler, operatorHandler, outlined, compatibility, disabled } = init;
+  const { path, operator, condition } = config;
+  return html`
+    <div class="iterator-block">
+      ${iteratorPathTemplate(inputHandler, path, { outlined, compatibility, disabled })}
+      ${operatorTemplate({
+        handler: operatorHandler,
+        name: 'config.source.iterator.operator',
+        operator,
+        outlined, 
+        compatibility, 
+        disabled,
+      })}
+      ${iteratorConditionTemplate(inputHandler, condition, { outlined, compatibility, disabled })}
+    </div>
+  `;
 }
 
 /**

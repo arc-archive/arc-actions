@@ -330,7 +330,7 @@ export function dataIteratorTemplate(enabled, changeHandler, inputConfig = {}) {
  * @param {InputConfiguration=} inputConfig
  * @return {TemplateResult} Template for the iterator path input.
  */
-function iteratorPathTemplate(inputHandler, path = '', inputConfig) {
+export function iteratorPathTemplate(inputHandler, path = '', inputConfig) {
   const cnf = {
     ...inputConfig,
     required: true,
@@ -387,7 +387,7 @@ export function iteratorConditionTemplate(
 /**
  * @return {IteratorConfiguration}
  */
-function defaultItConfig() {
+export function defaultItConfig() {
   return {
     path: '',
     condition: '',

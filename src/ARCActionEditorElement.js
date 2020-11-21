@@ -4,6 +4,7 @@ import { classMap } from 'lit-html/directives/class-map.js';
 import '@anypoint-web-components/anypoint-dropdown-menu/anypoint-dropdown-menu.js';
 import '@anypoint-web-components/anypoint-listbox/anypoint-listbox.js';
 import '@anypoint-web-components/anypoint-item/anypoint-item.js';
+import '@anypoint-web-components/anypoint-switch/anypoint-switch.js';
 import elementStyles from './styles/ActionEditor.styles.js';
 import cardStyles from './styles/Card.styles.js';
 import tooltipStyles from './styles/Tooltip.styles.js';
@@ -372,7 +373,7 @@ export class ARCActionEditorElement extends LitElement {
         );
         break;
       default:
-        return html``;
+        content = html``;
     }
     return html`
       ${this[openedCardTitle](name)} 
@@ -453,6 +454,7 @@ export class ARCActionEditorElement extends LitElement {
       ?compatibility="${compatibility}"
       .checked="${enabled}"
       @change="${this[enabledHandler]}"
+      name="enabled"
     >Enabled</anypoint-switch>
     `;
   }
@@ -463,13 +465,13 @@ export class ARCActionEditorElement extends LitElement {
   [deleteButtonTemplate]() {
     const { compatibility } = this;
     return html`
-      <anypoint-button
-        title="Removes this action"
-        class="action-delete"
-        ?compatibility="${compatibility}"
-        @click="${this[deleteHandler]}"
-        >Delete</anypoint-button
-      >
+    <anypoint-button
+      title="Removes this action"
+      class="action-delete"
+      ?compatibility="${compatibility}"
+      @click="${this[deleteHandler]}"
+      data-action="delete"
+    >Delete</anypoint-button>
     `;
   }
 
@@ -479,12 +481,12 @@ export class ARCActionEditorElement extends LitElement {
   [duplicateButtonTemplate]() {
     const { compatibility } = this;
     return html`
-      <anypoint-button
-        title="Duplicates this action"
-        ?compatibility="${compatibility}"
-        @click="${this[duplicateHandler]}"
-        >Duplicate</anypoint-button
-      >
+    <anypoint-button
+      title="Duplicates this action"
+      ?compatibility="${compatibility}"
+      @click="${this[duplicateHandler]}"
+      data-action="duplicate"
+    >Duplicate</anypoint-button>
     `;
   }
 
@@ -494,12 +496,12 @@ export class ARCActionEditorElement extends LitElement {
   [closeButtonTemplate]() {
     const { compatibility } = this;
     return html`
-      <anypoint-button
-        title="Closes the editor"
-        ?compatibility="${compatibility}"
-        @click="${this[closeHandler]}"
-        >Close</anypoint-button
-      >
+    <anypoint-button
+      title="Close the editor"
+      ?compatibility="${compatibility}"
+      @click="${this[closeHandler]}"
+      data-action="close"
+    >Close</anypoint-button>
     `;
   }
 
@@ -509,13 +511,12 @@ export class ARCActionEditorElement extends LitElement {
   [openButtonTemplate]() {
     const { compatibility } = this;
     return html`
-      <anypoint-button
-        title="Opens the editor"
-        class="action-open"
-        ?compatibility="${compatibility}"
-        @click="${this[openedHandler]}"
-        >Open</anypoint-button
-      >
+    <anypoint-button
+      title="Opens the editor"
+      class="action-open"
+      ?compatibility="${compatibility}"
+      @click="${this[openedHandler]}"
+    >Open</anypoint-button>
     `;
   }
 }
