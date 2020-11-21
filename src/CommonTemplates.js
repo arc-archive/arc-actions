@@ -69,7 +69,7 @@ export const operatorTemplate = (options) => {
         attrforselected="data-value"
         .selected="${operator}"
         ?compatibility="${compatibility}"
-        @selected-changed="${handler}"
+        @selected="${handler}"
         data-notify="config"
       >
         ${operatorOptionsTemplate(compatibility)}
@@ -106,8 +106,8 @@ export const operatorTemplate = (options) => {
  */
 export const inputTemplate = (name, value, label, inputHandler, opts = {}) => {
   const config = { ...opts };
-  config.type = opts.type || 'text';
-  if (opts.autocomplete === undefined) {
+  config.type = config.type || 'text';
+  if (config.autocomplete === undefined) {
     config.autocomplete = 'on';
   }
   const { outlined, compatibility, readOnly, disabled } = config;
@@ -116,18 +116,18 @@ export const inputTemplate = (name, value, label, inputHandler, opts = {}) => {
       .value="${value}"
       @input="${inputHandler}"
       name="${name}"
-      type="${opts.type}"
-      ?required="${opts.required}"
-      ?autoValidate="${opts.autoValidate}"
-      .autocomplete="${opts.autocomplete}"
+      type="${config.type}"
+      ?required="${config.required}"
+      ?autoValidate="${config.autoValidate}"
+      .autocomplete="${config.autocomplete}"
       .outlined="${outlined}"
       .compatibility="${compatibility}"
       ?readOnly="${readOnly}"
       ?disabled="${disabled}"
-      .invalidMessage="${opts.invalidLabel}"
-      .infoMessage="${opts.infoLabel}"
-      class="${classMap(opts.classes)}"
-      data-notify="${opts.notify}"
+      .invalidMessage="${config.invalidLabel}"
+      .infoMessage="${config.infoLabel}"
+      class="${classMap(config.classes)}"
+      data-notify="${config.notify}"
     >
       <label slot="label">${label}</label>
     </anypoint-input>
@@ -201,7 +201,7 @@ export const dataSourceSelector = (selected, selectHandler, opts = {}) => {
         attrforselected="data-value"
         .selected="${selected}"
         ?compatibility="${compatibility}"
-        @selected-changed="${selectHandler}"
+        @selected="${selectHandler}"
         data-notify="config"
         data-render="true"
       >
@@ -240,7 +240,7 @@ export const dataSourceTypeSelector = (options) => {
         attrforselected="data-value"
         .selected="${selected}"
         ?compatibility="${compatibility}"
-        @selected-changed="${handler}"
+        @selected="${handler}"
         data-notify="config"
         data-render="true"
         fallbackSelection="request"

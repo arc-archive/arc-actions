@@ -14,7 +14,7 @@
   },
   "include": [
     "**/*.js",
-    "node_modules/@open-wc/**/*.js"
+    "node_modules/@open-wc/**/*.js", "src/ARCActionEditorElement.d.ts", "index.d.ts"
   ],
   "exclude": [
     "node_modules/!(@open-wc)"

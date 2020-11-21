@@ -165,21 +165,21 @@ export class ARCConditionEditorElement extends LitElement {
 
   _dataSourceTypeHandler(e) {
     const { condition  } = this;
-    condition.type = e.detail.value;
+    condition.type = e.target.selected;
     this[notifyChange]('condition');
     this.requestUpdate();
   }
 
   _dataSourceHandler(e) {
     const { condition  } = this;
-    condition.source = e.detail.value;
+    condition.source = e.target.selected;
     this[notifyChange]('condition');
     this.requestUpdate();
   }
 
   _operatorHandler(e) {
     const { condition  } = this;
-    condition.operator = e.detail.value;
+    condition.operator = e.target.selected;
     this[notifyChange]('condition');
   }
 

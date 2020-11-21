@@ -1,6 +1,9 @@
 import { LitElement, html } from 'lit-element';
 import { ArcNavigationEvents } from '@advanced-rest-client/arc-events';
-import { classMap } from 'lit-html/directives/class-map';
+import { classMap } from 'lit-html/directives/class-map.js';
+import '@anypoint-web-components/anypoint-dropdown-menu/anypoint-dropdown-menu.js';
+import '@anypoint-web-components/anypoint-listbox/anypoint-listbox.js';
+import '@anypoint-web-components/anypoint-item/anypoint-item.js';
 import elementStyles from './styles/ActionEditor.styles.js';
 import cardStyles from './styles/Card.styles.js';
 import tooltipStyles from './styles/Tooltip.styles.js';
@@ -31,8 +34,6 @@ import {
   duplicateButtonTemplate,
   closeButtonTemplate,
 } from './internals.js';
-
-const configProperty = 'config';
 
 const helpBase = 'https://docs.advancedrestclient.com/arc-actions/';
 const helpMap = {
@@ -196,7 +197,6 @@ export class ARCActionEditorElement extends LitElement {
     // @ts-ignore
     const value = targetElement.selected;
     this[updateDeepProperty](name, value);
-    this[notifyChange](configProperty);
     const { notify, render } = targetElement.dataset;
     if (notify) {
       this[notifyChange](notify);
@@ -325,7 +325,7 @@ export class ARCActionEditorElement extends LitElement {
       name = '',
       type,
       failOnError,
-      config,
+      config={},
       outlined,
       compatibility,
       readOnly,

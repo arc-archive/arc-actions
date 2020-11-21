@@ -35,7 +35,7 @@ function nameTemplate(name, inputHandler, inputConfig) {
     name,
     'Variable name (required)',
     inputHandler,
-    cnf
+    cnf,
   );
 }
 

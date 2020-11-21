@@ -1,4 +1,4 @@
-import { ARCActionEditorElement } from './src/ARCActionEditorElement.js';
+import { ARCActionEditorElement } from './src/ARCActionEditorElement';
 
 declare global {
   interface HTMLElementTagNameMap {
