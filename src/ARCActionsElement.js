@@ -154,9 +154,9 @@ export class ARCActionsElement extends LitElement {
   }
 
   [actionsHandler](e) {
-    const { actions, type } = e.target;
+    const { conditions, type } = e.target;
     const key = type === 'request' ? 'requestActions' : 'responseActions';
-    this[key] = actions;
+    this[key] = conditions;
     this[notifyChange](type);
   }
 
@@ -207,7 +207,7 @@ export class ARCActionsElement extends LitElement {
     return this[panelTpl](this.responseActions, 'response');
   }
 
-  [panelTpl](actions, type) {
+  [panelTpl](conditions, type) {
     const { compatibility, outlined } = this;
     return html`
       <arc-actions-panel
@@ -215,7 +215,7 @@ export class ARCActionsElement extends LitElement {
         ?outlined="${outlined}"
         type="${type}"
         @change="${this[actionsHandler]}"
-        .actions="${actions}"
+        .conditions="${conditions}"
       ></arc-actions-panel>
     `;
   }

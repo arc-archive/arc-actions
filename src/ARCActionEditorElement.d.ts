@@ -23,6 +23,7 @@ import {
   closeButtonTemplate,
 } from './internals.js';
 import { DeleteCookieConfig, SetCookieConfig, SetVariableConfig } from '@advanced-rest-client/arc-types/src/actions/Actions';
+import { SupportedActions } from './types';
 
 /** @typedef {import('lit-html').TemplateResult} TemplateResult */
 /** @typedef {import('@advanced-rest-client/arc-types').Actions.DataSourceConfiguration} DataSourceConfiguration */
@@ -31,6 +32,8 @@ import { DeleteCookieConfig, SetCookieConfig, SetVariableConfig } from '@advance
 
 /**
  * @fires change When any configuration property change
+ * @fires duplicate When the user requests to duplicate this action
+ * @fires remove When the user requests to remove this action
  */
 export declare class ARCActionEditorElement extends LitElement {
   static get styles(): CSSResult[];
@@ -41,7 +44,7 @@ export declare class ARCActionEditorElement extends LitElement {
    * component won't render any editor.
    * @attribute
    */
-  name: 'set-variable' | 'set-cookie' | 'delete-cookie';
+  name: SupportedActions;
   /**
    * Either `request` or `response`. Actions without a type are not
    * executed.

@@ -49,6 +49,11 @@ export declare class ArcAction {
    * Returns a clone if this object.
    */
   clone(): ArcAction;
+
+  /**
+   * Serializes this object
+   */
+  toJSON(): Action;
 }
 
 

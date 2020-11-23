@@ -1,4 +1,4 @@
-import { ARCActionsPanelElement } from './src/ARCActionsPanelElement.js';
+import { ARCActionsPanelElement } from './src/ARCActionsPanelElement';
 
 declare global {
   interface HTMLElementTagNameMap {

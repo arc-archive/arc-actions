@@ -1,9 +1,9 @@
 import { html, LitElement } from 'lit-element';
+import { ArcNavigationEvents } from '@advanced-rest-client/arc-events';
 import '@anypoint-web-components/anypoint-button/anypoint-button.js';
 import '@anypoint-web-components/anypoint-menu-button/anypoint-menu-button.js';
 import '@anypoint-web-components/anypoint-listbox/anypoint-listbox.js';
 import '@anypoint-web-components/anypoint-item/anypoint-item.js';
-// import { ArcAction } from './ArcAction.js';
 import { ActionCondition } from './ActionCondition.js';
 import styles from './styles/ActionsPanel.styles.js';
 import commonStyles from './styles/ActionPanels-common.style.js';
@@ -30,6 +30,17 @@ import {
 /** @typedef {import('@anypoint-web-components/anypoint-listbox').AnypointListbox} AnypointListbox */
 /** @typedef {import('@anypoint-web-components/anypoint-menu-button').AnypointMenuButton} AnypointMenuButton */
 /** @typedef {import('@advanced-rest-client/arc-types').Actions.Condition} Condition */
+/** @typedef {import('@advanced-rest-client/arc-types').Actions.ActionType} ActionType */
+/** @typedef {import('@advanced-rest-client/arc-types').Actions.RunnableAction} RunnableAction */
+
+export const conditionsValue = Symbol('conditionsValue');
+export const actionsItemTemplate = Symbol('actionsItemTemplate');
+export const conditionTemplate = Symbol('conditionTemplate');
+export const addConditionHandler = Symbol('addConditionHandler');
+export const conditionRemoveHandler = Symbol('conditionRemoveHandler');
+export const conditionChangeHandler = Symbol('conditionChangeHandler');
+export const addResponseAction = Symbol('addResponseAction');
+export const addRequestAction = Symbol('addRequestAction');
 
 /**
  * Reads indexes of an action editor from the editor `data-*` attributes.
@@ -72,56 +83,61 @@ export class ARCActionsPanelElement extends LitElement {
   }
 
   /**
-   * @return {ActionCondition[]|null} Rendered list of actions
+   * @return {ActionCondition[]|null} Rendered list of conditions
    */
-  get actions() {
-    return this._actions;
+  get conditions() {
+    return this[conditionsValue];
   }
 
   /**
-   * @param {ActionCondition[]|null} value List of actions to render.
+   * @param {ActionCondition[]|null} value List of conditions to render.
    */
-  set actions(value) {
-    const old = this._actions;
-    const actions = ActionCondition.importExternal(value);
-    if (old === actions) {
+  set conditions(value) {
+    const old = this[conditionsValue];
+    const items = ActionCondition.importExternal(value);
+    if (old === items) {
       return;
     }
-    this._actions = actions;
-    this.requestUpdate('actions', actions);
+    this[conditionsValue] = items;
+    this.requestUpdate();
   }
 
   /**
-   * @return {Boolean} Returns true when the element has any action.
+   * @return {boolean} Returns true when the element has any condition set.
    */
-  get hasActions() {
-    const { actions } = this;
-    return !!(actions && actions.length);
+  get hasConditions() {
+    const { conditions } = this;
+    return !!(conditions && conditions.length);
   }
 
   constructor() {
     super();
-    this.actions = null;
+    /**
+     * @type {ActionCondition[]|null}
+     */
+    this.conditions = null;
+    /**
+     * @type {ActionType}
+     */
     this.type = null;
     this.compatibility = false;
     this.outlined = false;
   }
 
   /**
-   * Adds a new, empty request action to the list of actions.
-   * If actions list hasn't been initialized then it creates it.
+   * Adds a new, empty action to the list of actions for a condition identified by its index.
    *
    * @param {string} name The name of the action to add.
    * @param {number=} index For the response actions, index of the condition
    */
   add(name, index) {
-    if (!Array.isArray(this.actions)) {
-      this.actions = [];
+    if (!Array.isArray(this.conditions)) {
+      this.conditions = [];
     }
     if (this.type === 'request') {
-      this._addRequestAction(name, index);
+      this[addRequestAction](name, index);
     } else {
-      this._addResponseAction(name, index);
+      this[addResponseAction](name, index);
     }
     this.requestUpdate();
   }
@@ -131,9 +147,10 @@ export class ARCActionsPanelElement extends LitElement {
    * @param {string} name 
    * @param {number=} index For the response actions, index of the condition
    */
-  _addRequestAction(name, index) {
-    if (!this.actions.length) {
+  [addRequestAction](name, index) {
+    if (!this.conditions.length) {
       const condition = ActionCondition.defaultCondition('request');
+      condition.alwaysPass = true;
       const action = new ActionCondition({
         condition, 
         type: this.type,
@@ -141,9 +158,9 @@ export class ARCActionsPanelElement extends LitElement {
         enabled: true,
       });
       action.add(name);
-      this.actions.push(action);
+      this.conditions.push(action);
     } else {
-      const action = this.actions[index];
+      const action = this.conditions[index];
       action.add(name);
     }
   }
@@ -153,8 +170,8 @@ export class ARCActionsPanelElement extends LitElement {
    * @param {string} name  The name of the action
    * @param {number} index The condition index to where to put the action into
    */
-  _addResponseAction(name, index) {
-    if (!this.actions.length) {
+  [addResponseAction](name, index) {
+    if (!this.conditions.length) {
       const condition = ActionCondition.defaultCondition(this.type);
       condition.alwaysPass = false;
       const action = new ActionCondition({
@@ -164,35 +181,19 @@ export class ARCActionsPanelElement extends LitElement {
         actions: [],
       });
       action.add(name);
-      this.actions.push(action);
+      this.conditions.push(action);
     } else {
-      const action = this.actions[index];
+      const action = this.conditions[index];
       action.add(name);
     }
   }
 
   /**
-   * Dispatches `open-external-url` event to open an URL.
-   * If the event is not handled it returns a handler to a window opened
-   * by calling `open()` function.
-   *
-   * @return {Window|null}
+   * Dispatches the URL open event to open an URL.
    */
   [openTutorialHandler]() {
     const url = 'https://docs.advancedrestclient.com/using-arc/request-actions';
-    const e = new CustomEvent('open-external-url', {
-      bubbles: true,
-      cancelable: true,
-      composed: true,
-      detail: {
-        url
-      }
-    });
-    this.dispatchEvent(e);
-    if (e.defaultPrevented) {
-      return null;
-    }
-    return window.open(url);
+    ArcNavigationEvents.navigateExternal(this, url);
   }
 
   /**
@@ -226,22 +227,10 @@ export class ARCActionsPanelElement extends LitElement {
     if (ci === undefined || ai === undefined) {
       return;
     }
-    const cItem = this.actions[ci];
+    const cItem = this.conditions[ci];
     cItem.actions.splice(ai, 1);
     this.requestUpdate();
     this[notifyChange]();
-  }
-
-  _getEventAction(e) {
-    const { target } = e;
-    const data = /** @type DOMStringMap */ (/** @type {HTMLElement} */ (target).dataset);
-    const cIndex = Number(data.conditionIndex);
-    const aIndex = Number(data.actionIndex);
-    if (Number.isNaN(cIndex) || Number.isNaN(aIndex)) {
-      return null;
-    }
-    const cItem = this.actions[cIndex];
-    return cItem.actions[aIndex];
   }
 
   /**
@@ -254,26 +243,29 @@ export class ARCActionsPanelElement extends LitElement {
     if (ci === undefined || ai === undefined) {
       return;
     }
-    const cItem = this.actions[ci];
+    const cItem = this.conditions[ci];
     const item = cItem.actions[ai];
     const { prop = '' } = e.detail;
     if (prop.indexOf('.') === -1) {
       item[prop] = e.target[prop];
     } else {
-      let tmp = item;
-      let last = '';
-      const parts = String(prop).split('.');
-      parts.forEach((current, i, arr) => {
-        if (arr.length === i + 1) {
-          last = current;
-          return;
-        }
-        if (!tmp[current]) {
-          tmp[current] = {};
-        }
-        tmp = tmp[current];
-      });
-      tmp[last] = e.target[last];
+      // Deep paths are passed by a reference so they are already updated
+      // on the source object.
+
+      // let tmp = item;
+      // let last = '';
+      // const parts = String(prop).split('.');
+      // parts.forEach((current, i, arr) => {
+      //   if (arr.length === i + 1) {
+      //     last = current;
+      //     return;
+      //   }
+      //   if (!tmp[current]) {
+      //     tmp[current] = {};
+      //   }
+      //   tmp = tmp[current];
+      // });
+      // tmp[last] = e.target[last];
     }
     this[notifyChange]();
   }
@@ -291,38 +283,15 @@ export class ARCActionsPanelElement extends LitElement {
     if (ci === undefined || ai === undefined) {
       return;
     }
-    if (this.type === 'request') {
-      this._duplicateRequestAction(ci);
-    } else {
-      this._duplicateResponseAction(ci, ai);
-    }
+    const condition = this.conditions[ci];
+    const source = condition.actions[ai];
+    const action = source.clone();
+    condition.actions.push(action);
     this[notifyChange]();
     this.requestUpdate();
   }
 
-  /**
-   * Duplicates a request condition and adds it to the conditions list
-   * @param {number} conditionIndex The index of the condition object to copy
-   */
-  _duplicateRequestAction(conditionIndex) {
-    const condition = this.actions[conditionIndex];
-    const copy = condition.clone();
-    this.actions.push(copy);
-  }
-
-  /**
-   * Duplicates an action inside a response condition
-   * @param {number} conditionIndex The index of the condition object that contains the action to copy
-   * @param {number} actionIndex The action index to copy into the condition
-   */
-  _duplicateResponseAction(conditionIndex, actionIndex) {
-    const condition = this.actions[conditionIndex];
-    const source = condition.actions[actionIndex];
-    const action = source.clone();
-    condition.actions.push(action);
-  }
-
-  _addConditionHandler() {
+  [addConditionHandler]() {
     const condition = ActionCondition.defaultCondition(this.type);
     const actions = new ActionCondition({
       condition, 
@@ -330,44 +299,44 @@ export class ARCActionsPanelElement extends LitElement {
       enabled: true,
       actions: [],
     });
-    if (!Array.isArray(this.actions)) {
-      this.actions = [];
+    if (!Array.isArray(this.conditions)) {
+      this.conditions = [];
     }
-    this.actions.push(actions);
+    this.conditions.push(actions);
     this[notifyChange]();
     this.requestUpdate();
   }
 
-  _conditionChangeHandler(e) {
+  [conditionChangeHandler](e) {
     const { target } = e;
     const data = /** @type DOMStringMap */ (/** @type {HTMLElement} */ (target).dataset);
     const cIndex = Number(data.conditionIndex);
     if (Number.isNaN(cIndex)) {
       return;
     }
-    const cAction = this.actions[cIndex];
+    const cAction = this.conditions[cIndex];
     const { prop } = e.detail;
     cAction[prop] = target[prop];
     this[notifyChange]();
   }
 
-  _conditionRemoveHandler(e) {
+  [conditionRemoveHandler](e) {
     const { target } = e;
     const data = /** @type DOMStringMap */ (/** @type {HTMLElement} */ (target).dataset);
     const cIndex = Number(data.conditionIndex);
     if (Number.isNaN(cIndex)) {
       return;
     }
-    this.actions.splice(cIndex, 1);
+    this.conditions.splice(cIndex, 1);
     this[notifyChange]();
     this.requestUpdate();
   }
 
   render() {
-    const { hasActions } = this;
+    const { hasConditions } = this;
     return html`
       ${this[tutorialTpl]()}
-      ${hasActions ? this[actionsListTpl]() : ''}
+      ${hasConditions ? this[actionsListTpl]() : ''}
       ${this[addConditionTpl]()}
     `;
   }
@@ -379,9 +348,7 @@ export class ARCActionsPanelElement extends LitElement {
     const { compatibility } = this;
     return html`
     <div class="tutorial-section">
-      <p class="content">
-        ${this[introTextTpl]()}
-      </p>
+      ${this[introTextTpl]()}
       <anypoint-button
         ?compatibility="${compatibility}"
         @click="${this[openTutorialHandler]}"
@@ -420,7 +387,7 @@ export class ARCActionsPanelElement extends LitElement {
           ?compatibility="${compatibility}"
           @select="${this[addHandler]}"
         >
-          <anypoint-button slot="dropdown-trigger" ?compatibility="${compatibility}">Add action</anypoint-button>
+          <anypoint-button slot="dropdown-trigger" data-action="add-action" ?compatibility="${compatibility}">Add action</anypoint-button>
           <anypoint-listbox ?compatibility="${compatibility}" slot="dropdown-content">
             <anypoint-item data-name="set-variable" ?compatibility="${compatibility}">Set variable</anypoint-item>
             <anypoint-item data-name="set-cookie" ?compatibility="${compatibility}">Set cookie</anypoint-item>
@@ -436,17 +403,18 @@ export class ARCActionsPanelElement extends LitElement {
     return html`
     <anypoint-button
       ?compatibility="${compatibility}"
-      @click="${this._addConditionHandler}"
+      @click="${this[addConditionHandler]}"
+      data-action="add-condition"
     >Add condition</anypoint-button>
     `;
   }
 
   /**
-   * @return {TemplateResult[]} List of templates for current actions.
+   * @return {TemplateResult[]} List of templates for current conditions.
    */
   [actionsListTpl]() {
-    const { actions } = this;
-    const result = actions.map((action, index) => this._actionsItemTemplate(action, index));
+    const { conditions } = this;
+    const result = conditions.map((condition, index) => this[actionsItemTemplate](condition, index));
     return /** @type TemplateResult[] */ (result);
   }
 
@@ -455,11 +423,11 @@ export class ARCActionsPanelElement extends LitElement {
    * @param {number} index
    * @return {TemplateResult|TemplateResult[]|string[]}
    */
-  _actionsItemTemplate(conditionAction, index) {
+  [actionsItemTemplate](conditionAction, index) {
     const { actions } = conditionAction;
     return html`
     <div class="condition-wrapper">
-      ${this._conditionTemplate(conditionAction, index)}
+      ${this[conditionTemplate](conditionAction, index)}
       ${actions.map((action, i) => this[actionTpl](action, index, i))}
       ${this[addActionTpl](index)}
     </div>
@@ -468,10 +436,10 @@ export class ARCActionsPanelElement extends LitElement {
 
   /**
    * @param {ActionCondition} conditionAction The definition of the condition
-   * @param {number} conditionIndex Condition action's index in the `actions` array.
+   * @param {number} conditionIndex Condition action's index in the `conditions` array.
    * @return {TemplateResult} Template for the condition
    */
-  _conditionTemplate(conditionAction, conditionIndex) {
+  [conditionTemplate](conditionAction, conditionIndex) {
     const { enabled, condition } = conditionAction;
     const { outlined, compatibility, type } = this;
     return html`
@@ -482,15 +450,15 @@ export class ARCActionsPanelElement extends LitElement {
         ?outlined="${outlined}"
         ?compatibility="${compatibility}"
         data-condition-index="${conditionIndex}"
-        @change="${this._conditionChangeHandler}"
-        @remove="${this._conditionRemoveHandler}"
+        @change="${this[conditionChangeHandler]}"
+        @remove="${this[conditionRemoveHandler]}"
       ></arc-condition-editor>
     `;
   }
 
   /**
    * @param {ArcAction} action An action definition
-   * @param {number} conditionIndex Condition action's index in the `actions` array.
+   * @param {number} conditionIndex Condition action's index in the `conditions` array.
    * @param {number} actionIndex Action index in the condition
    * @return {string|TemplateResult} Template for an action
    */

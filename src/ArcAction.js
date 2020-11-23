@@ -19,7 +19,7 @@ export class ArcAction {
       type = 'request',
       name = null,
       enabled = false,
-      priority = 5,
+      priority = 1,
       config = {},
       sync = true,
       failOnError = true,

@@ -148,6 +148,7 @@ export class ActionCondition {
     const { type } = this;
     const init = ActionCondition.defaultAction(type);
     init.name = name;
+    init.view.opened = true;
     const action = new ArcAction(init);
     this.actions.push(action);
   }

@@ -105,6 +105,11 @@ export declare interface IteratorTemplateOptions extends BaseTemplateOptions {
   operatorHandler: Function;
 }
 
+/**
+ * An enum representing a list of supported in this runner/editor actions.
+ */
+export type SupportedActions = "set-variable" | "set-cookie" | "delete-cookie" | string;
+
 
 
 // import { ArcAction } from './ArcAction';
@@ -339,11 +344,6 @@ export declare interface IteratorTemplateOptions extends BaseTemplateOptions {
 // }
 
 // export type TypeEnum = "request" | "response";
-
-// /**
-//  * An enum representing a list of supported in this runner/editor actions.
-//  */
-// export type SupportedActions = "set-variable" | "set-cookie" | "delete-cookie";
 
 // /**
 //  * ARC Action configuration object.
