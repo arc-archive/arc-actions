@@ -4,19 +4,22 @@ import '@advanced-rest-client/arc-demo-helper/arc-interactive-demo.js';
 import '../arc-actions.js';
 
 const cacheKeys = Object.freeze({
-  request: 'cache.request.actions',
-  response: 'cache.response.actions'
+  request: 'cache.actions.request',
+  response: 'cache.actions.response',
+  selected: 'cache.actions.selected',
 });
 
 class ComponentDemo extends DemoPage {
   constructor() {
     super();
-    this.initObservableProperties(['outlined', 'requestActions', 'responseActions']);
+    this.initObservableProperties(['outlined', 'request', 'response', 'selected']);
     this.componentName = 'arc-actions';
     this.demoStates = ['Filled', 'Outlined', 'Anypoint'];
     this._actionsChange = this._actionsChange.bind(this);
-    this.requestActions = null;
-    this.responseActions = null;
+    this._selectionChange = this._selectionChange.bind(this);
+    this.request = null;
+    this.response = null;
+    this.selected = 0;
     this.renderViewControls = true;
     this._restoreCache();
   }
@@ -31,11 +34,15 @@ class ComponentDemo extends DemoPage {
   _actionsChange(e) {
     const { type } = e.detail;
     const { target } = e;
-    const list = type === 'request' ? target.requestActions : target.responseActions;
-    const key = type === 'request' ? 'requestActions' : 'responseActions';
-    this[key] = list;
+    const list = type === 'request' ? target.request : target.response;
+    this[type] = list;
     console.log(`${type} actions:`, list);
     this._cacheActions(type, list);
+  }
+
+  _selectionChange(e) {
+    const { selected } = e.target;
+    localStorage.setItem(cacheKeys.selected, String(selected));
   }
 
   _cacheActions(type, list) {
@@ -50,6 +57,11 @@ class ComponentDemo extends DemoPage {
   _restoreCache() {
     this._restoreCacheValue('request', localStorage.getItem(cacheKeys.request));
     this._restoreCacheValue('response', localStorage.getItem(cacheKeys.response));
+    const selectionRaw = localStorage.getItem(cacheKeys.selected);
+    const typedSelection = Number(selectionRaw);
+    if (selectionRaw && !Number.isNaN(typedSelection)) {
+      this.selected = typedSelection;
+    }
   }
 
   _restoreCacheValue(type, value) {
@@ -65,12 +77,11 @@ class ComponentDemo extends DemoPage {
     if (!list) {
       return;
     }
-    const key = type === 'request' ? 'requestActions' : 'responseActions';
-    this[key] = list;
+    this[type] = list;
   }
 
   _demoTemplate() {
-    const { demoStates, darkThemeActive, compatibility, outlined, requestActions, responseActions } = this;
+    const { demoStates, darkThemeActive, compatibility, outlined, request, response, selected } = this;
     return html`
       <section class="documentation-section">
         <h3>Interactive demo</h3>
@@ -83,12 +94,14 @@ class ComponentDemo extends DemoPage {
           ?dark="${darkThemeActive}"
         >
           <arc-actions
-            .requestActions="${requestActions}"
-            .responseActions="${responseActions}"
+            .request="${request}"
+            .response="${response}"
+            .selected="${selected||0}"
             ?compatibility="${compatibility}"
             ?outlined="${outlined}"
             slot="content"
-            @actionchange="${this._actionsChange}"
+            @change="${this._actionsChange}"
+            @selectedchange="${this._selectionChange}"
           ></arc-actions>
         </arc-interactive-demo>
       </section>
@@ -97,7 +110,7 @@ class ComponentDemo extends DemoPage {
 
   contentTemplate() {
     return html`
-      <h2>Requests actions panel</h2>
+      <h2>HTTP request actions</h2>
       ${this._demoTemplate()}
     `;
   }

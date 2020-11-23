@@ -1,3 +1,4 @@
+/* eslint-disable class-methods-use-this */
 import { html, css, LitElement } from 'lit-element';
 import '@anypoint-web-components/anypoint-tabs/anypoint-tabs.js';
 import '@anypoint-web-components/anypoint-tabs/anypoint-tab.js';
@@ -12,24 +13,19 @@ import {
   panelTpl,
 } from './internals.js';
 
-const actionChangeEvent = 'actionchange';
-const selectedChangeEvent = 'selectedchange';
+export const conditionChangeEvent = 'change';
+export const selectedChangeEvent = 'selectedchange';
+export const requestConditionsValue = Symbol('requestConditionsValue');
+export const responseConditionsValue = Symbol('responseConditionsValue');
+export const tutorialTemplate = Symbol('tutorialTemplate');
+export const onChangeValue = Symbol('onChangeValue');
+export const onSelectedValue = Symbol('onSelectedValue');
 
 /** @typedef {import('./ArcAction').ArcAction} ArcAction */
 /** @typedef {import('./ActionCondition').ActionCondition} ActionCondition */
+/** @typedef {import('./ARCActionsPanelElement').ARCActionsPanelElement} ARCActionsPanelElement */
 /** @typedef {import('@advanced-rest-client/arc-types').Actions.OperatorEnum} OperatorEnum */
 /** @typedef {import('lit-element').TemplateResult} TemplateResult */
-
-/**
- * @return {TemplateResult} Template for the tutorial
- */
-const tutorialTemplate = () => {
-  return html`
-    <p class="actions-intro">
-      Actions run a custom logic in a context of the current request. When they fail the request is reported as error.
-    </p>
-  `;
-}
 
 /**
  * An HTML element that renders a panel with request and response
@@ -47,10 +43,6 @@ export class ARCActionsElement extends LitElement {
   static get properties() {
     return {
       /**
-       * A list of response actions
-       */
-      responseActions: { type: Array },
-      /**
        * Enables compatibility with the Anypoint theme
        */
       compatibility: { type: Boolean, reflect: true },
@@ -66,76 +58,76 @@ export class ARCActionsElement extends LitElement {
   }
 
   /**
-   * A list of request actions.
+   * A list of request conditions and actions.
    * @return {ActionCondition[]}
    */
-  get requestActions() {
-    return this._requestActions;
+  get request() {
+    return this[requestConditionsValue];
   }
 
   /**
    * @param {ActionCondition[]} value List of request actions to render.
    */
-  set requestActions(value) {
-    const old = this._requestActions;
+  set request(value) {
+    const old = this[requestConditionsValue];
     if (old === value) {
       return;
     }
-    this._requestActions = value;
+    this[requestConditionsValue] = value;
     this.requestUpdate();
   }
 
   /**
-   * A list of request actions.
+   * A list of response conditions and actions.
    * @return {ActionCondition[]}
    */
-  get responseActions() {
-    return this._responseActions;
+  get response() {
+    return this[responseConditionsValue];
   }
 
   /**
    * @param {ActionCondition[]} value List of request actions to render.
    */
-  set responseActions(value) {
-    const old = this._responseActions;
+  set response(value) {
+    const old = this[responseConditionsValue];
     if (old === value) {
       return;
     }
-    this._responseActions = value;
+    this[responseConditionsValue] = value;
     this.requestUpdate();
   }
 
-  get onactionchange() {
-    return this._onactionchange;
+  get onchange() {
+    return this[onChangeValue];
   }
 
-  set onactionchange(value) {
-    const old = this._onactionchange;
-    this._onactionchange = null;
+  set onchange(value) {
+    const old = this[onChangeValue];
+    this[onChangeValue] = null;
     if (old) {
-      this.removeEventListener(actionChangeEvent, old);
+      this.removeEventListener(conditionChangeEvent, old);
     }
     if (typeof value !== 'function') {
       return;
     }
-    this._onactionchange = value;
-    this.addEventListener(actionChangeEvent, value);
+    this[onChangeValue] = value;
+    this.addEventListener(conditionChangeEvent, value);
   }
 
   get onselectedchange() {
-    return this._onselectedchange;
+    return this[onSelectedValue];
   }
 
   set onselectedchange(value) {
-    const old = this._onselectedchange;
-    this._onselectedchange = null;
+    const old = this[onSelectedValue];
+    this[onSelectedValue] = null;
     if (old) {
       this.removeEventListener(selectedChangeEvent, old);
     }
     if (typeof value !== 'function') {
       return;
     }
-    this._onselectedchange = value;
+    this[onSelectedValue] = value;
     this.addEventListener(selectedChangeEvent, value);
   }
 
@@ -144,25 +136,40 @@ export class ARCActionsElement extends LitElement {
     this.selected = 0;
     this.compatibility = false;
     this.outlined = false;
-    this._requestActions = null;
-    this._responseActions = null;
+    /**
+     * @type {ActionCondition[]}
+     */
+    this[requestConditionsValue] = null;
+    /**
+     * @type {ActionCondition[]}
+     */
+    this[responseConditionsValue] = null;
   }
 
+  /**
+   * @param {CustomEvent} e 
+   */
   [tabHandler](e) {
     this.selected = e.detail.value;
-    this.dispatchEvent(new CustomEvent(selectedChangeEvent));
+    this.dispatchEvent(new Event(selectedChangeEvent));
   }
 
+  /**
+   * @param {Event} e 
+   */
   [actionsHandler](e) {
-    const { conditions, type } = e.target;
-    const key = type === 'request' ? 'requestActions' : 'responseActions';
-    this[key] = conditions;
+    const panel = /** @type ARCActionsPanelElement */ (e.target);
+    const { conditions, type } = panel;
+    this[type] = conditions;
     this[notifyChange](type);
   }
 
+  /**
+   * @param {string} type 
+   */
   [notifyChange](type) {
     this.dispatchEvent(
-      new CustomEvent(actionChangeEvent, {
+      new CustomEvent(conditionChangeEvent, {
         detail: {
           type
         }
@@ -172,13 +179,27 @@ export class ARCActionsElement extends LitElement {
 
   render() {
     return html`
-      ${tutorialTemplate()}
+      ${this[tutorialTemplate]()}
       ${this[tabsTpl]()}
       ${this[requestActionsTpl]()}
       ${this[responseActionsTpl]()}
     `;
   }
 
+  /**
+   * @return {TemplateResult} Template for the tutorial
+   */
+  [tutorialTemplate]() {
+    return html`
+      <p class="actions-intro">
+        Actions run a custom logic in a context of the current request. When they fail the request is reported as error.
+      </p>
+    `;
+  }
+
+  /**
+   * @returns {TemplateResult}  The template for the context tabs
+   */
   [tabsTpl]() {
     const { selected, compatibility } = this;
     return html`
@@ -193,20 +214,31 @@ export class ARCActionsElement extends LitElement {
     `;
   }
 
+  /**
+   * @returns {TemplateResult|string}  The template for the request actions panel
+   */
   [requestActionsTpl]() {
     if (this.selected !== 0) {
       return '';
     }
-    return this[panelTpl](this.requestActions, 'request');
+    return this[panelTpl](this.request, 'request');
   }
 
+  /**
+   * @returns {TemplateResult|string}  The template for the response actions panel
+   */
   [responseActionsTpl]() {
     if (this.selected !== 1) {
       return '';
     }
-    return this[panelTpl](this.responseActions, 'response');
+    return this[panelTpl](this.response, 'response');
   }
 
+  /**
+   * @param {ActionCondition[]} conditions The list of conditions to render.
+   * @param {string} type The type of the UI.
+   * @returns {TemplateResult}  The template for the actions panel
+   */
   [panelTpl](conditions, type) {
     const { compatibility, outlined } = this;
     return html`

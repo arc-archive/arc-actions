@@ -2,6 +2,6 @@ import { ARCActionsPanelElement } from './src/ARCActionsPanelElement';
 
 declare global {
   interface HTMLElementTagNameMap {
-    'arc-action-panel': ARCActionsPanelElement;
+    'arc-actions-panel': ARCActionsPanelElement;
   }
 }
