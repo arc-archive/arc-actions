@@ -1,6 +1,11 @@
 import { html, LitElement } from 'lit-element';
 import '@advanced-rest-client/arc-icons/arc-icon.js';
 import '@anypoint-web-components/anypoint-switch/anypoint-switch.js';
+import '@anypoint-web-components/anypoint-item/anypoint-item.js';
+import '@anypoint-web-components/anypoint-listbox/anypoint-listbox.js';
+import '@anypoint-web-components/anypoint-input/anypoint-input.js';
+import '@anypoint-web-components/anypoint-dropdown-menu/anypoint-dropdown-menu.js';
+import '@anypoint-web-components/anypoint-button/anypoint-button.js';
 import elementStyles from './styles/ArcConditionEditor.styles.js';
 import cardStyles from './styles/Card.styles.js';
 import tooltipStyles from './styles/Tooltip.styles.js';
@@ -18,6 +23,29 @@ import {
 
 export const conditionValue = Symbol('conditionValue');
 export const notifyChange = Symbol('notifyChange');
+export const enabledHandler = Symbol('enabledHandler');
+export const alwaysPassHandler = Symbol('alwaysPassHandler');
+export const deleteHandler = Symbol('deleteHandler');
+export const closeHandler = Symbol('closeHandler');
+export const openedHandler = Symbol('openedHandler');
+export const dataSourceTypeHandler = Symbol('dataSourceTypeHandler');
+export const dataSourceHandler = Symbol('dataSourceHandler');
+export const operatorHandler = Symbol('operatorHandler');
+export const valueHandler = Symbol('valueHandler');
+export const pathHandler = Symbol('pathHandler');
+export const editorTemplate = Symbol('editorTemplate');
+export const summaryTemplate = Symbol('summaryTemplate');
+export const conditionExplainedTemplate = Symbol('conditionExplainedTemplate');
+export const openButtonTemplate = Symbol('openButtonTemplate');
+export const closeButtonTemplate = Symbol('closeButtonTemplate');
+export const deleteButtonTemplate = Symbol('deleteButtonTemplate');
+export const alwaysPassSwitchTemplate = Symbol('alwaysPassSwitchTemplate');
+export const enableSwitchTemplate = Symbol('enableSwitchTemplate');
+export const dataPathTemplate = Symbol('dataPathTemplate');
+export const valueTemplate = Symbol('valueTemplate');
+export const dataSourceTypeSelectorTemplate = Symbol('dataSourceTypeSelectorTemplate');
+export const dataSourceSelectorTemplate = Symbol('dataSourceSelectorTemplate');
+export const operatorTemplateTemplate = Symbol('operatorTemplateTemplate');
 
 export class ARCConditionEditorElement extends LitElement {
   static get styles() {
@@ -110,7 +138,7 @@ export class ARCConditionEditorElement extends LitElement {
    * A handler for the action enable switch.
    * @param {Event} e
    */
-  _enabledHandler(e) {
+  [enabledHandler](e) {
     this.enabled = /** @type {HTMLInputElement} */ (e.target).checked;
     this[notifyChange]('enabled');
   }
@@ -119,7 +147,7 @@ export class ARCConditionEditorElement extends LitElement {
    * The handler for the action always pass switch.
    * @param {Event} e
    */
-  _alwaysPassHandler(e) {
+  [alwaysPassHandler](e) {
     const enabled = /** @type {HTMLInputElement} */ (e.target).checked;
     const { condition  } = this;
     condition.alwaysPass = enabled;
@@ -131,7 +159,7 @@ export class ARCConditionEditorElement extends LitElement {
    * A handler for the delete action button click. Dispatches the `remove`
    * custom event.
    */
-  _deleteHandler() {
+  [deleteHandler]() {
     this.dispatchEvent(new CustomEvent('remove'));
   }
 
@@ -139,7 +167,7 @@ export class ARCConditionEditorElement extends LitElement {
    * A handler for the close action button click. Updates the `opened` value
    * on the `view` property.
    */
-  _closeHandler() {
+  [closeHandler]() {
     const { condition } = this;
     if (!condition.view) {
       condition.view = {};
@@ -153,7 +181,7 @@ export class ARCConditionEditorElement extends LitElement {
    * A handler for the open action button click. Updates the `opened` value
    * on the `view` property.
    */
-  _openedHandler() {
+  [openedHandler]() {
     const { condition } = this;
     if (!condition.view) {
       condition.view = {};
@@ -163,33 +191,33 @@ export class ARCConditionEditorElement extends LitElement {
     this.requestUpdate();
   }
 
-  _dataSourceTypeHandler(e) {
+  [dataSourceTypeHandler](e) {
     const { condition  } = this;
     condition.type = e.target.selected;
     this[notifyChange]('condition');
     this.requestUpdate();
   }
 
-  _dataSourceHandler(e) {
+  [dataSourceHandler](e) {
     const { condition  } = this;
     condition.source = e.target.selected;
     this[notifyChange]('condition');
     this.requestUpdate();
   }
 
-  _operatorHandler(e) {
+  [operatorHandler](e) {
     const { condition  } = this;
     condition.operator = e.target.selected;
     this[notifyChange]('condition');
   }
 
-  _valueHandler(e) {
+  [valueHandler](e) {
     const { condition  } = this;
     condition.predictedValue = e.target.value;
     this[notifyChange]('condition');
   }
 
-  _pathHandler(e) {
+  [pathHandler](e) {
     const { condition  } = this;
     condition.path = e.target.value;
     this[notifyChange]('condition');
@@ -201,47 +229,47 @@ export class ARCConditionEditorElement extends LitElement {
       return '';
     }
     if (opened) {
-      return this._renderEditor();
+      return this[editorTemplate]();
     }
-    return this._renderSummary();
+    return this[summaryTemplate]();
   }
 
-  _renderEditor() {
+  [editorTemplate]() {
     return html`
     <section class="action-card opened">
       <div class="opened-title">
         <div class="action-title">
           Condition editor
         </div>
-        ${this._closeButtonTemplate()}
+        ${this[closeButtonTemplate]()}
       </div>
       <div class="editor-contents">
-        ${this._dataSourceTypeSelector()}
-        ${this._dataSourceSelector()}
-        ${this._dataPathTemplate()}
-        ${this._operatorTemplate()}
-        ${this._valueTemplate()}
+        ${this[dataSourceTypeSelectorTemplate]()}
+        ${this[dataSourceSelectorTemplate]()}
+        ${this[dataPathTemplate]()}
+        ${this[operatorTemplateTemplate]()}
+        ${this[valueTemplate]()}
       </div>
       <div class="action-footer">
-        ${this._enableSwitchTemplate()}
-        ${this._alwaysPassSwitchTemplate()}
-        ${this._deleteButtonTemplate()}
-        ${this._closeButtonTemplate()}
+        ${this[enableSwitchTemplate]()}
+        ${this[alwaysPassSwitchTemplate]()}
+        ${this[deleteButtonTemplate]()}
+        ${this[closeButtonTemplate]()}
       </div>
     </section>`;
   }
 
-  _renderSummary() {
+  [summaryTemplate]() {
     const { condition } = this;
     const { alwaysPass } = condition;
     return html`
     <section class="action-card closed">
-      ${alwaysPass ? `Always execute the following:` : this._conditionExplained()}
-      ${this._openButtonTemplate()}
+      ${alwaysPass ? `Always execute the following:` : this[conditionExplainedTemplate]()}
+      ${this[openButtonTemplate]()}
     </section>`;
   }
 
-  _conditionExplained() {
+  [conditionExplainedTemplate]() {
     const { condition } = this;
     const { type, source, path, predictedValue, operator } = condition;
     const parts = [];
@@ -258,7 +286,7 @@ export class ARCConditionEditorElement extends LitElement {
     return parts;
   }
 
-  _dataSourceTypeSelector() {
+  [dataSourceTypeSelectorTemplate]() {
     const { type } = this;
     if (type === 'request') {
       // this can oly have the `request` as the source type.
@@ -267,21 +295,21 @@ export class ARCConditionEditorElement extends LitElement {
     const { condition, outlined, compatibility } = this;
     return dataSourceTypeSelector({
       selected: condition.type,
-      handler: this._dataSourceTypeHandler,
+      handler: this[dataSourceTypeHandler],
       outlined, 
       compatibility,
       disabled: !!condition.alwaysPass,
     });
   }
 
-  _dataSourceSelector() {
+  [dataSourceSelectorTemplate]() {
     const { condition, outlined, compatibility, type } = this;
     const { type: cType, source } = condition;
 
     const requestOptions = type === 'request' ? true : cType === 'request';
     const responseOptions = !requestOptions && (type === 'response' ? true : cType === 'response');
 
-    const input = dataSourceSelector(source, this._dataSourceHandler, {
+    const input = dataSourceSelector(source, this[dataSourceHandler], {
       outlined, 
       compatibility,
       requestOptions,
@@ -294,11 +322,11 @@ export class ARCConditionEditorElement extends LitElement {
     `;
   }
 
-  _operatorTemplate() {
+  [operatorTemplateTemplate]() {
     const { condition, outlined, compatibility } = this;
     const { operator, alwaysPass } = condition;
     const input = operatorTemplate({
-      handler: this._operatorHandler, 
+      handler: this[operatorHandler], 
       operator,
       outlined, compatibility,
       name: 'operator',
@@ -309,11 +337,11 @@ export class ARCConditionEditorElement extends LitElement {
     `;
   }
 
-  _valueTemplate() {
+  [valueTemplate]() {
     const { condition, outlined, compatibility } = this;
     const { predictedValue='', source, alwaysPass } = condition;
     const type = source === 'status' ? 'number' : 'text';
-    const input = inputTemplate('predictedValue', String(predictedValue), 'Condition value', this._valueHandler, {
+    const input = inputTemplate('predictedValue', String(predictedValue), 'Condition value', this[valueHandler], {
       outlined,
       compatibility,
       type,
@@ -324,7 +352,7 @@ export class ARCConditionEditorElement extends LitElement {
     `;
   }
 
-  _dataPathTemplate() {
+  [dataPathTemplate]() {
     const { condition, outlined, compatibility } = this;
     const { path, source, alwaysPass } = condition;
     if (['method', 'status'].indexOf(source) !== -1) {
@@ -334,97 +362,104 @@ export class ARCConditionEditorElement extends LitElement {
 
     const help = 'Path to the property that contains the data to extract.';
     // @ts-ignore
-    const input = inputTemplate('path', path, 'Path to the value', this._pathHandler, {
+    const input = inputTemplate('path', path, 'Path to the value', this[pathHandler], {
       outlined,
       compatibility,
       disabled: !!alwaysPass,
     });
     return html`
-      <div class="form-row">
-        ${input}
-        <div class="tooltip">
-          <arc-icon icon="helpOutline"></arc-icon>
-          <span class="tooltiptext">
-            ${help} Example: "data.property.subproperty".
-          </span>
-        </div>
+    <div class="form-row">
+      ${input}
+      <div class="tooltip">
+        <arc-icon icon="helpOutline"></arc-icon>
+        <span class="tooltiptext">
+          ${help} Example: "data.property.subproperty".
+        </span>
       </div>
+    </div>
     `;
   }
 
   /**
    * @return {TemplateResult} The template for the enabled switch.
    */
-  _enableSwitchTemplate() {
+  [enableSwitchTemplate]() {
     const { compatibility, enabled } = this;
     return html`
-      <anypoint-switch
-        ?compatibility="${compatibility}"
-        .checked="${enabled}"
-        @change="${this._enabledHandler}"
-      >Enabled</anypoint-switch>
+    <anypoint-switch
+      ?compatibility="${compatibility}"
+      .checked="${enabled}"
+      @change="${this[enabledHandler]}"
+      data-action="enabled"
+      name="enabled"
+    >Enabled</anypoint-switch>
     `;
   }
 
   /**
    * @return {TemplateResult|string} Template for the "always pass" which.
    */
-  _alwaysPassSwitchTemplate() {
+  [alwaysPassSwitchTemplate]() {
     const { compatibility, condition } = this;
     if (!condition) {
       return '';
     }
     return html`
-      <anypoint-switch
-        ?compatibility="${compatibility}"
-        .checked="${condition.alwaysPass}"
-        @change="${this._alwaysPassHandler}"
-        title="When selected it ignores the configured condition and always passes the check"
-      >Always pass</anypoint-switch>
+    <anypoint-switch
+      ?compatibility="${compatibility}"
+      .checked="${condition.alwaysPass}"
+      @change="${this[alwaysPassHandler]}"
+      data-action="always-pass"
+      title="When selected it ignores the configured condition and always passes the check"
+      name="alwaysPass"
+    >Always pass</anypoint-switch>
     `;
   }
 
   /**
    * @return {TemplateResult} Template for the delete button.
    */
-  _deleteButtonTemplate() {
+  [deleteButtonTemplate]() {
     const { compatibility } = this;
     return html`
-      <anypoint-button
-        title="Removes this action"
-        class="action-delete"
-        ?compatibility="${compatibility}"
-        @click="${this._deleteHandler}"
-      >Delete</anypoint-button>
+    <anypoint-button
+      title="Removes this action"
+      class="action-delete"
+      ?compatibility="${compatibility}"
+      @click="${this[deleteHandler]}"
+      data-action="remove"
+    >Delete</anypoint-button>
     `;
   }
 
   /**
    * @return {TemplateResult} Template for the close action button.
    */
-  _closeButtonTemplate() {
+  [closeButtonTemplate]() {
     const { compatibility } = this;
     return html`
-      <anypoint-button
-        title="Closes the editor"
-        ?compatibility="${compatibility}"
-        @click="${this._closeHandler}"
-      >Close</anypoint-button>
+    <anypoint-button
+      title="Closes the editor"
+      ?compatibility="${compatibility}"
+      @click="${this[closeHandler]}"
+      data-action="close"
+    >Close</anypoint-button>
     `;
   }
 
   /**
    * @return {TemplateResult|string} Template for the open action button.
    */
-  _openButtonTemplate() {
+  [openButtonTemplate]() {
     const { compatibility } = this;
     return html`
-      <anypoint-button
-        title="Opens the editor"
-        class="action-open"
-        ?compatibility="${compatibility}"
-        @click="${this._openedHandler}"
-      >Open</anypoint-button>
+    <anypoint-button
+      title="Opens the editor"
+      class="action-open"
+      ?compatibility="${compatibility}"
+      @click="${this[openedHandler]}"
+      data-action="open"
+    >Open</anypoint-button>
     `;
   }
 }

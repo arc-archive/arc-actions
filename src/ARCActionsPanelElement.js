@@ -385,10 +385,9 @@ export class ARCActionsPanelElement extends LitElement {
           closeOnActivate
           data-index="${index}"
           ?compatibility="${compatibility}"
-          @select="${this[addHandler]}"
         >
           <anypoint-button slot="dropdown-trigger" data-action="add-action" ?compatibility="${compatibility}">Add action</anypoint-button>
-          <anypoint-listbox ?compatibility="${compatibility}" slot="dropdown-content">
+          <anypoint-listbox ?compatibility="${compatibility}" slot="dropdown-content" @selected="${this[addHandler]}">
             <anypoint-item data-name="set-variable" ?compatibility="${compatibility}">Set variable</anypoint-item>
             <anypoint-item data-name="set-cookie" ?compatibility="${compatibility}">Set cookie</anypoint-item>
             <anypoint-item data-name="delete-cookie" ?compatibility="${compatibility}">Delete cookie</anypoint-item>

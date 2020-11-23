@@ -9,7 +9,6 @@ import {
   operatorTemplate,
   iteratorConditionTemplate,
   failTemplate,
-  defaultSourceConfig,
   dataSourceTypeSelector,
   defaultItConfig,
 } from '../CommonTemplates.js';
@@ -151,7 +150,7 @@ export default function render(
   dataSourceHandler,
   inputConfig
 ) {
-  const { name, source = defaultSourceConfig() } = config;
+  const { name, source = {} } = config;
   return [
     nameTemplate(name, inputHandler, inputConfig),
     html`<div class="action-title">Value setting</div>`,

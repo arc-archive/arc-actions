@@ -41,11 +41,14 @@ export function readBodyString(body) {
  * @param {string | File | Blob | Buffer | ArrayBuffer | FormData} data Payload value.
  * @param {string} ct Body content type.
  * @param {string[]} path Remaining path to follow
- * @param {IteratorConfiguration} iterator Iterator model
+ * @param {IteratorConfiguration=} iterator Iterator model
  * @return {string|undefined} Value for given path.
  */
 export function getPayloadValue(data, ct, path, iterator) {
-  if (!data || !path || !path.length) {
+  if (!data) {
+    return undefined;
+  }
+  if (!path || !path.length) {
     return String(data);
   }
   const typedData = readBodyString(data);
