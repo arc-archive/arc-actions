@@ -10,6 +10,8 @@ The module replaces:
 -   request-actions-panel component
 -   other ARC's local libraries in the application logic to process actions.
 
+This is a work in progress.
+
 ## Installation
 
 ```bash
