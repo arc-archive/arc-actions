@@ -14,7 +14,7 @@
   },
   "include": [
     "**/*.js",
-    "node_modules/@open-wc/**/*.js", "src/ARCActionEditorElement.d.ts", "index.d.ts", "src/ARCActionsPanelElement.d.ts", "src/ARCActionsElement.d.ts", "src/ARCConditionEditorElement.d.ts"
+    "node_modules/@open-wc/**/*.js", "src/ARCActionEditorElement.d.ts", "index.d.ts", "src/ARCActionsPanelElement.d.ts", "src/ARCActionsElement.d.ts", "src/ARCConditionEditorElement.d.ts", "src/runner/ActionsRunner.d.ts", "src/runner/ActionRunner.d.ts"
   ],
   "exclude": [
     "node_modules/!(@open-wc)"

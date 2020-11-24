@@ -84,7 +84,7 @@ export class ActionsRunner {
           request: request.request,
         });
         if (action.sync === false) {
-          runner.run();
+          this.runAsynchronousAction(runner);
           continue;
         }
         try {
@@ -97,6 +97,19 @@ export class ActionsRunner {
       }
     }
     return request;
+  }
+
+  /**
+   * Runs asynchronous action
+   * @param {ActionRunner} runner 
+   */
+  async runAsynchronousAction(runner) {
+    try {
+      await runner.run();
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.info(`Asynchronous action resulted in error`, e);
+    }
   }
 
   /**
@@ -141,7 +154,7 @@ export class ActionsRunner {
           response,
         });
         if (action.sync === false) {
-          runner.run();
+          this.runAsynchronousAction(runner);
           continue;
         }
         try {
@@ -167,6 +180,9 @@ export class ActionsRunner {
     // @ts-ignore
     await processor.evaluateVariables(config);
     const { source } = /** @type any */ (config);
+    if (source) {
+      await processor.evaluateVariables(source);
+    }
     if (source && source.iterator) {
       await processor.evaluateVariables(source.iterator);
     }

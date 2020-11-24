@@ -51,7 +51,13 @@ export class ActionCondition {
     return {
       type,
       name: 'New action',
-      config: {},
+      config: {
+        source: {
+          type,
+          source: 'body',
+        },
+        name: '',
+      },
       failOnError: false,
       priority: 0,
       sync: false,

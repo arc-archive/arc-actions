@@ -602,7 +602,13 @@ describe('ActionCondition', () => {
 
     it('has the default config object', () => {
       const result = ActionCondition.defaultAction();
-      assert.deepEqual(result.config, { });
+      assert.deepEqual(result.config, {
+        source: {
+          type: 'response',
+          source: 'body',
+        },
+        name: '',
+      });
     });
 
     it('has the default failOnError', () => {

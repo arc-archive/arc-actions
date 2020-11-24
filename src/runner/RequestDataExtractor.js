@@ -73,6 +73,8 @@ export class RequestDataExtractor {
         return DataUtils.getDataHeaders(this.getHeaders(type), args);
       case 'status':
         return this.response.status;
+      case 'method':
+          return this.request.method;
       case 'body':
         return DataUtils.getDataPayload(this.getBody(type), this.getHeaders(type), args, it);
       default:

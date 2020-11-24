@@ -21,6 +21,9 @@ export class SetVariableAction extends ArcExecutable {
   async execute() {
     const cnf = /** @type SetVariableConfig */ (this.action.config);
     const value = this.readValue(cnf.source);
+    if (!value && this.action.failOnError) {
+      throw new Error(`Cannot read value for the action "${this.action.name}"`);
+    }
     await this.setVariable(cnf, String(value));
   }
 
@@ -36,6 +39,7 @@ export class SetVariableAction extends ArcExecutable {
       const extractor = new RequestDataExtractor({
         request: this.init.request,
         response: this.init.response,
+        executedRequest: this.init.executedRequest,
       });
       value = extractor.extract(source);
     }
