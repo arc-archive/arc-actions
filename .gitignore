@@ -1,20 +1,60 @@
-## editors
-/.idea
-/.vscode
-
-## system files
+# General
 .DS_Store
+.AppleDouble
+.LSOverride
 
-## npm
-/node_modules/
-/npm-debug.log
+# Icon must end with two \r
+Icon
 
-## testing
-/coverage/
 
-## temp folders
-/.tmp/
+# Thumbnails
+._*
 
-# build
-/_site/
-/dist/
+# Windows thumbnail cache files
+Thumbs.db
+ehthumbs.db
+ehthumbs_vista.db
+
+# Dump file
+*.stackdump
+
+# Folder config file
+[Dd]esktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# Windows Installer files
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+
+# Windows shortcuts
+*.lnk
+
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+*~
+
+# temporary files which can be created if a process still has a handle open of a deleted file
+.fuse_hidden*
+
+# KDE directory preferences
+.directory
+
+# Linux trash folder which might appear on any partition or disk
+.Trash-*
+
+# .nfs files are created when an open file is removed but is still being accessed
+.nfs*
+
+node_modules
+coverage
+dev-lib/jexl.min.js
+web_modules

@@ -1,3 +1,3 @@
-import { ArcActions } from './src/ArcActions.js';
+import { ARCActionsElement } from './src/ARCActionsElement.js';
 
-window.customElements.define('arc-actions', ArcActions);
+window.customElements.define('arc-actions', ARCActionsElement);

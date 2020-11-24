@@ -1,30 +1,337 @@
 {
-  "version": 2,
+  "version": "experimental",
   "tags": [
     {
-      "name": "arc-actions",
-      "description": "A component with a title and an action counter",
-      "properties": [
+      "name": "arc-action-editor",
+      "path": "./arc-action-editor.js",
+      "attributes": [
         {
-          "name": "title",
-          "type": "String",
-          "description": "The title of your component",
-          "default": "Hey there"
+          "name": "name",
+          "description": "Action name that determines which editor to load.\nThe name mast be one of the supported action types or otherwise the\ncomponent won't render any editor.",
+          "type": "string"
         },
         {
-          "name": "counter",
-          "type": "Number",
-          "description": "An action counter",
-          "default": 0
+          "name": "type",
+          "description": "Either `request` or `response`. Actions without a type are not\nexecuted.",
+          "type": "string"
+        },
+        {
+          "name": "enabled",
+          "description": "Whether the action is enabled. An action is considered enabled when\nthis value equals `true`.",
+          "type": "boolean"
+        },
+        {
+          "name": "sync",
+          "description": "Whether the action should be called synchronously to the request or\nthe response.\nThis value is optional and default to `true`.",
+          "type": "boolean",
+          "default": "\"true\""
+        },
+        {
+          "name": "failOnError",
+          "description": "Whether the action should fail when\nthe request / response if it results in error.",
+          "type": "boolean"
+        },
+        {
+          "name": "priority",
+          "description": "Action's priority on a scale of 1 to 10. The default value is 5 and\nthis property is optional.",
+          "type": "number"
+        },
+        {
+          "name": "opened",
+          "description": "Whether or not the action is rendered in full view.",
+          "type": "boolean"
+        },
+        {
+          "name": "compatibility",
+          "description": "Enables compatibility with the Anypoint theme",
+          "type": "boolean"
+        },
+        {
+          "name": "outlined",
+          "description": "Enables outlined MD theme",
+          "type": "boolean"
+        },
+        {
+          "name": "readOnly",
+          "type": "boolean"
+        },
+        {
+          "name": "disabled",
+          "type": "boolean"
         }
       ],
-      "events": [],
-      "slots": [],
-      "cssProperties": [
+      "properties": [
         {
-          "name": "--arc-actions-text-color",
-          "description": "Main Text Color",
-          "type": "Color"
+          "name": "name",
+          "attribute": "name",
+          "description": "Action name that determines which editor to load.\nThe name mast be one of the supported action types or otherwise the\ncomponent won't render any editor.",
+          "type": "string"
+        },
+        {
+          "name": "type",
+          "attribute": "type",
+          "description": "Either `request` or `response`. Actions without a type are not\nexecuted.",
+          "type": "string"
+        },
+        {
+          "name": "enabled",
+          "attribute": "enabled",
+          "description": "Whether the action is enabled. An action is considered enabled when\nthis value equals `true`.",
+          "type": "boolean"
+        },
+        {
+          "name": "sync",
+          "attribute": "sync",
+          "description": "Whether the action should be called synchronously to the request or\nthe response.\nThis value is optional and default to `true`.",
+          "type": "boolean",
+          "default": "\"true\""
+        },
+        {
+          "name": "failOnError",
+          "attribute": "failOnError",
+          "description": "Whether the action should fail when\nthe request / response if it results in error.",
+          "type": "boolean"
+        },
+        {
+          "name": "priority",
+          "attribute": "priority",
+          "description": "Action's priority on a scale of 1 to 10. The default value is 5 and\nthis property is optional.",
+          "type": "number"
+        },
+        {
+          "name": "config",
+          "description": "The configuration of an action. The type depends on the `name` property.",
+          "type": "SetCookieConfig | DeleteCookieConfig | SetVariableConfig"
+        },
+        {
+          "name": "opened",
+          "attribute": "opened",
+          "description": "Whether or not the action is rendered in full view.",
+          "type": "boolean"
+        },
+        {
+          "name": "compatibility",
+          "attribute": "compatibility",
+          "description": "Enables compatibility with the Anypoint theme",
+          "type": "boolean"
+        },
+        {
+          "name": "outlined",
+          "attribute": "outlined",
+          "description": "Enables outlined MD theme",
+          "type": "boolean"
+        },
+        {
+          "name": "readOnly",
+          "attribute": "readOnly",
+          "type": "boolean"
+        },
+        {
+          "name": "disabled",
+          "attribute": "disabled",
+          "type": "boolean"
+        }
+      ],
+      "events": [
+        {
+          "name": "change",
+          "description": "When any configuration property change"
+        },
+        {
+          "name": "duplicate",
+          "description": "When the user requests to duplicate this action"
+        },
+        {
+          "name": "remove",
+          "description": "When the user requests to remove this action"
+        }
+      ]
+    },
+    {
+      "name": "arc-actions-panel",
+      "path": "./arc-actions-panel.js",
+      "attributes": [
+        {
+          "name": "compatibility",
+          "description": "Enables compatibility with the Anypoint theme",
+          "type": "boolean"
+        },
+        {
+          "name": "outlined",
+          "description": "Enables outlined MD theme",
+          "type": "boolean"
+        },
+        {
+          "name": "type",
+          "description": "A type of actions this panel renders. The actions are using\ntype defined in the action definition. This property is used by the tutorial.",
+          "type": "string"
+        }
+      ],
+      "properties": [
+        {
+          "name": "compatibility",
+          "attribute": "compatibility",
+          "description": "Enables compatibility with the Anypoint theme",
+          "type": "boolean"
+        },
+        {
+          "name": "outlined",
+          "attribute": "outlined",
+          "description": "Enables outlined MD theme",
+          "type": "boolean"
+        },
+        {
+          "name": "type",
+          "attribute": "type",
+          "description": "A type of actions this panel renders. The actions are using\ntype defined in the action definition. This property is used by the tutorial.",
+          "type": "string"
+        },
+        {
+          "name": "conditions",
+          "description": "Current list of actions",
+          "type": "(RunnableAction | ActionCondition)[] | null"
+        },
+        {
+          "name": "hasConditions",
+          "description": "Returns true when the element has any condition set.",
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "name": "arc-actions",
+      "path": "./arc-actions.js",
+      "description": "An HTML element that renders a panel with request and response\nactions.",
+      "attributes": [
+        {
+          "name": "compatibility",
+          "description": "Enables compatibility with the Anypoint theme",
+          "type": "boolean"
+        },
+        {
+          "name": "outlined",
+          "description": "Enables outlined MD theme",
+          "type": "boolean"
+        },
+        {
+          "name": "selected",
+          "description": "Currently selected tab.",
+          "type": "number"
+        }
+      ],
+      "properties": [
+        {
+          "name": "response",
+          "description": "A list of response conditions and actions.",
+          "type": "(RunnableAction | ActionCondition)[]"
+        },
+        {
+          "name": "request",
+          "description": "A list of request conditions and actions.",
+          "type": "(RunnableAction | ActionCondition)[]"
+        },
+        {
+          "name": "compatibility",
+          "attribute": "compatibility",
+          "description": "Enables compatibility with the Anypoint theme",
+          "type": "boolean"
+        },
+        {
+          "name": "outlined",
+          "attribute": "outlined",
+          "description": "Enables outlined MD theme",
+          "type": "boolean"
+        },
+        {
+          "name": "selected",
+          "attribute": "selected",
+          "description": "Currently selected tab.",
+          "type": "number"
+        },
+        {
+          "name": "onchange",
+          "type": "EventListener | null"
+        },
+        {
+          "name": "onselectedchange",
+          "type": "EventListener | null"
+        }
+      ],
+      "events": [
+        {
+          "name": "change",
+          "description": "When value in the editor change. The detail has the `type` property indicating which property has changes."
+        },
+        {
+          "name": "selectedchange",
+          "description": "When the panel selection change"
+        }
+      ]
+    },
+    {
+      "name": "arc-condition-editor",
+      "path": "./arc-condition-editor.js",
+      "attributes": [
+        {
+          "name": "condition",
+          "description": "A list of response actions",
+          "type": "Condition"
+        },
+        {
+          "name": "compatibility",
+          "description": "Enables compatibility with the Anypoint theme",
+          "type": "boolean"
+        },
+        {
+          "name": "outlined",
+          "description": "Enables outlined MD theme",
+          "type": "boolean"
+        },
+        {
+          "name": "enabled",
+          "description": "Whether or not the condition is enabled",
+          "type": "boolean"
+        },
+        {
+          "name": "type",
+          "description": "The type of the condition that is being rendered.\nEither `request` or `response`.\nThis is not the same as condition's model source type as in response action\ncan be executed with conditions for both request and response.",
+          "type": "string"
+        }
+      ],
+      "properties": [
+        {
+          "name": "condition",
+          "attribute": "condition",
+          "description": "A list of response actions",
+          "type": "Condition"
+        },
+        {
+          "name": "compatibility",
+          "attribute": "compatibility",
+          "description": "Enables compatibility with the Anypoint theme",
+          "type": "boolean"
+        },
+        {
+          "name": "outlined",
+          "attribute": "outlined",
+          "description": "Enables outlined MD theme",
+          "type": "boolean"
+        },
+        {
+          "name": "enabled",
+          "attribute": "enabled",
+          "description": "Whether or not the condition is enabled",
+          "type": "boolean"
+        },
+        {
+          "name": "type",
+          "attribute": "type",
+          "description": "The type of the condition that is being rendered.\nEither `request` or `response`.\nThis is not the same as condition's model source type as in response action\ncan be executed with conditions for both request and response.",
+          "type": "string"
+        },
+        {
+          "name": "opened",
+          "type": "boolean"
         }
       ]
     }

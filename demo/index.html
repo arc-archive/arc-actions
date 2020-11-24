@@ -2,10 +2,13 @@
 <html lang="en-GB">
 <head>
   <meta charset="utf-8">
+  <title>HTTP request actions</title>
   <style>
-    body.styled {
-      --primary-color: #000000;
-      --accent-color: rgb(33, 150, 243);
+    body.styled.demo {
+      font-size: 16px;
+      
+      --primary-color: #3F51B5;
+      --accent-color: #4caf50;
       --error-color: #F44336;
       --dark-divider-opacity: 0.12;
       --arc-font-body1-font-size: 14px;
@@ -13,12 +16,11 @@
       --arc-font-body1-line-height: 20px;
       --arc-font-code-family: 'Roboto Mono', 'Consolas', 'Menlo', monospace;
       --code-background-color: #f5f7f9;
-      --anypoiont-menu-button-dropdown-background: #fff;
+      --anypoint-menu-button-dropdown-background: #fff;
       --anypoint-listbox-background-color: #fff;
       --anypoint-item-focused-background-color: #f5f5f5;
       --anypoint-item-before-background: transparent;
-      --anypoiont-dropdown-shaddow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.4);
-      --primary-color: #3F51B5;
+      --anypoint-dropdown-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.4);
       --anypoint-color-primary: var(--primary-color);
       --arc-font-body1-font-size: 14px;
       --arc-font-body1-font-weight: 400;
@@ -33,13 +35,56 @@
       --arc-font-headline-letter-spacing: -.012em;
       --arc-font-headline-line-height: 32px;
 
+      --anypoint-item-min-height: 48px;
+      --anypoint-item-focus-color: currentColor;
+      --anypoint-item-focused-color: currentColor;
+      --anypoint-item-before-background: currentColor;
+      --anypoint-item-before-opacity: 0.12;
+      --anypoint-item-border-left-width: 0;
+      --anypoint-item-border-right-width: 0;
+      --anypoint-item-hover-background-color: #F5F5F5;
+      --anypoint-item-pressed-background-color: #BDBDBD;
+      --anypoint-item-secondary-focus-color: var(--secondary-text-color);
+
+      --action-editor-opened-border-color: #2196f3;
+      --action-editor-opened-title-background-color: #0d47a1;
+      --action-editor-opened-title-color: #fff;
+
       --box-shadow-2dp: 0 2px 2px 0 rgba(0, 0, 0, 0.14),
                   0 1px 5px 0 rgba(0, 0, 0, 0.12),
                   0 3px 1px -2px rgba(0, 0, 0, 0.2);
     }
+
+    body.styled arc-actions {
+      padding: 0 12px;
+    }
+
+    body.styled.dark {
+      --primary-background-color: #424242;
+      --secondary-text-color: #616161;
+
+      --anypoint-dropdown-menu-background-color: #37474F;
+      --anypoint-dropdown-menu-label-background-color: var(--primary-background-color);
+      --anypoint-listbox-background-color: #37474F;
+      --anypoint-dropdown-menu-focus-background-color: #37474F;
+      --anypoint-dropdown-menu-label-color: #fff;
+      --anypoint-dropdown-menu-info-message-color: #fff;
+
+
+      --anypoint-item-hover-background-color: #616161;
+      --anypoint-item-pressed-background-color: #757575;
+      --secondary-text-color: #9E9E9E;
+
+      --anypoint-item-focused-color: #000;
+    }
+
+    .centered[role="main"] {
+      width: 1400px;
+      max-width: 100%;
+    }
   </style>
 </head>
-<body>
+<body class="demo">
   <div id="demo"></div>
 
   <script type="module" src="index.js"></script>
