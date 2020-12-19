@@ -4,7 +4,7 @@ import { ArcEditorRequest, ARCVariable } from '@advanced-rest-client/arc-models'
 import { TransportRequest } from '@advanced-rest-client/arc-types/src/request/ArcRequest';
 import { ErrorResponse, Response } from '@advanced-rest-client/arc-types/src/request/ArcResponse';
 import { ArcAction } from '../ArcAction.js';
-import { ActionsRunnerInit } from '../types.js';
+import { ActionsRunnerInit, RequestProcessOptions, ResponseProcessOptions } from '../types.js';
 import { ActionRunner } from './ActionRunner.js';
 
 /**
@@ -35,7 +35,7 @@ export declare class ActionsRunner {
    * @returns Promise resolved to the passed request object. It may be a copy.
    * @throws {Error} When required arguments are not set.
    */
-  processRequestActions(request: ArcEditorRequest): Promise<ArcEditorRequest>;
+  processRequestActions(request: ArcEditorRequest, options?: RequestProcessOptions): Promise<ArcEditorRequest>;
 
   /**
    * Runs asynchronous action
@@ -50,7 +50,7 @@ export declare class ActionsRunner {
    * @param response ARC response object.
    * @returns A promise resolved when actions were performed.
    */
-  processResponseActions(request: ArcEditorRequest, executed: TransportRequest, response: Response|ErrorResponse): Promise<void>;
+  processResponseActions(request: ArcEditorRequest, executed: TransportRequest, response: Response|ErrorResponse, options?: ResponseProcessOptions): Promise<void>;
 
   /**
    * Evaluates variables in the action.
@@ -58,5 +58,5 @@ export declare class ActionsRunner {
    * @param processor Initialized variables processor with the current environment
    * @returns Resolved to an action without variables.
    */
-  evaluateAction(action: ArcAction, processor: VariablesProcessor): Promise<ArcAction>;
+  evaluateAction(action: ArcAction, processor?: VariablesProcessor): Promise<ArcAction>;
 }
