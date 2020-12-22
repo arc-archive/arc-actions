@@ -19,6 +19,7 @@ import { ActionRunner } from './ActionRunner.js';
 /** @typedef {import('@advanced-rest-client/arc-types').ArcResponse.Response} Response */
 /** @typedef {import('@advanced-rest-client/arc-types').ArcResponse.ErrorResponse} ErrorResponse */
 /** @typedef {import('@advanced-rest-client/arc-types').Actions.RunnableAction} RunnableAction */
+/** @typedef {import('@advanced-rest-client/arc-types').Variable.SystemVariables} SystemVariables */
 /** @typedef {import('@advanced-rest-client/arc-models').ARCVariable} ARCVariable */
 
 /**
@@ -32,17 +33,6 @@ export class ActionsRunner {
     const { jexl, eventsTarget } = config;
     this.jexl = jexl;
     this.eventsTarget = eventsTarget;
-  }
-
-  /**
-   * Refreshes information about all environments.
-   * 
-   * @returns {Promise<ARCVariable[]>} Resolved when the environments are refreshed and update is complete.
-   */
-  async readVariables() {
-    const record = await ArcModelEvents.Environment.current(this.eventsTarget);
-    const { variables } = record;
-    return variables;
   }
 
   /**
@@ -74,9 +64,13 @@ export class ActionsRunner {
     const runnables = mapRunnables(enabled);
 
     let processor = /** @type VariablesProcessor|null */ (null);
+    let systemVariables;
     if (config.evaluateVariables !== false) {
-      const variables = await this.readVariables();
-      processor = new VariablesProcessor(this.jexl, variables);
+      const env = await ArcModelEvents.Environment.current(this.eventsTarget);
+      if (config.evaluateSystemVariables !== false) {
+        systemVariables = env.systemVariables;
+      }
+      processor = new VariablesProcessor(this.jexl, env.variables);
     }
     for (let i = 0, len = runnables.length; i < len; i++) {
       const runnable = runnables[i];
@@ -86,7 +80,7 @@ export class ActionsRunner {
       const execs = mapActions(runnable.actions).filter((item) => !!item.enabled);
       execs.sort(sortActions);
       for (let j = 0, eLen = execs.length; j < eLen; j++) {
-        const action = await this.evaluateAction(execs[j], processor);
+        const action = await this.evaluateAction(execs[j], processor, systemVariables);
         const runner = new ActionRunner(action, this.eventsTarget, {
           request: request.request,
         });
@@ -146,9 +140,13 @@ export class ActionsRunner {
     }
     const runnables = mapRunnables(enabled);
     let processor = /** @type VariablesProcessor|null */ (null);
+    let systemVariables;
     if (config.evaluateVariables !== false) {
-      const variables = await this.readVariables();
-      processor = new VariablesProcessor(this.jexl, variables);
+      const env = await ArcModelEvents.Environment.current(this.eventsTarget);
+      if (config.evaluateSystemVariables !== false) {
+        systemVariables = env.systemVariables;
+      }
+      processor = new VariablesProcessor(this.jexl, env.variables);
     }
     for (let i = 0, len = runnables.length; i < len; i++) {
       const runnable = runnables[i];
@@ -158,7 +156,7 @@ export class ActionsRunner {
       const execs = mapActions(runnable.actions).filter((item) => !!item.enabled);
       execs.sort(sortActions);
       for (let j = 0, eLen = execs.length; j < eLen; j++) {
-        const action = await this.evaluateAction(execs[j], processor);
+        const action = await this.evaluateAction(execs[j], processor, systemVariables);
         const runner = new ActionRunner(action, this.eventsTarget, {
           request: request.request,
           executedRequest: executed,
@@ -182,23 +180,28 @@ export class ActionsRunner {
   /**
    * Evaluates variables in the action.
    * @param {ArcAction} action An action to evaluate.
-   * @param {VariablesProcessor} processor Initialized variables processor with the current environment
+   * @param {VariablesProcessor=} processor Initialized variables processor with the current environment
+   * @param {SystemVariables=} systemVariables System variables to use with the variables processor.
    * @return {Promise<ArcAction>} Resolved to an action without variables.
    */
-  async evaluateAction(action, processor) {
+  async evaluateAction(action, processor, systemVariables) {
     const copy = action.clone();
     if (!processor) {
       return copy;
     }
     const { config } = copy;
-    // @ts-ignore
-    await processor.evaluateVariables(config);
+    const evalOptions = {}
+    if (systemVariables) {
+      evalOptions.override = systemVariables;
+    }
+
+    await processor.evaluateVariables(config, evalOptions);
     const { source } = /** @type any */ (config);
     if (source) {
-      await processor.evaluateVariables(source);
+      await processor.evaluateVariables(source, evalOptions);
     }
     if (source && source.iterator) {
-      await processor.evaluateVariables(source.iterator);
+      await processor.evaluateVariables(source.iterator, evalOptions);
     }
     return copy;
   }
