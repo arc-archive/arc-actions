@@ -1,14 +1,9 @@
 import { css } from 'lit-element';
 
 export default css`
-/* .action-card {
-  margin: 8px 12px;
-} */
-
 .action-card.opened {
   border: 1px var(--action-editor-opened-border-color) solid;
   border-radius: 8px;
-  /* overflow: hidden; */
 }
 
 .opened-title {
@@ -18,6 +13,7 @@ export default css`
   border-top-right-radius: 8px;
   background-color: var(--action-editor-opened-title-background-color);
   padding: 4px 12px;
+  border-bottom: 1px var(--action-editor-opened-title-border-bottom-color, transparent) solid;
 }
 
 .opened-title,

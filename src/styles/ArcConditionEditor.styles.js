@@ -20,7 +20,8 @@ anypoint-input[type=number] {
 .action-card.closed {
   display: flex;
   align-items: center;
-  background-color: #E0E0E0;
+  background-color: var(--action-condition-closed-background-color, #E0E0E0);
+  border-bottom: 1px var(--action-condition-closed-border-bottom-color, transparent) solid;
   padding: 4px 12px 4px 24px;
 }
 
