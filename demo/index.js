@@ -21,6 +21,10 @@ class ComponentDemo extends DemoPage {
     this.response = null;
     this.selected = 0;
     this.renderViewControls = true;
+
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      this.darkThemeActive = true;
+    }
     this._restoreCache();
   }
 

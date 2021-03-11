@@ -113,13 +113,25 @@ export type SupportedActions = "set-variable" | "set-cookie" | "delete-cookie" |
 export declare interface RequestProcessOptions {
   /**
    * Whether to run jexl to evaluate variables. Default to true.
+   * @default true
    */
   evaluateVariables?: boolean;
+  /**
+   * Whether to override application variables with system variables
+   * @default true
+   */
+  evaluateSystemVariables?: boolean;
 }
 
 export declare interface ResponseProcessOptions {
   /**
    * Whether to run jexl to evaluate variables. Default to true.
+   * @default true
    */
   evaluateVariables?: boolean;
+  /**
+   * Whether to override application variables with system variables
+   * @default true
+   */
+  evaluateSystemVariables?: boolean;
 }

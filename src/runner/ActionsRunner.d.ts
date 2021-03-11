@@ -1,6 +1,6 @@
-/* eslint-disable class-methods-use-this */
 import { VariablesProcessor } from '@advanced-rest-client/arc-environment';
-import { ArcEditorRequest, ARCVariable } from '@advanced-rest-client/arc-models';
+import { ArcEditorRequest } from '@advanced-rest-client/arc-models';
+import { SystemVariables } from '@advanced-rest-client/arc-types/src/models/Variable';
 import { TransportRequest } from '@advanced-rest-client/arc-types/src/request/ArcRequest';
 import { ErrorResponse, Response } from '@advanced-rest-client/arc-types/src/request/ArcResponse';
 import { ArcAction } from '../ArcAction.js';
@@ -18,13 +18,6 @@ export declare class ActionsRunner {
    * @param config Configuration options
    */
   constructor(config: ActionsRunnerInit);
-
-  /**
-   * Refreshes information about all environments.
-   * 
-   * @returns Resolved when the environments are refreshed and update is complete.
-   */
-  readVariables(): Promise<ARCVariable[]>;
 
   /**
    * Takes the ARC editor request object and runs the request actions added to it.
@@ -58,5 +51,5 @@ export declare class ActionsRunner {
    * @param processor Initialized variables processor with the current environment
    * @returns Resolved to an action without variables.
    */
-  evaluateAction(action: ArcAction, processor?: VariablesProcessor): Promise<ArcAction>;
+  evaluateAction(action: ArcAction, processor?: VariablesProcessor, systemVariables?: SystemVariables): Promise<ArcAction>;
 }
