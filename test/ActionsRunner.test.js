@@ -1,9 +1,8 @@
 /* eslint-disable no-template-curly-in-string */
 import { assert, oneEvent } from '@open-wc/testing';
 import sinon from 'sinon';
-import { ArcModelEventTypes } from '@advanced-rest-client/arc-models';
 import { DataGenerator } from '@advanced-rest-client/arc-data-generator';
-import { SessionCookieEventTypes } from '@advanced-rest-client/arc-events';
+import { ArcModelEventTypes, SessionCookieEventTypes } from '@advanced-rest-client/arc-events';
 import { ActionsRunner } from '../index.js';
 import { Jexl } from '../web_modules/jexl/dist/Jexl.js';
 

@@ -1,4 +1,4 @@
-import { toJSON, contentType } from '@advanced-rest-client/headers-parser-mixin/src/HeadersParser.js';
+import { HeadersParser } from '@advanced-rest-client/arc-headers';
 import { JsonExtractor } from './JsonExtractor.js';
 import { XmlExtractor } from './XmlExtractor.js';
 
@@ -152,7 +152,7 @@ export function getDataUrl(url, path) {
  * @return {string|undefined} Value for the path.
  */
 export function getDataHeaders(source, path) {
-  const headers = toJSON(source);
+  const headers = HeadersParser.toJSON(source);
   if (!path || !path.length || !path[0] || !headers || !headers.length) {
     return source;
   }
@@ -175,7 +175,7 @@ export function getDataHeaders(source, path) {
  * @return {String} Value for the path.
  */
 export function getDataPayload(payload, headers, path, iterator) {
-  const ct = contentType(headers);
+  const ct = HeadersParser.contentType(headers);
   if (!ct) {
     return undefined;
   }

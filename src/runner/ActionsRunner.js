@@ -1,6 +1,6 @@
 /* eslint-disable class-methods-use-this */
 import { VariablesProcessor } from '@advanced-rest-client/arc-environment';
-import { ArcModelEvents } from '@advanced-rest-client/arc-models';
+import { ArcModelEvents } from '@advanced-rest-client/arc-events';
 import { mapRunnables } from '../ActionCondition.js';
 import { mapActions, sortActions } from '../ArcAction.js';
 import { ActionRunner } from './ActionRunner.js';

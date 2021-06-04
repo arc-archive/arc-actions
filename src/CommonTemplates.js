@@ -19,8 +19,7 @@ import '@anypoint-web-components/anypoint-checkbox/anypoint-checkbox.js';
  * @param {boolean} [compatibility=false] Compatibility mode flag.
  * @return {TemplateResult} Template for the condition's operator drop down options.
  */
-export const operatorOptionsTemplate = (compatibility = false) => {
-  return html`
+export const operatorOptionsTemplate = (compatibility = false) => html`
     <anypoint-item data-value="equal" ?compatibility="${compatibility}">Equal</anypoint-item>
     <anypoint-item data-value="not-equal" ?compatibility="${compatibility}">Not equal</anypoint-item>
     <anypoint-item data-value="greater-than" ?compatibility="${compatibility}">Greater than</anypoint-item>
@@ -30,7 +29,6 @@ export const operatorOptionsTemplate = (compatibility = false) => {
     <anypoint-item data-value="contains" ?compatibility="${compatibility}">Contains</anypoint-item>
     <anypoint-item data-value="regex" ?compatibility="${compatibility}">Regular expression</anypoint-item>
   `;
-};
 
 /**
  * @typedef {Object} OperatorConfiguration
@@ -138,27 +136,23 @@ export const inputTemplate = (name, value, label, inputHandler, opts = {}) => {
  * @param {Boolean} [compatibility=false] Compatibility mode flag.
  * @return {TemplateResult} Template for the request action's source options
  */
-export const requestSourceOptions = (compatibility = false) => {
-  return html`
+export const requestSourceOptions = (compatibility = false) => html`
     <anypoint-item data-value="url" ?compatibility="${compatibility}">URL</anypoint-item>
     <anypoint-item data-value="method" ?compatibility="${compatibility}">Method</anypoint-item>
     <anypoint-item data-value="headers" ?compatibility="${compatibility}">Headers</anypoint-item>
     <anypoint-item data-value="body" ?compatibility="${compatibility}">Body</anypoint-item>
   `;
-};
 
 /**
  * @param {Boolean} [compatibility=false] Compatibility mode flag.
  * @return {TemplateResult} Template for the response action's source options
  */
-export const responseSourceOptions = (compatibility = false) => {
-  return html`
+export const responseSourceOptions = (compatibility = false) => html`
     <anypoint-item data-value="url" ?compatibility="${compatibility}">URL</anypoint-item>
     <anypoint-item data-value="status" ?compatibility="${compatibility}">Status code</anypoint-item>
     <anypoint-item data-value="headers" ?compatibility="${compatibility}">Headers</anypoint-item>
     <anypoint-item data-value="body" ?compatibility="${compatibility}">Body</anypoint-item>
   `;
-};
 
 /**
  * @typedef {Object} SourceSelectorConfiguration

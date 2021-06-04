@@ -125,7 +125,6 @@ This configuration returns the `id` on an array item (array is declared as `*`).
 
 Note, this behavior chanced in ARC 16. Before the main `path` was only pointing to the property inside found value by the iterator and the `iterator.path` was defining the full path to the value to compare.
 
-
 ## Development
 
 ```sh

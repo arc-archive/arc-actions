@@ -1,5 +1,5 @@
 /* eslint-disable class-methods-use-this */
-import { ArcModelEvents } from '@advanced-rest-client/arc-models';
+import { ArcModelEvents } from '@advanced-rest-client/arc-events';
 import { RequestDataExtractor } from '../runner/RequestDataExtractor.js';
 import { ArcExecutable } from './ArcExecutable.js';
 
