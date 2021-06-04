@@ -109,13 +109,13 @@ export const mapActions = (value) => {
   if (!Array.isArray(value)) {
     return [];
   }
-  return value.map((item) => {
-    return new ArcAction(item);
+  return value.map((item) => 
+     new ArcAction(item)
     // if (!(item instanceof ArcAction)) {
     //   return new ArcAction(item);
     // }
     // return item;
-  });
+  );
 };
 
 /**
