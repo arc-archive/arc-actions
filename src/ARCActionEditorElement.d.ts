@@ -34,6 +34,7 @@ import { SupportedActions } from './types';
  * @fires change When any configuration property change
  * @fires duplicate When the user requests to duplicate this action
  * @fires remove When the user requests to remove this action
+ * @deprecated Use `@advanced-rest-client/app` instead.
  */
 export declare class ARCActionEditorElement extends LitElement {
   static get styles(): CSSResult[];

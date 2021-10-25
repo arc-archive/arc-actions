@@ -1,4 +1,8 @@
-# ARC actions
+# Deprecated
+
+This component is deprecated. Use `@advanced-rest-client/app` instead.
+
+----
 
 The UI and logic for Advanced REST Client HTTP request actions.
 

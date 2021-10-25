@@ -26,6 +26,7 @@ export declare const onSelectedValue: unique symbol;
  * 
  * @fires change When value in the editor change. The detail has the `type` property indicating which property has changes.
  * @fires selectedchange When the panel selection change
+ * @deprecated Use `@advanced-rest-client/app` instead.
  */
 export class ARCActionsElement extends LitElement {
   static get styles(): CSSResult;

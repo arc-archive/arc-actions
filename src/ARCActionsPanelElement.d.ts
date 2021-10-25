@@ -34,6 +34,9 @@ export declare const addRequestAction: unique symbol;
 export declare const duplicateRequestAction: unique symbol;
 export declare const duplicateResponseAction: unique symbol;
 
+/**
+ * @deprecated Use `@advanced-rest-client/app` instead.
+ */
 export declare class ARCActionsPanelElement extends LitElement {
   static get styles(): CSSResult[];
 

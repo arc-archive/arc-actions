@@ -27,6 +27,9 @@ export declare const dataSourceTypeSelectorTemplate: unique symbol;
 export declare const dataSourceSelectorTemplate: unique symbol;
 export declare const operatorTemplateTemplate: unique symbol;
 
+/**
+ * @deprecated Use `@advanced-rest-client/app` instead.
+ */
 export declare class ARCConditionEditorElement extends LitElement {
   static get styles(): CSSResult[];
 
